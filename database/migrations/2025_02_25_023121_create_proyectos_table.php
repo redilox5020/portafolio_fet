@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('proyectos', function (Blueprint $table) {
-            $table->string("id")->primary();
+            $table->string("codigo")->primary();
             $table->string("nombre");
             $table->string("objetivo_general");
             $table->foreignId("programa_id")->constrained('programas')->onDelete("cascade");
             $table->foreignId("procedencia_id")->constrained('procedencias')->onDelete("cascade");
+            $table->foreignId("procedencia_codigo_id")->constrained("procedencia_codigos")->onDelete("cascade");
             $table->foreignId("tipo_id")->constrained("tipologias")->onDelete("cascade");
             $table->date("fecha_inicio");
             $table->date("fecha_fin");

@@ -9,8 +9,13 @@ class Proyecto extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "codigo";
+
+    public $incrementing = false;
+
+    protected $keyType = "string";
+
     protected $fillable = [
-        'codigo',
         'nombre',
         'objetivo_general',
         'programa_id',

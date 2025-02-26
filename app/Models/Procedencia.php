@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Procedencia extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'opcion'
+    ];
+
+    public function proyectos(): HasMany
+    {
+        return $this->hasMany(Proyecto::class);
+    }
 }

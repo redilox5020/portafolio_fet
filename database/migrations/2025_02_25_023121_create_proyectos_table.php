@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId("programa_id")->constrained('programas')->onDelete("cascade");
             $table->foreignId("procedencia_id")->constrained('procedencias')->onDelete("cascade");
             $table->foreignId("procedencia_codigo_id")->constrained("procedencia_codigos")->onDelete("cascade");
-            $table->foreignId("tipo_id")->constrained("tipologias")->onDelete("cascade");
+            $table->foreignId("tipologia_id")->constrained("tipologias")->onDelete("cascade");
             $table->date("fecha_inicio");
             $table->date("fecha_fin");
             $table->decimal("costo", 15, 7);

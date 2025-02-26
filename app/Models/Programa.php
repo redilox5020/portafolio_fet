@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Programa extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'nombre', 'sufijo'
+    ];
+
+    public function proyectos(): HasMany
+    {
+        return $this->hasMany(Proyecto::class);
+    }
 }

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Crear Proyecto</title>
+
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <body>
         <h1>Crear Proyecto</h1>
@@ -22,7 +24,7 @@
                 <label for="programa_id">Programa:</label>
                 <select id="programa_id" name="programa_id" required>
                     @foreach($programas as $programa)
-                        <option value="{{ $programa->sufijo }}">{{ $programa->nombre }}</option>
+                        <option value="{{ $programa->id }}">{{ $programa->nombre }}</option>
                     @endforeach
                 </select>
             </div>
@@ -50,6 +52,12 @@
                     @endforeach
                 </select>
             </div>
+            <div id="investigadoresContainer">
+                <div class="investigador-input">
+                    <input type="text" name="investigadores[]" placeholder="Nombre del investigador" required>
+                    <button type="button" class="añadir-investigador">+</button>
+                </div>
+            </div>
             <div>
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input type="date" id="fecha_inicio" name="fecha_inicio" required>
@@ -64,5 +72,7 @@
             </div>
             <button type="submit">Crear Proyecto</button>
         </form>
+
+        <script src="{{ asset('js/script.js') }}"></script>
 </body>
 </html>

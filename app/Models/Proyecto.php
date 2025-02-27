@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Proyecto extends Model
 {
@@ -16,6 +17,7 @@ class Proyecto extends Model
     protected $keyType = "string";
 
     protected $fillable = [
+        'codigo',
         'nombre',
         'objetivo_general',
         'programa_id',
@@ -27,8 +29,9 @@ class Proyecto extends Model
         'costo'
     ];
 
-    public function investigadores(): BelongsToMany{
-        return $this->belongsToMany(Investigador::class, 'investigador_proyecto', 'investigador_id', 'proyecto_id');
+    public function investigadores(): BelongsToMany
+    {
+        return $this->belongsToMany(Investigador::class, 'investigador_proyecto', 'proyecto_id', 'investigador_id');
     }
 
     public function programa():  BelongsTo

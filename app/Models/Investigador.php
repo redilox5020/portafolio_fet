@@ -9,12 +9,16 @@ class Investigador extends Model
 {
     use HasFactory;
 
+    protected $table = 'investigadores';
+
+    public $timestamps = false;
+
     protected $fillable = [
         'nombre'
     ];
 
     public function proyectos(): BelongsToMany
     {
-        return $this->belongsToMany(Proyecto::class, 'investigador_proyecto', 'proyecto_id', 'investigador_id',);
+        return $this->belongsToMany(Proyecto::class, 'investigador_proyecto', 'investigador_id', 'proyecto_id');
     }
 }

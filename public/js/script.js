@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const newInput = document.createElement('div');
         newInput.classList.add('investigador-input');
         newInput.innerHTML = `
-            <input type="text" name="investigadores[]" placeholder="Nombre del investigador" required>
+            <input type="text" name="investigadores_nombres[]" placeholder="Nombre del investigador" required>
             <button type="button" class="eliminar-investigador">-</button>
         `;
         container.appendChild(newInput);

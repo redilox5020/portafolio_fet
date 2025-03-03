@@ -9,6 +9,8 @@ class Tipologia extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable= [
         'opcion'
     ];

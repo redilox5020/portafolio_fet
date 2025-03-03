@@ -9,6 +9,8 @@ class Procedencia extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'opcion'
     ];

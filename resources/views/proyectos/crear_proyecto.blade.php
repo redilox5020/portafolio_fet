@@ -202,7 +202,7 @@
 
                 </div>
                 <div class="col-auto">
-                    @if ($proyecto->pdf_url)
+                    @if (isset($proyecto) && $proyecto->pdf_url)
                         <p>Archivo actual: <a href="{{ $proyecto->pdf_url }}" target="_blank">Ver PDF</a></p>
                     @endif
 

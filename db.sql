@@ -16,7 +16,7 @@
 
 -- Volcando datos para la tabla fetportafolioproyectos.failed_jobs: ~0 rows (aproximadamente)
 
--- Volcando datos para la tabla fetportafolioproyectos.investigadores: ~21 rows (aproximadamente)
+-- Volcando datos para la tabla fetportafolioproyectos.investigadores: ~38 rows (aproximadamente)
 INSERT INTO `investigadores` (`id`, `nombre`) VALUES
 	(1, 'Jose Ricardo Castañeda'),
 	(2, 'Cristian Casanova'),
@@ -47,9 +47,22 @@ INSERT INTO `investigadores` (`id`, `nombre`) VALUES
 	(27, 'Jose Ignaciio Castañeda'),
 	(28, 'Jonathan Esteban Macías Pastrana'),
 	(29, 'Jeffrey Díaz Aya'),
-	(30, 'Leonardo Jiménez');
+	(30, 'Leonardo Jiménez'),
+	(31, 'Johan Sebastián Trujillo Pulido'),
+	(32, 'Carlos Alberto Mosquera'),
+	(33, 'Fernando Guzmán Vargas'),
+	(34, 'Jesús Mauricio Andrade'),
+	(35, 'Karla Díaz Donato'),
+	(36, 'Anderson Javier González Guarnizo'),
+	(37, 'Joey Steven Salamanca Quezada'),
+	(38, 'Víctor David Herrera Rojas'),
+	(39, 'John Sebastián Samaca Rebolledo'),
+	(40, 'John Serrato'),
+	(41, 'Kevin Andrés Dussan'),
+	(42, 'Henry Mauricio Lozada'),
+	(43, 'Luis Fernando Muñoz Suaza');
 
--- Volcando datos para la tabla fetportafolioproyectos.investigador_proyecto: ~29 rows (aproximadamente)
+-- Volcando datos para la tabla fetportafolioproyectos.investigador_proyecto: ~50 rows (aproximadamente)
 INSERT INTO `investigador_proyecto` (`id`, `investigador_id`, `proyecto_id`) VALUES
 	(1, 1, 'SOF-5-1-2025-10'),
 	(2, 2, 'SOF-5-1-2025-10'),
@@ -90,7 +103,24 @@ INSERT INTO `investigador_proyecto` (`id`, `investigador_id`, `proyecto_id`) VAL
 	(40, 6, 'SOF-5-1-2025-2'),
 	(41, 28, 'SOF-1-1-2020-1'),
 	(42, 29, 'SOF-1-1-2020-1'),
-	(43, 30, 'SOF-1-1-2020-1');
+	(43, 30, 'SOF-1-1-2020-1'),
+	(45, 31, 'SOF-1-1-2020-2'),
+	(46, 32, 'SOF-1-1-2020-2'),
+	(47, 33, 'SOF-1-1-2020-2'),
+	(48, 30, 'SOF-1-1-2020-2'),
+	(49, 34, 'SOF-4-1-2020-1'),
+	(50, 35, 'SOF-4-1-2020-1'),
+	(51, 36, 'SOF-4-1-2020-2'),
+	(52, 37, 'SOF-4-1-2020-2'),
+	(53, 38, 'SOF-4-1-2020-2'),
+	(54, 39, 'SOF-4-1-2020-2'),
+	(55, 40, 'SOF-4-1-2020-2'),
+	(56, 41, 'SOF-1-1-2025-1'),
+	(57, 42, 'SOF-1-1-2025-1'),
+	(58, 43, 'SOF-1-1-2025-1'),
+	(59, 40, 'SOF-1-1-2025-1'),
+	(60, 34, 'SOF-5-1-2025-8'),
+	(61, 36, 'SOF-5-1-2025-8');
 
 -- Volcando datos para la tabla fetportafolioproyectos.migrations: ~0 rows (aproximadamente)
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
@@ -106,7 +136,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 	(10, '2025_02_25_031645_create_proyectos_table', 1),
 	(11, '2025_02_25_231224_create_investigador_proyecto_table', 1),
 	(12, '2025_03_01_033650_add_new_column_to_proyectos', 2),
-	(13, '2025_03_02_043509_update_costo_column_in_proyectos_table', 3);
+	(13, '2025_03_02_043509_update_costo_column_in_proyectos_table', 3),
+	(14, '2025_03_03_203936_add_new_file_path_to_proyectos', 4);
 
 -- Volcando datos para la tabla fetportafolioproyectos.password_reset_tokens: ~0 rows (aproximadamente)
 
@@ -140,30 +171,34 @@ INSERT INTO `programas` (`id`, `nombre`, `sufijo`) VALUES
 	(6, 'Dirección de I+D+i', 'IDD'),
 	(7, 'Otro Programa', 'OTr');
 
--- Volcando datos para la tabla fetportafolioproyectos.proyectos: ~18 rows (aproximadamente)
-INSERT INTO `proyectos` (`codigo`, `nombre`, `objetivo_general`, `programa_id`, `procedencia_id`, `procedencia_codigo_id`, `tipologia_id`, `fecha_inicio`, `fecha_fin`, `costo`, `created_at`, `updated_at`, `anio`) VALUES
-	('ALI-1-1-2020-1', 'Elaboración de bebida fermentada kombucha saborizada con cholupa', 'Formular y caracterizar una bebida funcional a partir de hongo de té Kombucha adicionado de sacarosa, cúrcuma longa y sabor natural a Cholupa (Passiflora maliformis).', 2, 1, 1, 1, '2020-03-01', '2020-12-01', 5000000.00, '2025-03-02 09:44:03', '2025-03-02 09:44:03', '2020'),
-	('ALI-1-1-2020-2', 'Elaboración y caracterización de Néctares de Gulupa (Passiflora edulis f. edulis sims) con zanahoria (Daucus carota) y remolacha (Beta vulgaris) con uva Isabela (Vitis labrusca).', 'Laborar y caracterizar dos Néctares a base de mezcla de Gulupa y Zanahoria; y la mezcla de Remolacha y Uva Isabela', 2, 1, 1, 1, '2025-03-04', '2026-10-01', 2000000.00, '2025-03-02 09:56:37', '2025-03-02 09:56:37', '2020'),
-	('ALI-4-2-2025', 'proyecto prueba', 'primera prueba', 2, 2, 4, 2, '2025-02-26', '2025-03-26', 10000000.00, '2025-02-27 07:21:28', '2025-02-27 07:21:28', '2024'),
-	('AMB-1-1-2020-1', 'Proyección del crecimiento de los procesos de desertificación en el bosque seco tropical tatacoa ubicado en el municipio de villa vieja departamento del Huila.', 'Realizar un análisis multitemporal de la dinámica del proceso de desertificación en el bosque seco tropical tatacoa ubicado en el municipio de Villa Vieja departamento del Huila, por medio de los Sistemas de Información Geográfica.', 1, 1, 1, 1, '2024-06-01', '2025-03-31', 5670980.00, '2025-03-01 10:14:50', '2025-03-01 10:14:50', '2020'),
-	('AMB-4-1-2025-1', 'Ecommerce Diamond pijamas', 'ecommerce para un restaurante', 1, 2, 4, 1, '2025-02-26', '2026-07-27', 10000000.13, '2025-02-28 07:28:38', '2025-03-02 09:31:04', '2024'),
-	('AMB-4-1-2025-2', 'ecommerce', 'ecommerce para un restaurante', 1, 2, 4, 1, '2025-02-26', '2026-07-27', 10000000.00, '2025-02-28 07:33:20', '2025-02-28 07:33:20', '2024'),
-	('CEC-5-1-2025-1', 'prueba 2', 'esta es la segunda prueba de codigo', 5, 1, 5, 1, '2025-02-26', '2025-03-26', 10000000.00, '2025-02-27 07:51:22', '2025-02-27 07:51:22', '2025'),
-	('SOF-1-1-2020-1', 'DriverSecurity', 'Desarrollar una aplicación móvil capaz de prevenir la aparición de microsueños de los conductores sin importar su categoría.', 3, 1, 1, 1, '2025-04-02', '2025-06-20', 5200000.00, '2025-03-03 01:31:52', '2025-03-03 01:31:52', '2020'),
-	('SOF-4-2-2025-1', 'Gestor administrativo de clientes', 'es un software administrativo de clientess para un gymnasio', 3, 1, 4, 2, '2025-02-27', '2025-11-30', 99999999.00, '2025-02-28 07:21:59', '2025-02-28 07:21:59', '2020'),
-	('SOF-5-1-2025-1', 'prueba 3', 'esta es la tercera prueba de codigo', 3, 1, 5, 1, '2025-02-26', '2025-03-26', 90000000.00, '2025-02-27 07:51:58', '2025-02-27 07:51:58', '2025'),
-	('SOF-5-1-2025-10', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2023-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:33:59', '2025-02-27 09:33:59', '2025'),
-	('SOF-5-1-2025-2', 'Un proyecto de Ing. Soft', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 90000000.00, '2025-02-27 07:53:52', '2025-03-03 01:28:12', '2021'),
-	('SOF-5-1-2025-3', 'prueba 5', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 99000000.00, '2025-02-27 07:54:48', '2025-02-27 07:54:48', '2021'),
-	('SOF-5-1-2025-4', 'prueba 6', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 99000000.00, '2025-02-27 08:20:09', '2025-02-27 08:20:09', '2021'),
-	('SOF-5-1-2025-5', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:04:02', '2025-02-27 09:04:02', '2025'),
-	('SOF-5-1-2025-6', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:08:56', '2025-02-27 09:08:56', '2019'),
-	('SOF-5-1-2025-7', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:12:16', '2025-02-27 09:12:16', '2018'),
-	('SOF-5-1-2025-8', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:20:17', '2025-02-27 09:20:17', '2019'),
-	('SOF-5-1-2025-9', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:32:07', '2025-02-27 09:32:07', '2021'),
-	('SST-1-1-2020-1', 'Diseño de un protocolo para la contratación de personas en situación de discapacidad para las empresas de la ciudad de Neiva', 'Diseñar una herramienta digital para la evaluación de posturas ergonómicas en las tareas administrativas dentro de la organización Funeraria San José, ubicada en la ciudad de Neiva', 4, 1, 1, 1, '2024-12-28', '2025-03-20', 2770000.00, '2025-03-01 09:09:11', '2025-03-01 09:09:11', '2020'),
-	('SST-1-1-2020-2', 'Factores de riesgos asociados a los trastornos músculo esqueléticos a los que están expuestos los trabajadores informales de la plaza de mercado MercaNeiva.', 'Identificar los factores de riesgos asociados a los trastornos músculo esqueléticos a los que están expuestos los trabajadores informales de la plaza de mercado MercaNeiva.', 4, 1, 1, 1, '2020-01-01', '2021-01-01', 2770000.00, '2025-03-01 10:06:56', '2025-03-01 10:06:56', '2020'),
-	('SST-5-1-2020-1', 'Evaluación de posturas ergonómicas en el área administrativa a partir de una herramienta digital', 'Diseñar  una  herramienta digita para la evaluación de posturas ergonómicas a partir de la metodología Ocra para el buen desarrollo de las  tareas administrativas dentro de la organización Funeraria San José, ubicada en la ciudad de Neiva.', 4, 1, 5, 1, '2023-07-12', '2024-03-06', 12000000.00, '2025-03-01 10:10:29', '2025-03-01 10:10:29', '2020');
+-- Volcando datos para la tabla fetportafolioproyectos.proyectos: ~26 rows (aproximadamente)
+INSERT INTO `proyectos` (`codigo`, `nombre`, `objetivo_general`, `programa_id`, `procedencia_id`, `procedencia_codigo_id`, `tipologia_id`, `fecha_inicio`, `fecha_fin`, `costo`, `created_at`, `updated_at`, `anio`, `pdf_url`) VALUES
+	('ALI-1-1-2020-1', 'Elaboración de bebida fermentada kombucha saborizada con cholupa', 'Formular y caracterizar una bebida funcional a partir de hongo de té Kombucha adicionado de sacarosa, cúrcuma longa y sabor natural a Cholupa (Passiflora maliformis).', 2, 1, 1, 1, '2020-03-01', '2020-12-01', 5000000.00, '2025-03-02 09:44:03', '2025-03-02 09:44:03', '2020', NULL),
+	('ALI-1-1-2020-2', 'Elaboración y caracterización de Néctares de Gulupa (Passiflora edulis f. edulis sims) con zanahoria (Daucus carota) y remolacha (Beta vulgaris) con uva Isabela (Vitis labrusca).', 'Laborar y caracterizar dos Néctares a base de mezcla de Gulupa y Zanahoria; y la mezcla de Remolacha y Uva Isabela', 2, 1, 1, 1, '2025-03-04', '2026-10-01', 2000000.00, '2025-03-02 09:56:37', '2025-03-02 09:56:37', '2020', NULL),
+	('ALI-4-2-2025', 'proyecto prueba', 'primera prueba', 2, 2, 4, 2, '2025-02-26', '2025-03-26', 10000000.00, '2025-02-27 07:21:28', '2025-02-27 07:21:28', '2024', NULL),
+	('AMB-1-1-2020-1', 'Proyección del crecimiento de los procesos de desertificación en el bosque seco tropical tatacoa ubicado en el municipio de villa vieja departamento del Huila.', 'Realizar un análisis multitemporal de la dinámica del proceso de desertificación en el bosque seco tropical tatacoa ubicado en el municipio de Villa Vieja departamento del Huila, por medio de los Sistemas de Información Geográfica.', 1, 1, 1, 1, '2024-06-01', '2025-03-31', 5670980.00, '2025-03-01 10:14:50', '2025-03-01 10:14:50', '2020', NULL),
+	('AMB-4-1-2025-1', 'Ecommerce Diamond pijamas', 'ecommerce para un restaurante', 1, 2, 4, 1, '2025-02-26', '2026-07-27', 10000000.13, '2025-02-28 07:28:38', '2025-03-02 09:31:04', '2024', NULL),
+	('AMB-4-1-2025-2', 'ecommerce', 'ecommerce para un restaurante', 1, 2, 4, 1, '2025-02-26', '2026-07-27', 10000000.00, '2025-02-28 07:33:20', '2025-02-28 07:33:20', '2024', NULL),
+	('CEC-5-1-2025-1', 'prueba 2', 'esta es la segunda prueba de codigo', 5, 1, 5, 1, '2025-02-26', '2025-03-26', 10000000.00, '2025-02-27 07:51:22', '2025-02-27 07:51:22', '2025', NULL),
+	('SOF-1-1-2020-1', 'DriverSecurity', 'Desarrollar una aplicación móvil capaz de prevenir la aparición de microsueños de los conductores sin importar su categoría.', 3, 1, 1, 1, '2025-04-02', '2025-06-20', 5200000.00, '2025-03-03 01:31:52', '2025-03-03 01:31:52', '2020', NULL),
+	('SOF-1-1-2020-2', 'CanaimanCo', 'Desarrollar un videojuego 2D que logre ser de apoyo en el conocimiento de culturas dentro y fuera de nuestra universidad', 3, 1, 1, 1, '2020-02-04', '2024-07-03', 2542000.00, '2025-03-04 02:32:18', '2025-03-04 02:32:18', '2020', 'https://res.cloudinary.com/dqxq7tupx/image/upload/v1741037537/pdfs/tcdioax7hvlmjkdc184f.pdf'),
+	('SOF-1-1-2025-1', 'Contaminación Invisible', 'Identificar la contaminación invisible por radiación electromagnética que generan los diferentes dispositivos móviles (Tecnología 3G, 4G, 5G).', 3, 1, 1, 1, '2025-03-04', '2026-01-03', 55000000.00, '2025-03-04 03:28:14', '2025-03-04 03:28:14', '2025', 'https://res.cloudinary.com/dqxq7tupx/image/upload/v1741040893/pdfs/phxtt4rlfou6l9hipbsg.pdf'),
+	('SOF-4-1-2020-1', 'Plataforma de Gestión de Auditoría en la Seguridad de la Información basada en la norma ISO 27001 en el área de TI para las empresas.', 'Implementar una plataforma de Gestión de Auditoría en la Seguridad de la Información basada en la norma ISO 27001 en el área de TI para las empresas', 3, 1, 4, 1, '2020-02-03', '2020-08-03', 1200000.00, '2025-03-04 03:19:57', '2025-03-04 03:19:57', '2020', 'https://res.cloudinary.com/dqxq7tupx/image/upload/v1741040396/pdfs/jpgjogymx28pmcqmanzk.pdf'),
+	('SOF-4-1-2020-2', 'Investigación y análisis de las vulnerabilidades producidas por ataques de software malicioso “malware” en empresas', 'Investigar y analizar las vulnerabilidades producidas por los softwares maliciosos, logrando obtener el conocimiento requerido conllevando así la prevención de infecciones en usuarios.', 3, 1, 4, 1, '2024-02-03', '2025-11-12', 6000000.00, '2025-03-04 03:24:49', '2025-03-04 03:24:49', '2020', 'https://res.cloudinary.com/dqxq7tupx/image/upload/v1741040688/pdfs/gz1japlnbcdmrqpc0mep.pdf'),
+	('SOF-4-2-2025-1', 'Gestor administrativo de clientes', 'es un software administrativo de clientess para un gymnasio', 3, 1, 4, 2, '2025-02-27', '2025-11-30', 99999999.00, '2025-02-28 07:21:59', '2025-02-28 07:21:59', '2020', NULL),
+	('SOF-5-1-2025-1', 'prueba 3', 'esta es la tercera prueba de codigo', 3, 1, 5, 1, '2025-02-26', '2025-03-26', 90000000.00, '2025-02-27 07:51:58', '2025-02-27 07:51:58', '2025', NULL),
+	('SOF-5-1-2025-10', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2023-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:33:59', '2025-02-27 09:33:59', '2025', NULL),
+	('SOF-5-1-2025-2', 'Un proyecto de Ing. Soft', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 90000000.00, '2025-02-27 07:53:52', '2025-03-03 01:28:12', '2021', NULL),
+	('SOF-5-1-2025-3', 'prueba 5', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 99000000.00, '2025-02-27 07:54:48', '2025-02-27 07:54:48', '2021', NULL),
+	('SOF-5-1-2025-4', 'prueba 6', 'esta es la cuarta prueba de codigo', 3, 1, 5, 1, '2025-02-20', '2025-03-29', 99000000.00, '2025-02-27 08:20:09', '2025-02-27 08:20:09', '2021', NULL),
+	('SOF-5-1-2025-5', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:04:02', '2025-02-27 09:04:02', '2025', NULL),
+	('SOF-5-1-2025-6', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:08:56', '2025-02-27 09:08:56', '2019', NULL),
+	('SOF-5-1-2025-7', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:12:16', '2025-02-27 09:12:16', '2018', NULL),
+	('SOF-5-1-2025-8', 'prueba con investigadores actualizado', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:20:17', '2025-03-05 09:05:47', '2019', 'https://res.cloudinary.com/dqxq7tupx/image/upload/v1741147546/pdfs/xsmnwe4lionvzd5tmpwg.pdf'),
+	('SOF-5-1-2025-9', 'prueba con investigadores', 'otrra prueba con un array de investigadores', 3, 1, 5, 1, '2025-02-26', '2025-03-28', 90000000.00, '2025-02-27 09:32:07', '2025-02-27 09:32:07', '2021', NULL),
+	('SST-1-1-2020-1', 'Diseño de un protocolo para la contratación de personas en situación de discapacidad para las empresas de la ciudad de Neiva', 'Diseñar una herramienta digital para la evaluación de posturas ergonómicas en las tareas administrativas dentro de la organización Funeraria San José, ubicada en la ciudad de Neiva', 4, 1, 1, 1, '2024-12-28', '2025-03-20', 2770000.00, '2025-03-01 09:09:11', '2025-03-01 09:09:11', '2020', NULL),
+	('SST-1-1-2020-2', 'Factores de riesgos asociados a los trastornos músculo esqueléticos a los que están expuestos los trabajadores informales de la plaza de mercado MercaNeiva.', 'Identificar los factores de riesgos asociados a los trastornos músculo esqueléticos a los que están expuestos los trabajadores informales de la plaza de mercado MercaNeiva.', 4, 1, 1, 1, '2020-01-01', '2021-01-01', 2770000.00, '2025-03-01 10:06:56', '2025-03-01 10:06:56', '2020', NULL),
+	('SST-5-1-2020-1', 'Evaluación de posturas ergonómicas en el área administrativa a partir de una herramienta digital', 'Diseñar  una  herramienta digita para la evaluación de posturas ergonómicas a partir de la metodología Ocra para el buen desarrollo de las  tareas administrativas dentro de la organización Funeraria San José, ubicada en la ciudad de Neiva.', 4, 1, 5, 1, '2023-07-12', '2024-03-06', 12000000.00, '2025-03-01 10:10:29', '2025-03-01 10:10:29', '2020', NULL);
 
 -- Volcando datos para la tabla fetportafolioproyectos.tipologias: ~5 rows (aproximadamente)
 INSERT INTO `tipologias` (`id`, `opcion`) VALUES

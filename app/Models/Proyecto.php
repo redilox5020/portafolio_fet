@@ -29,7 +29,8 @@ class Proyecto extends Model
         'fecha_inicio',
         'fecha_fin',
         'anio',
-        'costo'
+        'costo',
+        'pdf_url'
     ];
     public function getDuracionAttribute()
     {

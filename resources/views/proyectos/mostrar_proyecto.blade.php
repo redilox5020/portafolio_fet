@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Mostrar proyecto</title>
+    <script src="https://kit.fontawesome.com/b5762637e9.js" crossorigin="anonymous"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -25,6 +26,7 @@
                 $indexInvestigadores++;
             @endphp
         @endforeach
+        <a href="{{$proyecto->pdf_url}}"><i style="font-size: 40px; color: red" class="fa-solid fa-file-pdf" target="_blank"></i></a>
     </div>
     <a href="{{route('inicio')}}">ir a inicio</a>
 </body>

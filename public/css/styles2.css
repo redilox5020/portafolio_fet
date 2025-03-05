@@ -1,0 +1,105 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+header {
+    background: #0d3865;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    border-radius: 8px 8px 0 0;
+}
+
+h1, h2 {
+    margin: 5px 0;
+}
+
+.info {
+    padding: 15px;
+    background: #eaeaea;
+    border-radius: 8px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+input {
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    flex-grow: 1;
+}
+
+input[type="number"] {
+    width: 60px;
+    text-align: center;
+}
+
+.id {
+    margin-left: 15px;
+    color: white;
+    background: #009900;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.codigo {
+    background: #6ec262;
+    color: white;
+    font-weight: bold;
+}
+
+.table-container {
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #d4edda;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th {
+    background: #5c9155;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+td input {
+    width: 100%;
+    text-align: center;
+    border: none;
+    padding: 5px;
+}
+
+.total td input {
+    background: #eee;
+    font-weight: bold;
+}

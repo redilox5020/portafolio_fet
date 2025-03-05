@@ -4,14 +4,14 @@
         <h1>Crear {{ $title }}</h1>
         <form action="{{ route($routeName . '.store') }}" method="post">
             @csrf
-            <div>
+            <div class="group-form input-group">
                 <label for="{{ $modalId !== 'programa' ? 'opcion' : 'nombre' }}">{{ $title }}</label>
-                <input type="text" name="{{ $modalId !== 'programa' ? 'opcion' : 'nombre' }}" required>
+                <input class="form-control" type="text" name="{{ $modalId !== 'programa' ? 'opcion' : 'nombre' }}" required>
             </div>
             @if ($modalId === 'programa')
-            <div>
+            <div class="group-form input-group">
                 <label for="sufijo">Sufijo</label>
-                <input type="text" name="sufijo" required>
+                <input class="form-control" type="text" name="sufijo" required>
             </div>
             @endif
             <button type="submit">Guardar</button>

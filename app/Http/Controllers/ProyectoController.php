@@ -10,6 +10,7 @@ use App\Models\Programa;
 use App\Models\Proyecto;
 use App\Models\Investigador;
 use DB;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProyectoController extends Controller
 {
@@ -52,7 +53,12 @@ class ProyectoController extends Controller
             })
             ->paginate($this->perPage);
 
-            return view('proyectos.index', compact('proyectos'));
+        $programas = Programa::all();
+        $tipologias = Tipologia::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $search = $request->search;
+
+        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias', 'search'));
     }
 
     public function proyectosPorGrupoCodigo(Request $request){
@@ -70,7 +76,11 @@ class ProyectoController extends Controller
 
         $proyectos->withQueryString();
 
-        return view('proyectos.index', compact('proyectos'));
+        $programas = Programa::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $tipologias = Tipologia::all();
+
+        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias','codigo'));
     }
 
     public function proyectosPorPrograma($programaId)
@@ -78,7 +88,11 @@ class ProyectoController extends Controller
         $programa = Programa::findOrFail($programaId);
         $proyectos = $programa->proyectos()->paginate($this->perPage);
 
-        return view('proyectos.index', compact('programa', 'proyectos'));
+        $programas = Programa::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $tipologias = Tipologia::all();
+
+        return view('proyectos.index', compact('programa', 'proyectos', 'programas','procedenciaCodigos','tipologias'));
     }
 
     public function proyectosPorAnio($programaId, $anio)
@@ -88,7 +102,11 @@ class ProyectoController extends Controller
             ->where('anio', $anio)
             ->paginate($this->perPage);
 
-        return view('proyectos.index', compact('programa', 'proyectos', 'anio'));
+        $programas = Programa::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $tipologias = Tipologia::all();
+
+        return view('proyectos.index', compact('programa', 'proyectos', 'anio','programas','procedenciaCodigos','tipologias'));
     }
 
     public function proyectosPorCodigo($codigo){
@@ -100,7 +118,11 @@ class ProyectoController extends Controller
     public function findAll(){
         $proyectos = Proyecto::orderBy('codigo', 'desc')->paginate($this->perPage);
 
-        return view('proyectos.index', compact('proyectos'));
+        $programas = Programa::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $tipologias = Tipologia::all();
+
+        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias'));
     }
 
     public function create(){
@@ -124,6 +146,7 @@ class ProyectoController extends Controller
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
             'anio' => 'required|integer|digits:4|min:2010|max:2100',
+            'pdf_file' => 'nullable|mimes:pdf|max:2048',
             'costo' => [
                 'required',
                 'numeric',
@@ -134,12 +157,12 @@ class ProyectoController extends Controller
             'investigadores_nombres.*' => 'nullable|string|max:255',
         ]);
 
-        #Obtener el sufjo del programa seleccionado
+        // Obtener el sufjo del programa seleccionado
         $sufijoPrograma = Programa::find($validatedData['programa_id'])->sufijo;
 
-        #Obtener el id de la opcion del campo procedencia_codigo
+        // Obtener el id de la opcion del campo procedencia_codigo
         $idProcedenciaCodigo = $validatedData['procedencia_codigo_id'];
-        #Obtener el id de la opciion del campo tiipologia
+        // Obtener el id de la opciion del campo tiipologia
         $idTipologia = $validatedData['tipologia_id'];
 
         $anio = $validatedData['anio'];
@@ -159,11 +182,23 @@ class ProyectoController extends Controller
         }else{
             $numeroIncremental = 1;
         }
-        #Generar el codigo
+        // Generar el codigo
         $validatedData['codigo']="{$baseCodigo}-{$numeroIncremental}";
-        $proyecto = Proyecto::create($validatedData);
 
-        #Agregar investigadores
+        // Subir PDF
+        if(isset($validatedData['pdf_file'])){
+            $pdfSubido = $validatedData['pdf_file'];
+            $uploadResult = Cloudinary::upload($pdfSubido->getRealPath(), [
+                'folder' => 'pdfs',
+                'resource_type' => 'auto',
+            ]);
+            $validatedData['pdf_url'] = $uploadResult->getSecurePath();
+        }
+
+        $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
+        $proyecto = Proyecto::create($proyectoData);
+
+        // Agregar investigadores
         $investigadoresIds = [];
 
         foreach ($validatedData["investigadores_nombres"] as $nombre) {
@@ -172,7 +207,7 @@ class ProyectoController extends Controller
             $investigadoresIds[] = $investigador->id;
             }
         }
-        #Asociar investigadores al proyecto attach
+        // Asociar investigadores al proyecto attach
         $proyecto->investigadores()->sync($investigadoresIds);
 
         return redirect()->back()
@@ -199,6 +234,7 @@ class ProyectoController extends Controller
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
             'anio' => 'required|integer|digits:4|min:2010|max:2100',
+            'pdf_file' => 'nullable|mimes:pdf|max:2048',
             'costo' => [
                 'required',
                 'numeric',
@@ -213,7 +249,16 @@ class ProyectoController extends Controller
 
         DB::beginTransaction();
         try {
-            $proyectoData = $request->except(['investigadores_ids', 'investigadores_nombres']);
+            // Subir PDF
+            if(isset($validatedData['pdf_file'])){
+                $pdfSubido = $validatedData['pdf_file'];
+                $uploadResult = Cloudinary::upload($pdfSubido->getRealPath(), [
+                    'folder' => 'pdfs',
+                    'resource_type' => 'auto',
+                ]);
+                $validatedData['pdf_url'] = $uploadResult->getSecurePath();
+            }
+            $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
             $proyecto->update($proyectoData);
 
             $investigadoresIds = $validatedData['investigadores_ids'] ?? [];

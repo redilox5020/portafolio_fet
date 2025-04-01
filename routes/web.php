@@ -6,6 +6,9 @@ use App\Http\Controllers\TipologiaController;
 use App\Http\Controllers\ProcedenciaController;
 use App\Http\Controllers\ProcedenciaCodigoController;
 use App\Http\Controllers\ProgramaController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,48 +20,118 @@ use App\Http\Controllers\ProgramaController;
 |
 */
 
-Route::get('/proyectos/crear', [ProyectoController::class, 'create'])
-    ->name('proyectos.create');
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AdminController::class, 'login'])->name('login');
+    Route::post('login', [AdminController::class, 'loginPost'])->name('logging');
+    Route::get('register', [AdminController::class, 'register'])->name('register');
+    Route::post('register', [AdminController::class, 'registerPost'])->name('register');
 
-Route::post('/proyectos/crear', [ProyectoController::class, 'store'])
-    ->name('proyectos.store');
+    Route::get('forgot-password', [AdminController::class, 'forgotPassword'])->name('forgot-password');
+    Route::post('forgot-password', [AdminController::class, 'forgotPasswordPost'])->name('password.email');
+    Route::get('reset-password/{token}', [AdminController::class, 'resetPassword'])->name('password.reset');
+    Route::post('reset-password', [AdminController::class, 'resetPasswordPost'])->name('password.update');
 
-Route::get('/tipologias/crear', [TipologiaController::class, 'create'])
-    ->name('tipologia.create');
+});
+Route::get('logout', [AdminController::class, 'logout'])->name('logout');
 
-Route::post('/tipologias/crear', [TipologiaController::class, 'store'])
-    ->name('tipologia.store');
+Route::middleware('auth')->group(function () {
+    Route::get('/home', [ProyectoController::class, 'index'])
+        ->name('inicio');
 
-Route::post('/procedencias/crear', [ProcedenciaController::class, 'store'])
-    ->name('procedencia.store');
+    Route::prefix('/admin')->group(function () {
+        Route::prefix('/proyectos')->group(function () {
+            // Filters
+            Route::get('/', [ProyectoController::class, 'findAll'])
+                ->name('proyectos');
 
-Route::post('/programas/crear', [ProgramaController::class, 'store'])
-    ->name('programa.store');
+            Route::get('programa/{programa}', [ProyectoController::class, 'proyectosPorPrograma'])
+                ->name('proyectos.por.programa');
 
-Route::post('/procedencia-codigos/crear', [ProcedenciaCodigoController::class, 'store'])
-    ->name('procedencia.codigo.store');
+            Route::get('codigo', [ProyectoController::class, 'proyectosPorGrupoCodigo'])
+                ->name('proyectos.por.grupo.codigo');
 
-Route::get('/', [ProyectoController::class, 'index'])
-    ->name('inicio');
+            Route::get('buscar', [ProyectoController::class, 'buscarProyectos'])
+                ->name('proyectos.busqueda');
 
-Route::get('/proyectos/programa/{programa}', [ProyectoController::class, 'proyectosPorPrograma'])
-    ->name('proyectos.por.programa');
+            Route::get('programa/{programa}/anio/{anio}', [ProyectoController::class, 'proyectosPorAnio'])
+                ->name('proyectos.por.anio');
 
-Route::get('/proyectos/codigo/', [ProyectoController::class, 'proyectosPorGrupoCodigo'])
-    ->name('proyectos.por.grupo.codigo');
+            // Ruta de creacion
+            Route::get('crear', [ProyectoController::class, 'create'])
+                ->middleware('can:proyecto.create')
+                ->name('proyectos.create');
 
-Route::get('/proyectos/buscar', [ProyectoController::class, 'buscarProyectos'])
-    ->name('proyectos.busqueda');
+            Route::post('crear', [ProyectoController::class, 'store'])
+                ->middleware('can:proyecto.create')
+                ->name('proyectos.store');
+            Route::delete('/delete/{id}', [ProyectoController::class, 'destroy'])
+                ->name("destroy.project");
+            // Ruta dinamica "Ver"
+            Route::get('{codigo}', [ProyectoController::class, 'proyectosPorCodigo'])
+                ->middleware('can:proyecto.view')
+                ->name('proyecto.por.codigo');
 
-Route::get('/proyectos/programa/{programa}/anio/{anio}', [ProyectoController::class, 'proyectosPorAnio'])
-    ->name('proyectos.por.anio');
+            // Ruta dinamica de actualizacion
+            Route::get('{proyecto}/edit', [ProyectoController::class, 'edit'])
+                ->middleware('can:proyecto.edit')
+                ->name('proyectos.edit');
 
-Route::get('/proyectos', [ProyectoController::class, 'findAll'])
-    ->name('proyectos');
-
-Route::get('/proyectos/{codigo}', [ProyectoController::class, 'proyectosPorCodigo'])
-    ->name('proyecto.por.codigo');
+            Route::put('{proyecto}', [ProyectoController::class, 'update'])
+                ->middleware('can:proyecto.edit')
+                ->name('proyectos.update');
 
 
-    Route::get('/proyectos/{proyecto}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
-    Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->name('proyectos.update');
+        });
+
+        Route::prefix('/tipologias')->group(function () {
+            Route::get('crear', [TipologiaController::class, 'create'])
+                ->middleware('can:tipologia.create')
+                ->name('tipologia.create');
+
+            Route::post('crear', [TipologiaController::class, 'store'])
+                ->middleware('can:tipologia.create')
+                ->name('tipologia.store');
+        });
+
+        Route::prefix('/procedencias')->group(function () {
+            Route::post('crear', [ProcedenciaController::class, 'store'])
+                ->middleware('can:procedencia.create')
+                ->name('procedencia.store');
+        });
+
+        Route::prefix('/procedencia-codigos')->group(function () {
+            Route::post('crear', [ProcedenciaCodigoController::class, 'store'])
+                ->middleware('can:procedencia.codigo.create')
+                ->name('procedencia.codigo.store');
+        });
+
+        Route::prefix('/programas')->group(function () {
+            Route::post('crear', [ProgramaController::class, 'store'])
+                ->middleware('can:programa.create')
+                ->name('programa.store');
+        });
+
+        Route::prefix('/users')->group(function () {
+            Route::get('/', [UserController::class, "index"])
+                ->name('users');
+
+            Route::get('{user}/edit', [UserController::class, 'edit'])
+                ->name('user.edit');
+
+            Route::put('{user}', [UserController::class, 'update'])
+                ->name('user.update');
+        });
+
+        Route::prefix('/roles')->group(function () {
+            Route::get('/', [RoleController::class, "index"])
+                ->name('roles.index');;
+
+            Route::post('/', [RoleController::class, 'store'])
+                ->name('roles.store');
+
+            Route::put('/{role}', [RoleController::class, 'update'])
+                ->name('roles.update');
+
+        });
+    });
+});

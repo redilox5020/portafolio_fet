@@ -1,62 +1,213 @@
-@extends("layouts.dashboard")
-@section("main")
-@if (isset($programa))
-    <h3 class="titulo-proyectos">Proyectos de {{ $programa->nombre }} @isset($anio) - Año {{ $anio }} @endisset</h3>
-@elseif (isset($search))
-    <h3 class="titulo-proyectos">Proyectos filtrados por: <code>{{ $search }}</code></h3>
-@elseif (isset($codigo))
-    <h3 class="titulo-proyectos">Proyectos filtrados por grupo de códigos: <code>{{ $codigo }}</code></h3>
-@else
-    <h3 class="titulo-proyectos">Todos los proyectos</h3>
-@endif
+@extends('layouts.dashboard_admin')
+@section('main')
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h3 id="titulo-proyectos" class="h3 mb-2 text-gray-800">
+                @if (request('codigo_grupo'))
+                    Proyectos filtrados por grupo de códigos: <code>{{ request('codigo_grupo') }}</code>
+                @elseif(request('programa_nombre') && request('anio'))
+                    Proyectos de {{ request('programa_nombre') }} - Año {{ request('anio') }}
+                @elseif(request('programa_nombre'))
+                    Proyectos de {{ request('programa_nombre') }}
+                @elseif(request('search'))
+                    Proyectos filtrados por: <code>{{ request('search') }}</code>
+                @else
+                    Todos los proyectos
+                @endif
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="proyectosTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre del Proyecto</th>
+                            <th>Programa</th>
+                            <th>Duración</th>
+                            <th>Costo (COP)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-<section class="table-container">
-<table>
-    <thead>
-        <tr>
-            <th>Codigo</th>
-            <th>Nombre del Proyecto</th>
-            <th>Duracion</th>
-            <th>Costo (COP)</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($proyectos as $proyecto)
-            <tr>
-                <td>{{$proyecto->codigo}}</td>
-                <td>
-                    <a href="{{ route('proyecto.por.codigo', $proyecto->codigo) }}">
-                        {{ $proyecto->nombre }}
-                    </a>
-                </td>
-                <td>{{ $proyecto->duracion }}</td>
-                <td>${{ number_format($proyecto->costo, 2, ',', '.') }}</td>
-                <td>
-                    <a href="{{route('proyectos.edit', $proyecto->codigo)}}">Editar</a>
-                    <a href="#">Eliminar</a>
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
+                    </tbody>
+                </table>
+            </div>
+            <a href="{{ route('inicio') }}" class="btn btn-secondary mt-3">Volver al inicio</a>
+        </div>
+    </div>
+@endsection
 
-</section>
-{{ $proyectos->links('pagination::bootstrap-4') }}
-<a href="{{route('inicio')}}">ir a inicio</a>
-
-@endsection
-@section("css")
-<style>
-    .titulo-proyectos{
-        margin-top: 15px
-    }
-</style>
-@endsection
-{{-- @extends("layouts.dashboard")
-@section("main")
-@endsection
 @section('css')
+    <link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <style>
+        .titulo-proyectos {
+            margin-top: 15px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
 @endsection
+
 @section('scripts')
-@endsection --}}
+    <script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+
+    <script>
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialSearch = urlParams.get('search') || '';
+            const titulo = $('#titulo-proyectos');
+            let isInitialLoad = true;
+
+            const table = $('#proyectosTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('proyectos') }}",
+                    type: "GET",
+                    data: function(d) {
+
+                        if (isInitialLoad && initialSearch) {
+                            d.search.value = initialSearch;
+                            isInitialLoad = false;
+                        }
+                        @if (!is_null(request('programa')))
+                            d.programa_id = "{{ request('programa') }}";
+                        @endif
+
+                        @if (!is_null(request('programa')) && !is_null(request('anio')))
+                            d.anio = "{{ request('anio') }}";
+                        @endif
+
+                        @if (!is_null(request('codigo_grupo')))
+                            d.codigo_grupo = "{{ request('codigo_grupo') }}";
+                        @endif
+
+                    }
+                },
+                columns: [{
+                        data: 'codigo',
+                        name: 'codigo'
+                    },
+                    {
+                        data: 'nombre_link',
+                        name: 'nombre',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'programa',
+                        name: 'programa',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'duracion',
+                        name: 'duracion'
+                    },
+                    {
+                        data: 'costo_formateado',
+                        name: 'costo',
+                        orderable: true,
+                        searchable: false
+                    },
+                    {
+                        data: 'acciones',
+                        name: 'acciones',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    }
+                ],
+                language: {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    },
+                    "buttons": {
+                        "copy": "Copiar",
+                        "colvis": "Visibilidad"
+                    }
+                },
+                lengthMenu: [
+                    [10, 25, 50],
+                    [10, 25, 50]
+                ],
+                pageLength: 10,
+                searchDelay: 500,
+                order: [
+                    [0, 'desc']
+                ],
+            }).search(initialSearch);
+            if (initialSearch) {
+                updateTitleAndUrl(initialSearch);
+            }
+
+            function updateTitleAndUrl(searchValue) {
+                const url = new URL(window.location);
+
+                if (searchValue && searchValue.length >= 3) {
+                    titulo.html(`Proyectos filtrados por: <code>${searchValue}</code>`);
+                    url.searchParams.set('search', searchValue);
+                } else {
+                    // Restaurar título original basado en otros parámetros
+                    @if (request('codigo_grupo'))
+                        titulo.html(
+                            `Proyectos filtrados por grupo de códigos: <code>{{ request('codigo_grupo') }}</code>`
+                            );
+                    @elseif (request('programa_nombre') && request('anio'))
+                        titulo.html(`Proyectos de {{ request('programa_nombre') }} - Año {{ request('anio') }}`);
+                    @elseif (request('programa_nombre'))
+                        titulo.html(`Proyectos de {{ request('programa_nombre') }}`);
+                    @else
+                        titulo.text('Todos los proyectos');
+                    @endif
+
+                    url.searchParams.delete('search');
+                }
+
+                window.history.pushState({}, '', url);
+            }
+
+            // Escuchar el evento de búsqueda de DataTables; Incluye la accion de limpiar el input
+            table.on('search.dt', function() {
+                const searchValue = table.search();
+                updateTitleAndUrl(searchValue);
+            });
+
+            // Manejar navegación con botones atrás/adelante
+            window.addEventListener('popstate', function() {
+                const newSearch = new URLSearchParams(window.location.search).get('search') || '';
+                const currentSearch = table.search();
+
+                if (newSearch !== currentSearch) {
+                    table.search(newSearch).draw();
+                    updateTitleAndUrl(newSearch);
+                }
+            });
+        });
+    </script>
+@endsection

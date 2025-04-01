@@ -70,43 +70,38 @@ class ProyectoController extends Controller
         ]);
 
         $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_codigo_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
-        $proyectos = Proyecto::where("codigo", "like", "{$codigo}%")
-                            ->orderBy('created_at', 'desc')
-                            ->paginate(5);
 
-        $proyectos->withQueryString();
-
-        $programas = Programa::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
-
-        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias','codigo'));
+        return redirect()->route('proyectos', [
+            'codigo_grupo' => $codigo,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
     }
 
     public function proyectosPorPrograma($programaId)
     {
-        $programa = Programa::findOrFail($programaId);
-        $proyectos = $programa->proyectos()->paginate($this->perPage);
-
-        $programas = Programa::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
-
-        return view('proyectos.index', compact('programa', 'proyectos', 'programas','procedenciaCodigos','tipologias'));
+        $programa = Programa::select(["nombre"])->findOrFail($programaId);
+        return redirect()->route('proyectos', [
+            'programa' => $programaId,
+            'programa_nombre' => $programa->nombre ?? null,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
     }
 
     public function proyectosPorAnio($programaId, $anio)
     {
-        $programa = Programa::findOrFail($programaId);
-        $proyectos = $programa->proyectos()
-            ->where('anio', $anio)
-            ->paginate($this->perPage);
-
-        $programas = Programa::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
-
-        return view('proyectos.index', compact('programa', 'proyectos', 'anio','programas','procedenciaCodigos','tipologias'));
+        $programa = Programa::select(["nombre"])->findOrFail($programaId);
+        return redirect()->route('proyectos', [
+            'programa' => $programaId,
+            'programa_nombre' => $programa->nombre ?? null,
+            'anio' => $anio,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
     }
 
     public function proyectosPorCodigo($codigo){
@@ -115,14 +110,104 @@ class ProyectoController extends Controller
         return view('proyectos.mostrar_proyecto', compact('proyecto'));
     }
 
-    public function findAll(){
-        $proyectos = Proyecto::orderBy('codigo', 'desc')->paginate($this->perPage);
+    public function findAll(Request $request)
+    {
+        if ($request->ajax()) {
+            $start = $request->input('start', 0);
+            $length = $request->input('length', 10);
+            $search = $request->input('search.value');
+            $orderColumn = $request->input('order.0.column');
+            $orderDir = $request->input('order.0.dir');
+
+            $query = Proyecto::with(['programa', 'procedenciaCodigo', 'tipologia', 'investigadores:nombre']);
+
+            // Aplicar filtros existentes si están presentes
+
+            if ($request->has('programa_id')) {
+                $query->whereHas('programa', function($eq) use ($request) {
+                    $eq->where('id', $request->programa_id);
+                });
+            }
+
+            if ($request->has('anio')) {
+                $query->where('anio', $request->anio);
+            }
+
+            if ($request->has('codigo_grupo')) {
+                $query->where('codigo', 'like', $request->codigo_grupo . '%');
+            }
+
+
+            //
+            if (!empty($search)) {
+                $query->when(strlen($search) >= 4, function ($q) use ($search){
+                    $q->where('nombre', 'like', "%$search%")
+                    ->orWhere('objetivo_general', 'like', "%$search%")
+                    ->orWhereHas('investigadores', function($q) use ($search) {
+                        $q->where('nombre', 'like', "%$search%");
+                    });
+
+                });
+            }
+
+            // Ordenamiento
+            $columns = ['codigo', 'nombre', 'programa.nombre', 'duracion', 'costo'];
+            if (isset($columns[$orderColumn])) {
+                $orderField = $columns[$orderColumn];
+                if ($orderField === 'duracion') {
+                    // Ordenar por la diferencia en días
+                    $query->orderByRaw('DATEDIFF(fecha_fin, fecha_inicio) ' . $orderDir);
+                }
+                elseif (str_contains($orderField, '.')) {
+                    $relation = explode('.', $orderField)[0];
+                    $query->whereHas($relation, function($q) use ($orderField, $orderDir) {
+                        $q->orderBy(explode('.', $orderField)[1], $orderDir);
+                    });
+                } else {
+                    $query->orderBy($orderField, $orderDir);
+                }
+            }
+
+            $total = $query->count();
+            $proyectos = $query->skip($start)->take($length)->get();
+
+            $data = $proyectos->map(function($proyecto) {
+                $csrfToken = csrf_token();
+
+                return [
+                    'codigo' => $proyecto->codigo,
+                    'nombre_link' => '<a href="'.route('proyecto.por.codigo', $proyecto->codigo).'">'.$proyecto->nombre.'</a>',
+                    'programa' => $proyecto->programa->nombre ?? '',
+                    'duracion' => $proyecto->duracion,
+                    'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),
+                    'acciones' => '<div class="d-flex flex-wrap gap-1 justify-content-center">
+                                    <a href="'.route('proyectos.edit', $proyecto->codigo).'" class="btn btn-success btn-circle">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form action="'.route('destroy.project', $proyecto->codigo).'" method="POST" class="d-inline">
+                                        <input type="hidden" name="_token" value="'.$csrfToken.'">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn-danger btn-circle">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>'
+                ];
+            });
+
+            return response()->json([
+                'draw' => $request->input('draw'),
+                'recordsTotal' => Proyecto::count(),
+                'recordsFiltered' => $total,
+                'data' => $data
+            ]);
+        }
 
         $programas = Programa::all();
         $procedenciaCodigos = ProcedenciaCodigo::all();
         $tipologias = Tipologia::all();
 
-        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias'));
+        return view('proyectos.index', compact('programas', 'procedenciaCodigos', 'tipologias'));
     }
 
     public function create(){
@@ -279,5 +364,10 @@ class ProyectoController extends Controller
             DB::rollback();
             return redirect()->back()->with('error', 'Error al actualizar el proyecto: ' . $e->getMessage());
         }
+    }
+
+    public function destroy(String $codigo){
+        DB::delete('delete from proyectos where codigo = ?', [$codigo]);
+        return redirect()->route('proyectos')->with('success', "Proyecto eliminado correctamente");
     }
 }

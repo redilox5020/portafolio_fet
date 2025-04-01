@@ -73,6 +73,21 @@
     <div class="row g-0">
         <div class="col-md-3">
             <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                 <!-- Formulario para crear nuevo rol -->
                   <form method="POST" action="{{ route('roles.store') }}">
                       @csrf

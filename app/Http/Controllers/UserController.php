@@ -63,7 +63,7 @@ class UserController extends Controller
                                     <form method="POST" class="d-inline">
                                         <input type="hidden" name="_token" value="'.$csrfToken.'">
                                         <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn-danger btn-circle">
+                                        <button type="button" class="btn btn-danger btn-circle">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>

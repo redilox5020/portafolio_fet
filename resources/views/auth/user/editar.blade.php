@@ -5,6 +5,21 @@
             <h3 class="h3 mb-2 text-gray-800">Editar Usuario</h3>
         </div>
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
             <form action="{{ route('user.update', $user->id) }}" class="formulario__register" method="POST">
                 @csrf @method('PUT')
 
@@ -15,7 +30,7 @@
                             value="{{ $user->name }}">
                     </div>
                 </div>
-{{--                 <div class="mb-3 row">
+                {{--                 <div class="mb-3 row">
                     <label for="inputPassword" class="col-sm-2 col-form-label">Apellido</label>
                     <div class="col-sm-10">
                         <input class="form-control" type="text" name="last_name" placeholder="Apellido">

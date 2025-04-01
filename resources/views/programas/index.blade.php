@@ -1,5 +1,47 @@
-@extends("layouts.dashboard")
+@extends("layouts.dashboard_admin")
 @section("main")
+<header>
+    <h1>FUNDACIÓN ESCUELA TECNOLÓGICA DE NEIVA - FET</h1>
+    <h2>VICERRECTORÍA DE INVESTIGACIÓN Y EXTENSIÓN</h2>
+</header>
+<section class="info">
+    <div>
+        <form class="search-form" action="{{route('proyectos.por.grupo.codigo')}}" method="get">
+            <h2>Buscar Código</h2>
+            <div class="form-group">
+                <label for="programa_sufijo">Programa:</label>
+                <select class="form-select" id="programa_sufijo" name="programa_sufijo" required>
+                    @foreach($programas as $programa)
+                    <option value="{{ $programa->sufijo }}">{{ $programa->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="procedencia_codigo_id">Procedencia Código:</label>
+                <select class="form-select" id="procedencia_codigo_id" name="procedencia_codigo_id" required>
+                    @foreach($procedenciaCodigos as $procedenciaCodigo)
+                    <option value="{{ $procedenciaCodigo->id }}">{{ $procedenciaCodigo->opcion }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tipologia_id">Tipología:</label>
+                <select class="form-select" id="tipologia_id" name="tipologia_id" required>
+                    @foreach($tipologias as $tipologia)
+                    <option value="{{ $tipologia->id }}">{{ $tipologia->opcion }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="anio">Año:</label>
+                <input class="form-control" type="number" id="anio" name="anio" min="2010" max="2100" step="1" placeholder="2025" value="{{date('Y')}}">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-dark" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+</section>
 <section class="table-container">
     <table>
         <thead>
@@ -10,34 +52,30 @@
         </thead>
         <tbody>
             @php
-                $currentPrograma = null;
+            $currentPrograma = null;
             @endphp
             @foreach($datos as $dato)
-                @if ($dato->programa->nombre != $currentPrograma)
-                    <tr>
-                        <td>
-                            <a href="{{ route('proyectos.por.programa', $dato->programa->id) }}">
-                                <strong>
-                                    {{ $dato->programa->nombre }}
-                                </strong>
-                            </a>
-                        </td>
-                        <td>{{ $totalesPorPrograma[$dato->programa_id] }}</td>
-                    </tr>
-                    @php
-                        $currentPrograma = $dato->programa->nombre;
-                    @endphp
-                @endif
-                @if ($dato->anio)
-                    <tr>
-                        <td class="subcategoria">
-                            <a href="{{ route('proyectos.por.anio',
-                                ['programa'=> $dato->programa->id, 'anio'=> $dato->anio]
-                                ) }}">{{ $dato->anio }}</a>
-                        </td>
-                        <td>{{ $dato->cuenta_de_programa }}</td>
-                    </tr>
-                @endif
+            @if ($dato->programa->nombre != $currentPrograma)
+            <tr>
+                <td>
+                    <a href="{{ route('proyectos.por.programa', $dato->programa->id) }}">
+                        <strong>{{ $dato->programa->nombre }}</strong>
+                    </a>
+                </td>
+                <td>{{ $totalesPorPrograma[$dato->programa_id] }}</td>
+            </tr>
+            @php
+            $currentPrograma = $dato->programa->nombre;
+            @endphp
+            @endif
+            @if ($dato->anio)
+            <tr style="background-color: #f2f2f2;">
+                <td class="subcategoria">
+                    <a href="{{ route('proyectos.por.anio', ['programa'=> $dato->programa->id, 'anio'=> $dato->anio]) }}">{{ $dato->anio }}</a>
+                </td>
+                <td>{{ $dato->cuenta_de_programa }}</td>
+            </tr>
+            @endif
             @endforeach
             <tr>
                 <td>
@@ -50,59 +88,24 @@
         </tbody>
     </table>
 </section>
-{{-- {{ $datos->links('pagination::bootstrap-4') }} --}}
 <a href="{{route('proyectos.store')}}">Registrar Proyecto</a>
-<div class="modal">
-    <div class="modal-content">
-        <div style="display: flex;gap: 10px;flex-direction: row-reverse;">
-            <div>
-                <h2>Buscar Codigo</h2>
-                <form action="{{route('proyectos.por.grupo.codigo')}}" method="get">
-                    <div>
-                        <label for="programa_sufijo">Programa:</label>
-                        <select id="programa_sufijo" name="programa_sufijo" required>
-                            @foreach($programas as $programa)
-                                <option value="{{ $programa->sufijo }}">{{ $programa->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="procedencia_codigo_id">Procedencia Código:</label>
-                        <select id="procedencia_codigo_id" name="procedencia_codigo_id" required>
-                            @foreach($procedenciaCodigos as $procedenciaCodigo)
-                                <option value="{{ $procedenciaCodigo->id }}">{{ $procedenciaCodigo->opcion }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="tipologia_id">Tipología:</label>
-                        <select id="tipologia_id" name="tipologia_id" required>
-                            @foreach($tipologias as $tipologia)
-                                <option value="{{ $tipologia->id }}">{{ $tipologia->opcion }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="anio">Selecciona un año:</label>
-                        <input type="number" id="anio" name="anio" min="2010" max="2100" step="1" placeholder="2025" value="{{date('Y')}}">
-                    </div>
-                    <button type="submit">Buscar</button>
-                </form>
-            </div>
-            <div>
-                <h2>Buscar</h2>
-                <form action="{{route('proyectos.busqueda')}}" method="get">
-                    <input type="text" name="search" value="{{ request('search') }}" minlength="4" required placeholder="Ingresa una palabra clave">
-                    <button type="submit">Buscar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection
 @section('css')
+<link rel="stylesheet" href="{{ asset('css/styles2.css') }}">
 <style>
-
+    .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        align-items: center
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group:last-child{
+        align-self: end;
+    }
     .subcategoria {
         padding-left: 20px;
     }
@@ -113,57 +116,11 @@
     a:hover {
         text-decoration: underline;
     }
-
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: max-content;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
+    th {
+        background-color: #4CAF50;
     }
 </style>
 @endsection
 @section('scripts')
-<script>
-    let modal = document.querySelector('.modal');
-    let btnAbrir = document.getElementById('abrirModal');
-
-    btnAbrir.onclick = ()=>{
-        modal.style.display = 'block';
-    }
-
-    window.onclick = (event) => {
-        if(event.target.classList.contains('modal')){
-            modal.style.display = 'none';
-        }
-    }
-</script>
+<script></script>
 @endsection
-

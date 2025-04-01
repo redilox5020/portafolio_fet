@@ -1,23 +1,11 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-}
-.container {
-    background: white;
-    padding: 10px;
-    box-shadow: 0px 0px 10px rgb(87, 85, 85);
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
+
  header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background-color: #ccc;
+    background-color: #ececec;
+    border-radius: 8px;
 }
 
 .container h1 {
@@ -46,20 +34,6 @@ body {
     padding: 20px;
 }
 
-.group-form {
-    padding: 10px 50px;
-    font-weight: 600;
-}
-
-.group-form label {
-    background-color: green;
-    color: white;
-    padding: 5px;
-    font-weight: bold;
-    text-align: right;
-    border-radius: 5px 0 0 5px;
-}
-
 
 .investigador-input {
     margin-bottom: 10px;
@@ -78,27 +52,12 @@ body {
 .button {
     padding: 8px 12px;
     font-size: 16px;
-    background-color: #28a745;
-    color: white;
-    border: none;
+    background-color: #ededed;
+    border: 1px solid #cdd3d9;
     border-radius: 4px;
     cursor: pointer;
 }
 
 .button:hover {
-    background-color: #218838;
-}
-
-button[type="submit"] {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #c8f7d2;
 }

@@ -64,8 +64,10 @@ Route::middleware('auth')->group(function () {
             Route::post('crear', [ProyectoController::class, 'store'])
                 ->middleware('can:proyecto.create')
                 ->name('proyectos.store');
+
             Route::delete('/delete/{id}', [ProyectoController::class, 'destroy'])
-                ->name("destroy.project");
+                ->name("proyectos.delete");
+
             // Ruta dinamica "Ver"
             Route::get('{codigo}', [ProyectoController::class, 'proyectosPorCodigo'])
                 ->middleware('can:proyecto.view')
@@ -84,6 +86,9 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('/tipologias')->group(function () {
+            Route::get('/', [TipologiaController::class, 'index'])
+                ->name('tipologia.index');
+
             Route::get('crear', [TipologiaController::class, 'create'])
                 ->middleware('can:tipologia.create')
                 ->name('tipologia.create');
@@ -91,24 +96,43 @@ Route::middleware('auth')->group(function () {
             Route::post('crear', [TipologiaController::class, 'store'])
                 ->middleware('can:tipologia.create')
                 ->name('tipologia.store');
+
+            Route::delete('/delete/{tipologia_id}', [TipologiaController::class, 'destroy'])
+                ->name('tipologia.delete');
         });
 
         Route::prefix('/procedencias')->group(function () {
+            Route::get('/', [ProcedenciaController::class, 'index'])
+                ->name('procedencia.index');
             Route::post('crear', [ProcedenciaController::class, 'store'])
                 ->middleware('can:procedencia.create')
                 ->name('procedencia.store');
+            Route::delete('/delete/{procedencia_id}', [ProcedenciaController::class, 'destroy'])
+                ->name('procedencia.delete');
         });
 
         Route::prefix('/procedencia-codigos')->group(function () {
+            Route::get('/', [ProgramaController::class, 'index'])
+                ->name('procedencia.codigo.index');
+
             Route::post('crear', [ProcedenciaCodigoController::class, 'store'])
                 ->middleware('can:procedencia.codigo.create')
                 ->name('procedencia.codigo.store');
+
+            Route::delete('/delete/{procedencia_codigo_id}', [ProcedenciaCodigoController::class, 'destroy'])
+                ->name('procedencia.codigo.delete');
         });
 
         Route::prefix('/programas')->group(function () {
+            Route::get('/', [ProgramaController::class, 'index'])
+                ->name('programa.index');
+
             Route::post('crear', [ProgramaController::class, 'store'])
                 ->middleware('can:programa.create')
                 ->name('programa.store');
+
+            Route::delete('/delete/{programa_id}', [ProgramaController::class, 'destroy'])
+                ->name('programa.delete');
         });
 
         Route::prefix('/users')->group(function () {
@@ -120,6 +144,9 @@ Route::middleware('auth')->group(function () {
 
             Route::put('{user}', [UserController::class, 'update'])
                 ->name('user.update');
+
+            Route::delete('/delete/{user_id}', [UserController::class, 'destroy'])
+                ->name('user.delete');
         });
 
         Route::prefix('/roles')->group(function () {
@@ -132,6 +159,8 @@ Route::middleware('auth')->group(function () {
             Route::put('/{role}', [RoleController::class, 'update'])
                 ->name('roles.update');
 
+            Route::delete('/delete/{rol_id}', [RoleController::class, 'destroy'])
+                ->name('roles.delete');
         });
     });
 });

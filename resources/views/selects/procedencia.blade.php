@@ -2,7 +2,7 @@
 @section('main')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h3 class="h3 mb-2 text-gray-800">Todos los Usuarios</h3>
+            <h3 class="h3 mb-2 text-gray-800">Procedencia</h3>
         </div>
         <div class="card-body">
             @if ($errors->any())
@@ -21,12 +21,11 @@
                 </div>
             @endif
             <div class="table-responsive">
-                <table class="table table-bordered" id="usuariosTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="tipologiaTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Id</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
+                            <th>Opcion</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -53,11 +52,11 @@
 
     <script>
         $(document).ready(function() {
-            const table = $('#usuariosTable').DataTable({
+            const table = $('#tipologiaTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('users') }}",
+                    url: "{{ route('programa.index') }}",
                     type: "GET"
                 },
                 columns: [{
@@ -66,13 +65,7 @@
                     },
                     {
                         data: 'nombre',
-                        name: 'nombre',
-                        orderable: true,
-                        searchable: true
-                    },
-                    {
-                        data: 'email',
-                        name: 'email',
+                        name: 'opcion',
                         orderable: true,
                         searchable: true
                     },
@@ -121,14 +114,12 @@
                     [0, 'desc']
                 ],
             });
-
+            $(document).on("click", ".delete-btn", function() {
+                let userId = $(this).data("id");
+                let deleteUrl = "{{ route('procedencia.delete', ':id') }}".replace(':id', userId);
+                $("#deleteForm").attr("action", deleteUrl);
+            });
         })
-
-        $(document).on("click", ".delete-btn", function() {
-            let userId = $(this).data("id");
-            let deleteUrl = "{{ route('user.delete', ':id') }}".replace(':id', userId);
-            $("#deleteForm").attr("action", deleteUrl);
-        });
     </script>
     <!-- Page level custom scripts -->
     <script src="{{ asset('js/demo/datatables-demo.js') }}"></script>

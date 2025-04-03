@@ -115,7 +115,7 @@
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Tipologia: </h6>
-                    <a class="collapse-item" href="#">Listar</a>
+                    <a class="collapse-item" href="{{route('tipologia.index')}}">Listar</a>
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-tipologia">Crear</a>
                 </div>
             </div>
@@ -131,7 +131,7 @@
             <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Procedencia: </h6>
-                    <a class="collapse-item" href="#">Listar</a>
+                    <a class="collapse-item" href="{{route('procedencia.index')}}">Listar</a>
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-procedencia">Crear</a>
                 </div>
             </div>
@@ -147,7 +147,7 @@
             <div id="collapseFour" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Procedencia Codigo: </h6>
-                    <a class="collapse-item" href="#">Listar</a>
+                    <a class="collapse-item" href="{{route('procedencia.codigo.index')}}">Listar</a>
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-procedenciaCodigo">Crear</a>
                 </div>
             </div>
@@ -163,7 +163,7 @@
             <div id="collapseFive" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Programa: </h6>
-                    <a class="collapse-item" href="#">Listar</a>
+                    <a class="collapse-item" href="{{route('programa.index')}}">Listar</a>
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-programa">Crear</a>
                 </div>
             </div>
@@ -357,6 +357,31 @@
             </div>
         </div>
     </div>
+</div>
+<!--  Modal-->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">¿Seguro que deseas eliminar?</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            Estas seguro que deseas eliminar este registro
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <form id="deleteForm" action="#" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </form>
+        </div>
+    </div>
+</div>
 </div>
 <!-- Bootstrap core JavaScript-->
 <script src="{{asset("vendor/jquery/jquery.min.js")}}"></script>

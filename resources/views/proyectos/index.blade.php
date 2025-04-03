@@ -17,6 +17,21 @@
             </h3>
         </div>
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('success') }}
+                </div>
+            @endif
             <div class="table-responsive">
                 <table class="table table-bordered" id="proyectosTable" width="100%" cellspacing="0">
                     <thead>
@@ -35,6 +50,7 @@
                 </table>
             </div>
             <a href="{{ route('inicio') }}" class="btn btn-secondary mt-3">Volver al inicio</a>
+
         </div>
     </div>
 @endsection
@@ -207,6 +223,12 @@
                     table.search(newSearch).draw();
                     updateTitleAndUrl(newSearch);
                 }
+            });
+
+            $(document).on("click", ".delete-btn", function() {
+                let userId = $(this).data("id");
+                let deleteUrl = "{{ route('proyectos.delete', ':id') }}".replace(':id', userId);
+                $("#deleteForm").attr("action", deleteUrl);
             });
         });
     </script>

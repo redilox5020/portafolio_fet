@@ -60,13 +60,12 @@ class UserController extends Controller
                                     <a href="'.route('user.edit', $usuario->id).'" class="btn btn-success btn-circle">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <form method="POST" class="d-inline">
-                                        <input type="hidden" name="_token" value="'.$csrfToken.'">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="button" class="btn btn-danger btn-circle">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <a  class="btn btn-danger btn-circle delete-btn"
+                                    data-id="'.$usuario->id.'"
+                                    data-toggle="modal"
+                                    data-target="#deleteModal">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
                                 </div>'
                 ];
             });
@@ -118,14 +117,26 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * ['required', 'email', Rule::unique('users')->ignore($user->id)],
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email'=> 'required|email|unique:users,email,'.$user->id,
             'role' => 'required|string',
         ]);
-        $user->update($request->all());
-        $user->syncRoles([$request->input('role')]);
+
+        $userData = collect($validatedData)->except(['role'])->toArray();
+
+        $user->fill($userData);
+        if($user->isDirty()){
+            $user->update($userData);
+        }
+        $newRole = $request->input('role');
+        if(!$user->hasRole($newRole)){
+            $user->syncRoles([$newRole]);
+        }
         return redirect()->back()->with('success', 'Roles actualizados');
     }
 
@@ -134,6 +145,10 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        $user->delete();
+
+        return redirect()->route('users')->with('success', "Usuario eliminado correctamente");
     }
 }

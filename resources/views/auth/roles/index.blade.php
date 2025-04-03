@@ -130,6 +130,12 @@
                                     </div>
                                 @endforeach
                                 <button type="submit" class="btn btn-sm btn-info mt-2">Actualizar Permisos</button>
+                                <a  class="btn btn-sm btn-danger delete-btn mt-2"
+                                    data-id="{{ $role->id }}"
+                                    data-toggle="modal"
+                                    data-target="#deleteModal">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
                             </form>
                         </div>
                     </div>
@@ -138,12 +144,20 @@
           </div>
         </div>
     </div>
-
-
 </div>
 @endsection
 @section('css')
 @endsection
 @section('scripts')
+<script>
+    $(document).ready(function() {
+        $(document).on("click", ".delete-btn", function() {
+            let userId = $(this).data("id");
+            let deleteUrl = "{{ route('roles.delete', ':id') }}".replace(':id', userId);
+            $("#deleteForm").attr("action", deleteUrl);
+        });
+    })
+</script>
+
 @endsection
 

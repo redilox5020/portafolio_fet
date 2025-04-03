@@ -11,11 +11,14 @@ use App\Models\Proyecto;
 use App\Models\Investigador;
 use DB;
 
-class ProgramaController extends Controller
+class ProgramaController extends BaseSelectController
 {
-    public function create(){
-        $select = 'Tipologia';
-        return view('selects.index', compact("select"));
+    public function __construct()
+    {
+        $this->model = Programa::class;
+        $this->fields = ['nombre', 'sufijo'];
+        $this->columns = ['id', 'nombre','sufijo'];
+        $this->view = 'selects.programa';
     }
 
     public function store(Request $request){
@@ -27,5 +30,14 @@ class ProgramaController extends Controller
 
         return redirect()->back()
             ->with('success', 'Programa creado exitosamente');
+    }
+
+    public function destroy(string $id)
+    {
+        $programa = Programa::findOrFail($id);
+
+        $programa->delete();
+
+        return redirect()->back()->with('success', "Programa eliminado correctamente");
     }
 }

@@ -11,11 +11,12 @@ use App\Models\Proyecto;
 use App\Models\Investigador;
 use DB;
 
-class ProcedenciaController extends Controller
+class ProcedenciaController extends BaseSelectController
 {
-    public function create(){
-        $select = 'Procedencia';
-        return view('selects.index', compact("select"));
+    public function __construct()
+    {
+        $this->model = Procedencia::class;
+        $this->view = 'selects.procedencia';
     }
 
     public function store(Request $request){
@@ -26,5 +27,14 @@ class ProcedenciaController extends Controller
 
         return redirect()->back()
             ->with('success', 'Procedencia creada exitosamente');
+    }
+
+    public function destroy(string $id)
+    {
+        $procedencia = Procedencia::findOrFail($id);
+
+        $procedencia->delete();
+
+        return redirect()->back()->with('success', "Opcion de procedencia eliminada correctamente");
     }
 }

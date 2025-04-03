@@ -184,13 +184,12 @@ class ProyectoController extends Controller
                                     <a href="'.route('proyectos.edit', $proyecto->codigo).'" class="btn btn-success btn-circle">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <form action="'.route('destroy.project', $proyecto->codigo).'" method="POST" class="d-inline">
-                                        <input type="hidden" name="_token" value="'.$csrfToken.'">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn-danger btn-circle">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <a  class="btn btn-danger btn-circle delete-btn"
+                                    data-id="'.$proyecto->codigo.'"
+                                    data-toggle="modal"
+                                    data-target="#deleteModal">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
                                 </div>'
                 ];
             });

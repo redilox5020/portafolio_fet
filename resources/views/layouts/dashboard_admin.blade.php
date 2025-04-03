@@ -69,9 +69,9 @@
                 <span>Dashboard</span></a>
         </li>
 
+        @can('admin-access')
         <!-- Divider -->
         <hr class="sidebar-divider">
-
         <!-- Heading -->
         <div class="sidebar-heading">
             Usuarios
@@ -83,6 +83,7 @@
                 <i class="fa-solid fa-table-list"></i>
                 <span>Listar Usuarios</span></a>
         </li>
+
 
         <!-- Divider -->
         <hr class="sidebar-divider">
@@ -96,7 +97,7 @@
                 <i class="fa-solid fa-table-list"></i>
                 <span>Administrar Roles</span></a>
         </li>
-
+        @endcan
         <!-- Divider -->
         <hr class="sidebar-divider">
 
@@ -116,7 +117,9 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Tipologia: </h6>
                     <a class="collapse-item" href="{{route('tipologia.index')}}">Listar</a>
+                    @can('tipologia.create')
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-tipologia">Crear</a>
+                    @endcan
                 </div>
             </div>
         </li>
@@ -132,7 +135,9 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Procedencia: </h6>
                     <a class="collapse-item" href="{{route('procedencia.index')}}">Listar</a>
+                    @can('procedencia.create')
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-procedencia">Crear</a>
+                    @endcan
                 </div>
             </div>
         </li>
@@ -148,7 +153,9 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Procedencia Codigo: </h6>
                     <a class="collapse-item" href="{{route('procedencia.codigo.index')}}">Listar</a>
+                    @can('procedencia.codigo.create')
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-procedenciaCodigo">Crear</a>
+                    @endcan
                 </div>
             </div>
         </li>
@@ -164,7 +171,9 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">CRUD Programa: </h6>
                     <a class="collapse-item" href="{{route('programa.index')}}">Listar</a>
+                    @can('programa.create')
                     <a class="collapse-item" data-toggle="modal" data-target="#modal-programa">Crear</a>
+                    @endcan
                 </div>
             </div>
         </li>
@@ -175,11 +184,14 @@
                 <i class="fa-solid fa-table-list"></i>
                 <span>Listar Proyectos</span></a>
         </li>
+        @can("proyecto.create")
         <li class="nav-item">
             <a class="nav-link" href="{{route('proyectos.store')}}">
                 <i class="fa-solid fa-plus"></i>
                 <span>Crear Proyecto</span></a>
         </li>
+
+        @endcan
 
         <!-- Divider -->
         <hr class="sidebar-divider d-none d-md-block">

@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
                 ->name('proyectos.store');
 
             Route::delete('/delete/{id}', [ProyectoController::class, 'destroy'])
+                ->middleware('can:proyecto.delete')
                 ->name("proyectos.delete");
 
             // Ruta dinamica "Ver"
@@ -98,16 +99,20 @@ Route::middleware('auth')->group(function () {
                 ->name('tipologia.store');
 
             Route::delete('/delete/{tipologia_id}', [TipologiaController::class, 'destroy'])
+                ->middleware('can:tipologia.delete')
                 ->name('tipologia.delete');
         });
 
         Route::prefix('/procedencias')->group(function () {
             Route::get('/', [ProcedenciaController::class, 'index'])
                 ->name('procedencia.index');
+
             Route::post('crear', [ProcedenciaController::class, 'store'])
                 ->middleware('can:procedencia.create')
                 ->name('procedencia.store');
+
             Route::delete('/delete/{procedencia_id}', [ProcedenciaController::class, 'destroy'])
+                ->middleware('can:procedencia.delete')
                 ->name('procedencia.delete');
         });
 
@@ -120,6 +125,7 @@ Route::middleware('auth')->group(function () {
                 ->name('procedencia.codigo.store');
 
             Route::delete('/delete/{procedencia_codigo_id}', [ProcedenciaCodigoController::class, 'destroy'])
+                ->middleware('can:procedencia.codigo.delete')
                 ->name('procedencia.codigo.delete');
         });
 
@@ -132,7 +138,8 @@ Route::middleware('auth')->group(function () {
                 ->name('programa.store');
 
             Route::delete('/delete/{programa_id}', [ProgramaController::class, 'destroy'])
-                ->name('programa.delete');
+            ->middleware('can:programas.delete')
+            ->name('programa.delete');
         });
 
         Route::prefix('/users')->group(function () {
@@ -146,6 +153,7 @@ Route::middleware('auth')->group(function () {
                 ->name('user.update');
 
             Route::delete('/delete/{user_id}', [UserController::class, 'destroy'])
+                ->middleware('can:user.delete')
                 ->name('user.delete');
         });
 
@@ -160,6 +168,7 @@ Route::middleware('auth')->group(function () {
                 ->name('roles.update');
 
             Route::delete('/delete/{rol_id}', [RoleController::class, 'destroy'])
+                ->middleware('can:roles.delete')
                 ->name('roles.delete');
         });
     });

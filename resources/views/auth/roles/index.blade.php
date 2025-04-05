@@ -71,7 +71,7 @@
     </div>
 
     <div class="row g-0">
-        <div class="col-md-3">
+        <div class="col-lg-auto">
             <div class="card-body">
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -108,13 +108,13 @@
                   </form>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md">
           <div class="card-body">
             <h3>Roles Existentes</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between;">
+            <div class="container_grid">
 
                 @foreach($roles as $role)
-                    <div class="card mb-3">
+                    <div class="card">
                         <div class="card-header">
                             <h5>{{ $role->name }}</h5>
                         </div>
@@ -144,9 +144,19 @@
           </div>
         </div>
     </div>
+
 </div>
 @endsection
 @section('css')
+<style>
+    .container_grid{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-right: -.75rem;
+        margin-left: -.75rem;
+    }
+</style>
 @endsection
 @section('scripts')
 <script>

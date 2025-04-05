@@ -26,7 +26,7 @@
 
     @yield("css")
     <style>
-        
+
         /* label Form */
         .group-form {
             padding: 10px 50px;
@@ -56,7 +56,7 @@
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
             <div class="sidebar-brand-icon">
-                <img src="{{ asset("/img/Logo-lg-FET-sidebar.png") }}" alt="" width="100%">
+                <img src="{{ asset("img/Logo-lg-FET-sidebar.png") }}" alt="" width="100%">
             </div>
         </a>
 
@@ -406,18 +406,6 @@ aria-hidden="true">
 <!-- Custom scripts for all pages-->
 <script src="{{asset("js/sb-admin-2.min.js")}}"></script>
 @yield("scripts")
-<script>
-    let flag = true
-    $("#sidebarToggle").on("click", function() {
-        if(flag){
-            $(".sidebar-brand-icon img").attr('src', '{{asset("img/Logo-sm-FET-sidebar.png")}}');
-            flag = false;
-        }else {
-            $(".sidebar-brand-icon img").attr('src', '{{ asset("img/Logo-lg-FET-sidebar.png") }}');
-            flag = true;
-        }
-    })
-</script>
 </body>
 
 </html>

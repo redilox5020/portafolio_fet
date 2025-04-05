@@ -3,19 +3,28 @@
 
   // Toggle the side navigation
   $("#sidebarToggle, #sidebarToggleTop").on('click', function(e) {
+
     $("body").toggleClass("sidebar-toggled");
     $(".sidebar").toggleClass("toggled");
     if ($(".sidebar").hasClass("toggled")) {
       $('.sidebar .collapse').collapse('hide');
+      $(".sidebar-brand-icon img").attr('src', "/img/Logo-sm-FET-sidebar.png");
+    }else if($(this).is("#sidebarToggle")){
+        $(".sidebar-brand-icon img").attr('src', "/img/Logo-lg-FET-sidebar.png");
     };
   });
-
+  if($(window).width() < 768){
+        $(".sidebar-brand-icon img").attr('src', "/img/Logo-sm-FET-sidebar.png");
+    }
   // Close any open menu accordions when window is resized below 768px
   $(window).resize(function() {
     if ($(window).width() < 768) {
       $('.sidebar .collapse').collapse('hide');
+      $(".sidebar-brand-icon img").attr('src', "/img/Logo-sm-FET-sidebar.png");
+    }else if(!$(".sidebar").hasClass("toggled")){
+        $(".sidebar-brand-icon img").attr('src', "/img/Logo-lg-FET-sidebar.png");
     };
-    
+
     // Toggle the side navigation when window is resized below 480px
     if ($(window).width() < 480 && !$(".sidebar").hasClass("toggled")) {
       $("body").addClass("sidebar-toggled");

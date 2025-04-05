@@ -81,8 +81,14 @@
         <!-- Nav Item - Charts -->
         <li class="nav-item">
             <a class="nav-link" href="{{route('users')}}">
-                <i class="fa-solid fa-table-list"></i>
+                <i class="fa-solid fa-users"></i>
                 <span>Listar Usuarios</span></a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{route('investigador.index')}}">
+                <i class="fa-solid fa-users"></i>
+                <span>Investigadores</span></a>
         </li>
 
 

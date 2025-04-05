@@ -2,7 +2,7 @@
 @section('main')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h3 class="h3 mb-2 text-gray-800">Tipologia</h3>
+            <h3 class="h3 mb-2 text-gray-800">Tipologias</h3>
         </div>
         <div class="card-body">
             @if ($errors->any())

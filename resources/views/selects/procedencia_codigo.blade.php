@@ -2,7 +2,7 @@
 @section('main')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h3 class="h3 mb-2 text-gray-800">Procedencia Codigo</h3>
+            <h3 class="h3 mb-2 text-gray-800">Procedencia Codigo Opciones</h3>
         </div>
         <div class="card-body">
             @if ($errors->any())
@@ -21,7 +21,7 @@
                 </div>
             @endif
             <div class="table-responsive">
-                <table class="table table-bordered" id="tipologiaTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="procedenciaCodigoTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Id</th>
@@ -52,11 +52,11 @@
 
     <script>
         $(document).ready(function() {
-            const table = $('#tipologiaTable').DataTable({
+            const table = $('#procedenciaCodigoTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('tipologia.index') }}",
+                    url: "{{ route('procedencia.codigo.index') }}",
                     type: "GET"
                 },
                 columns: [{

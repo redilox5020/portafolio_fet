@@ -2,7 +2,7 @@
 @section('main')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h3 class="h3 mb-2 text-gray-800">Procedencia</h3>
+            <h3 class="h3 mb-2 text-gray-800">Procedencias</h3>
         </div>
         <div class="card-body">
             @if ($errors->any())
@@ -56,7 +56,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('programa.index') }}",
+                    url: "{{ route('procedencia.index') }}",
                     type: "GET"
                 },
                 columns: [{
@@ -64,7 +64,7 @@
                         name: 'id'
                     },
                     {
-                        data: 'nombre',
+                        data: 'opcion',
                         name: 'opcion',
                         orderable: true,
                         searchable: true

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\InvestigadorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -117,7 +118,7 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('/procedencia-codigos')->group(function () {
-            Route::get('/', [ProgramaController::class, 'index'])
+            Route::get('/', [ProcedenciaCodigoController::class, 'index'])
                 ->name('procedencia.codigo.index');
 
             Route::post('crear', [ProcedenciaCodigoController::class, 'store'])
@@ -138,7 +139,7 @@ Route::middleware('auth')->group(function () {
                 ->name('programa.store');
 
             Route::delete('/delete/{programa_id}', [ProgramaController::class, 'destroy'])
-            ->middleware('can:programas.delete')
+            ->middleware('can:programa.delete')
             ->name('programa.delete');
         });
 
@@ -155,6 +156,14 @@ Route::middleware('auth')->group(function () {
             Route::delete('/delete/{user_id}', [UserController::class, 'destroy'])
                 ->middleware('can:user.delete')
                 ->name('user.delete');
+        });
+
+        Route::prefix('/investigadores')->group(function () {
+            Route::get('/', [InvestigadorController::class, "index"])
+                ->name('investigador.index');
+
+            Route::delete('/delete/{investigador_id}', [InvestigadorController::class, 'destroy'])
+                ->name('investigador.delete');
         });
 
         Route::prefix('/roles')->group(function () {

@@ -182,3 +182,11 @@ Route::middleware('auth')->group(function () {
         });
     });
 });
+
+Route::fallback(function () {
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    abort(404);
+});

@@ -35,13 +35,4 @@ class TipologiaController extends BaseSelectController
         return redirect()->back()
             ->with('success', 'Tipologia creada exitosamente');
     }
-
-    public function destroy(string $id)
-    {
-        $tipologia = Tipologia::findOrFail($id);
-
-        $tipologia->delete();
-
-        return redirect()->back()->with('success', "Opcion tipologia eliminada correctamente");
-    }
 }

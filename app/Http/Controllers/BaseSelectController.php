@@ -7,9 +7,10 @@ use Illuminate\Http\Request;
 abstract class BaseSelectController extends Controller
 {
     protected $model;
-    protected $fields = 'opcion';
-    protected $columns = ['id', 'opcion'];
+    protected $fields = 'opcion';           // campos de busqueda
+    protected $columns = ['id', 'opcion'];  // campos de filtrado
     protected $view;
+    protected $namePrimary = "opcion";      // campo de atributo nombre principal del registro
 
     public function index(Request $request)
     {
@@ -79,5 +80,16 @@ abstract class BaseSelectController extends Controller
             'recordsFiltered' => $total,
             'data' => $data
         ]);
+    }
+
+    public function destroy(string $id)
+    {
+        $model = $this->model::findOrFail($id);
+
+        $name = $model->{$this->namePrimary} ;
+
+        $model->delete();
+
+        return redirect()->back()->with('success', class_basename($model) . " '{$name}' eliminado correctamente");
     }
 }

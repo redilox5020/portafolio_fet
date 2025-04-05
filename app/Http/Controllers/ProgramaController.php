@@ -19,6 +19,7 @@ class ProgramaController extends BaseSelectController
         $this->fields = ['nombre', 'sufijo'];
         $this->columns = ['id', 'nombre','sufijo'];
         $this->view = 'selects.programa';
+        $this->namePrimary = "nombre";
     }
 
     public function store(Request $request){
@@ -30,14 +31,5 @@ class ProgramaController extends BaseSelectController
 
         return redirect()->back()
             ->with('success', 'Programa creado exitosamente');
-    }
-
-    public function destroy(string $id)
-    {
-        $programa = Programa::findOrFail($id);
-
-        $programa->delete();
-
-        return redirect()->back()->with('success', "Programa eliminado correctamente");
     }
 }

@@ -241,6 +241,16 @@ class ProyectoController extends Controller
             'investigadores_nombres.*' => 'nullable|string|max:255',
         ]);
 
+        // Validar el doble envio de la peticion
+        $exists = Proyecto::where('nombre', $request->nombre)
+            ->where('objetivo_general', $request->objetivo_general)
+            ->where('anio', $request->anio)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['El proyecto ya fue registrado anteriormente.']);
+        }
+
         // Obtener el sufjo del programa seleccionado
         $sufijoPrograma = Programa::find($validatedData['programa_id'])->sufijo;
 
@@ -280,6 +290,7 @@ class ProyectoController extends Controller
         }
 
         $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
+
         $proyecto = Proyecto::create($proyectoData);
 
         // Agregar investigadores

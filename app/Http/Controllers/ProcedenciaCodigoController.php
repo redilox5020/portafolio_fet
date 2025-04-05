@@ -28,13 +28,4 @@ class ProcedenciaCodigoController extends BaseSelectController
         return redirect()->back()
             ->with('success', 'Procedencia Codigo creada exitosamente');
     }
-
-    public function destroy(string $id)
-    {
-        $procedenciaCodigo = ProcedenciaCodigo::findOrFail($id);
-
-        $procedenciaCodigo->delete();
-
-        return redirect()->back()->with('success', "Opcion de Procedencia Codigo eliminada correctamente");
-    }
 }

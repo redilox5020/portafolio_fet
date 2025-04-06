@@ -127,11 +127,6 @@
                     value="{{ old('fecha_fin', $proyecto->fecha_fin ?? '') }}" required>
             </div>
             <div class="group-form input-group">
-                <label for="anio">Selecciona un año:</label>
-                <input class="form-control" type="number" id="anio" name="anio" min="2010" max="2100"
-                    step="1" placeholder="2025" value="{{ old('anio', $proyecto->anio ?? date('Y')) }}">
-            </div>
-            <div class="group-form input-group">
                 <label for="costo">Costo:</label>
                 <input class="form-control" type="number" step="0.01" id="costo" name="costo"
                     value="{{ old('costo', $proyecto->costo ?? '') }}" required>
@@ -184,7 +179,13 @@
         }
 
         function eliminarCampoInvestigador(event) {
-            container.removeChild(event.target.parentElement);
+            // si se da click en el icono el parentElement pasa a ser el btn
+            // no corresponde a container
+            // container.removeChild(event.target.parentElement);
+            const investigadorDiv = event.target.closest(".investigador-input");
+            if(investigadorDiv && container.contains(investigadorDiv)){
+                container.removeChild(investigadorDiv)
+            }
         }
 
         addButton.addEventListener('click', agregarInvestigadorCampo);

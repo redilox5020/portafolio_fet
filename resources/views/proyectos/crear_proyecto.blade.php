@@ -1,11 +1,15 @@
 @extends('layouts.dashboard_admin')
 @section('main')
-    <div class="container">
-        <header>
-            <h1>REGISTRO DE PROYECTOS</h1>
-            <h2>FUNDACIÓN ESCUELA TECNOLÓGICA DE NEIVA</h2>
-            <img src="{{ asset('img/Logo-FET.png') }}" alt="Logo de la FET">
+    <div class="container_register">
 
+        <header>
+            <div class="item item-1">
+                <h1>REGISTRO DE PROYECTOS</h1>
+            </div>
+            <div class="item item-2">
+                <h2>FUNDACIÓN ESCUELA TECNOLÓGICA DE NEIVA</h2>
+            </div>
+            <div class="item item-3"><img src="{{ asset('img/Logo-FET.png') }}" alt="Logo de la FET"></div>
         </header>
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -22,11 +26,8 @@
                 {{ session('success') }}
             </div>
         @endif
-        <form
-            action="@isset($proyecto)
-        {{ route('proyectos.update', $proyecto) }}
-        @else {{ route('proyectos.store') }}
-        @endisset"
+        <form id="formProyecto"
+            action="@isset($proyecto){{ route('proyectos.update', $proyecto) }}@else{{ route('proyectos.store') }}@endisset"
             method="POST" enctype="multipart/form-data">
             @csrf
             @isset($proyecto)
@@ -86,24 +87,21 @@
                 <button type="button" class="button" data-toggle="modal" data-target="#modal-tipologia"><i
                         class="fa-solid fa-plus"></i></button>
             </div>
-            <div class="group-form input-group" id="investigadoresContainer"
-                style="display: flex; flex-wrap: wrap;gap: 10px">
+            <div class="group-form container_grid" id="investigadoresContainer">
                 @if (isset($proyecto) && !empty($proyecto->investigadores))
-                    @foreach ($proyecto->investigadores as $investigador)
-                        <div class="investigador-input">
+                    @foreach ($proyecto->investigadores as $index => $investigador)
+                        <div class="input-group investigador-input">
+                            <label for="investigadores_nombres[]">{{ $index + 1 }}</label>
                             <input type="hidden" name="investigadores_ids[]" value="{{ $investigador->id }}">
 
-                            <input type="text" value="{{ $investigador->nombre }}" readonly>
-                            <button onclick="eliminarCampoInvestigador(event)" type="button" class="button"><i
-                                    class="fa-solid fa-user-minus"></i></button>
+                            <input class="form-control" style="height: auto;" type="text"
+                                value="{{ $investigador->nombre }}" readonly>
+                            <button type="button" class="button eliminar-investigador">
+                                <i class="fa-solid fa-user-minus"></i>
+                            </button>
                         </div>
                     @endforeach
                 @endif
-                <div class="investigador-input">
-                    <input class="form-control" type="text" name="investigadores_nombres[]"
-                        placeholder="Nombre del investigador">
-                    <button type="button" class="button añadir-investigador"><i class="fa-solid fa-user-plus"></i></button>
-                </div>
                 {{-- <select name="investigadores[]" multiple>
                 @foreach ($proyecto->investigadores as $investigador)
                     <option value="{{ $investigador->id }}"
@@ -115,6 +113,12 @@
                     </option>
                 @endforeach
             </select> --}}
+            </div>
+            <div class="group-form input-group">
+                <label for="investigadores_nombres[]">Investigador:</label>
+                <input id="input_add_investigador" class="form-control" type="text" style="height: auto;"
+                    name="investigadores_nombres[]" placeholder="Nombre del investigador">
+                <button type="button" class="button añadir-investigador"><i class="fa-solid fa-user-plus"></i></button>
             </div>
             <div class="group-form input-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
@@ -157,37 +161,93 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 @endsection
+
 @section('scripts')
     <script>
-        // Añadir inputs para investigadores
-        const container = document.getElementById('investigadoresContainer');
-        const addButton = document.querySelector('.añadir-investigador');
-        // const proyecto = json(proyecto);
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('investigadoresContainer');
+            const addButton = document.querySelector('.añadir-investigador');
+            const form = document.getElementById('formProyecto');
+            let hrInserted = false;
+            let investigadores = @json($proyecto->investigadores ?? []);
 
-        function agregarInvestigadorCampo() {
-
-            const newInput = document.createElement('div');
-            newInput.classList.add('investigador-input');
-            newInput.innerHTML = `
-            <input type="text" name="investigadores_nombres[]" placeholder="Nombre del investigador" required>
-            <button type="button" class="button eliminar-investigador"><i class="fa-solid fa-user-minus"></i></button>
-        `;
-            container.appendChild(newInput);
-
-            const deleteButton = newInput.querySelector('.eliminar-investigador');
-            deleteButton.addEventListener('click', eliminarCampoInvestigador);
-        }
-
-        function eliminarCampoInvestigador(event) {
-            // si se da click en el icono el parentElement pasa a ser el btn
-            // no corresponde a container
-            // container.removeChild(event.target.parentElement);
-            const investigadorDiv = event.target.closest(".investigador-input");
-            if(investigadorDiv && container.contains(investigadorDiv)){
-                container.removeChild(investigadorDiv)
+            // Añadir un nuevo campo de investigador
+            if (addButton) {
+                addButton.addEventListener('click', () => {
+                    if (Array.isArray(investigadores) && investigadores.length > 0 && !hrInserted) {
+                        const separator = document.createElement('hr');
+                        separator.style.gridColumn = '1 / -1';
+                        container.appendChild(separator);
+                        hrInserted = true;
+                    }
+                    const newInput = document.createElement('div');
+                    newInput.classList.add('input-group', 'investigador-input');
+                    newInput.innerHTML = `
+                    <label for="investigadores_nombres[]">Nuevo</label>
+                    <input class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre del investigador" required>
+                    <button type="button" class="button eliminar-investigador">
+                        <i class="fa-solid fa-user-minus"></i>
+                    </button>
+                `;
+                    container.appendChild(newInput);
+                });
             }
-        }
 
-        addButton.addEventListener('click', agregarInvestigadorCampo);
+            // Delegación de eventos para eliminar investigadores
+            container.addEventListener('click', function(event) {
+                if (event.target.closest('.eliminar-investigador')) {
+                    const investigadorDiv = event.target.closest('.investigador-input');
+                    if (investigadorDiv && container.contains(investigadorDiv)) {
+                        container.removeChild(investigadorDiv);
+                    }
+                }
+            });
+
+            // Validar investigadores antes de enviar el formulario
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const inputs = container.querySelectorAll('input[name="investigadores_nombres[]"]');
+                const inputAddInvestigador = document.getElementById('input_add_investigador');
+                const nombres = new Set();
+                let hasError = false;
+
+                const investigadoresExistentes = investigadores.map(i => i.nombre.trim().toLowerCase());
+
+                const validarInput = (input, esOpcional = false) => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (valor === '' && esOpcional) {
+                        return true;
+                    }
+                    if (valor === '') {
+                        alert("No se permiten nombres de investigadores vacíos.");
+                        input.focus();
+                        return false;
+                    }
+                    if (nombres.has(valor)) {
+                        alert(`El investigador "${input.value}" ya fue agregado.`);
+                        input.focus();
+                        return false;
+                    }
+                    if (investigadoresExistentes.includes(valor)) {
+                        alert(`El investigador "${input.value}" ya existe en este proyecto.`);
+                        input.focus();
+                        return false;
+                    }
+                    nombres.add(valor);
+                    return true;
+                }
+
+                if (!validarInput(inputAddInvestigador, true)) {
+                    hasError = true;
+                }
+                inputs.forEach(input => {
+                    if (!validarInput(input)) {
+                        hasError = true;
+                    }
+                })
+
+                if (!hasError) form.submit();
+            });
+        });
     </script>
 @endsection

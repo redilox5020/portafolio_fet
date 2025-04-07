@@ -29,7 +29,7 @@
 
         /* label Form */
         .group-form {
-            padding: 10px 50px;
+            padding: 10px 0;
             font-weight: 600;
         }
 

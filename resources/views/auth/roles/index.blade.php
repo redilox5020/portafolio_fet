@@ -139,9 +139,10 @@
                             </form>
                         </div>
                     </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
-          </div>
+            {{ $roles->links('pagination::bootstrap-4') }}
         </div>
     </div>
 

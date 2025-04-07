@@ -6,11 +6,12 @@
         </div>
         <div class="card-body">
             <p>{{ $proyecto->objetivo_general }}</p>
-            <p><Strong>Programa</Strong>: {{ $proyecto->programa->nombre }}</p>
-            <p><Strong>Procedencia</Strong>: {{ $proyecto->procedencia->opcion }}</p>
-            <p><Strong>Tipologia</Strong>: {{ $proyecto->tipologia->opcion }}</p>
-            <p><Strong>Duracion</Strong>: {{ $proyecto->duracion }}</p>
-            <p><Strong>Costo</Strong>: ${{ number_format($proyecto->costo, 2, ',', '.') }}</p>
+            <p><Strong>Programa:</Strong> {{ $proyecto->programa->nombre }}</p>
+            <p><Strong>Procedencia:</Strong> {{ $proyecto->procedencia->opcion }}</p>
+            <p><Strong>Tipologia:</Strong> {{ $proyecto->tipologia->opcion }}</p>
+            <p><Strong>Duracion:</Strong> {{ $proyecto->duracion }}</p>
+            <p><Strong>Costo:</Strong> ${{ number_format($proyecto->costo, 2, ',', '.') }}</p>
+            <p><strong>Año:</strong> {{ $proyecto->anio }}</p>
             @php
                 $indexInvestigadores = 1;
             @endphp

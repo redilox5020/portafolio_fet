@@ -12,12 +12,6 @@ class Proyecto extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "codigo";
-
-    public $incrementing = false;
-
-    protected $keyType = "string";
-
     protected $fillable = [
         'codigo',
         'nombre',
@@ -66,6 +60,51 @@ class Proyecto extends Model
         return implode(', ', $duracion);
     }
 
+    public function generarCodigo()
+    {
+        // Obtener sufijo del programa
+        $sufijoPrograma = $this->programa->sufijo ?? Programa::find($this->programa_id)->sufijo;
+
+        // Obtener año desde fecha_inicio
+        $anio = Carbon::parse($this->fecha_inicio)->year;
+
+        $this->codigo = self::generarCodigoUnico(
+            $sufijoPrograma,
+            $this->procedencia_codigo_id,
+            $this->tipologia_id,
+            $anio
+        );
+    }
+
+    public static function generarCodigoUnico($programaSufijo, $procedenciaCodigoId, $tipologiaId, $anio)
+    {
+        $baseCodigo = "{$programaSufijo}-{$procedenciaCodigoId}-{$tipologiaId}-{$anio}";
+
+        // Buscar el último código que empiece igual
+        $ultimoProyecto = self::where("codigo", "like", "{$baseCodigo}-%")
+                            ->orderBy("codigo", "desc")
+                            ->first();
+
+        if ($ultimoProyecto) {
+            $ultimoNumeroStr = substr($ultimoProyecto->codigo, strrpos($ultimoProyecto->codigo, '-') + 1);
+            $numeroIncremental = is_numeric($ultimoNumeroStr) ? intval($ultimoNumeroStr) + 1 : 1;
+        } else {
+            $numeroIncremental = 1;
+        }
+
+        // Generar y verificar unicidad
+        $nuevoCodigo = "{$baseCodigo}-{$numeroIncremental}";
+
+        while (self::where('codigo', $nuevoCodigo)->exists()) {
+            $numeroIncremental++;
+            $nuevoCodigo = "{$baseCodigo}-{$numeroIncremental}";
+        }
+
+        return $nuevoCodigo;
+    }
+
+
+
     public function investigadores(): BelongsToMany
     {
         return $this->belongsToMany(Investigador::class, 'investigador_proyecto', 'proyecto_id', 'investigador_id');
@@ -96,8 +135,14 @@ class Proyecto extends Model
         parent::boot();
 
         static::creating(function ($proyecto) {
-            if (empty($proyecto->anio)) {
-                $proyecto->anio = date('Y');
+            if (empty($proyecto->anio) && !empty($proyecto->fecha_inicio)) {
+                $proyecto->anio = Carbon::parse($proyecto->fecha_inicio)->year;
+            }
+        });
+
+        static::updating(function ($proyecto) {
+            if ($proyecto->isDirty('fecha_inicio')) {
+                $proyecto->anio = Carbon::parse($proyecto->fecha_inicio)->year;
             }
         });
     }

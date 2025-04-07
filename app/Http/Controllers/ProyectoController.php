@@ -11,106 +11,14 @@ use App\Models\Proyecto;
 use App\Models\Investigador;
 use DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Carbon\Carbon;
+use App\Contracts\FileUploaderInterface;
 
 class ProyectoController extends Controller
 {
     public $perPage = 10;
-    public function index()
-    {
-        // Obtener los datos de los programas y proyectos agrupados por programa y año
-        $datos = Proyecto::with('programa')
-            ->selectRaw('programa_id, anio, COUNT(*) as cuenta_de_programa')
-            ->groupBy('programa_id', 'anio')
-            ->orderBy('programa_id')
-            ->orderBy('anio')
-            ->get();
 
-        // Calcular el total acumulado por programa
-        $totalesPorPrograma = [];
-        foreach ($datos as $dato) {
-            if (!isset($totalesPorPrograma[$dato->programa_id])) {
-                $totalesPorPrograma[$dato->programa_id] = 0;
-            }
-            $totalesPorPrograma[$dato->programa_id] += $dato->cuenta_de_programa;
-        }
-
-        $totalGeneral = Proyecto::count();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
-        $programas = Programa::all();
-
-        return view('programas.index', compact('datos', 'totalesPorPrograma', 'totalGeneral', 'procedenciaCodigos','tipologias','programas'));
-    }
-
-    public function buscarProyectos(Request $request){
-        $proyectos = Proyecto::withOnly(['investigadores:nombre'])
-            ->when($request->search && strlen($request->search) >= 4, function ($query) use ($request){
-                $query->where('nombre', 'like', "%{$request->search}%")
-                    ->orWhere('objetivo_general', 'like', "%{$request->search}%")
-                    ->orWhereHas('investigadores', function ($query) use ($request){
-                        $query->where('nombre', 'like', "%{$request->search}%");
-                    });
-            })
-            ->paginate($this->perPage);
-
-        $programas = Programa::all();
-        $tipologias = Tipologia::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $search = $request->search;
-
-        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias', 'search'));
-    }
-
-    public function proyectosPorGrupoCodigo(Request $request){
-        $validatedData = $request->validate([
-            'programa_sufijo'=>'required|string',
-            'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
-            'tipologia_id'=>'required|integer|exists:tipologias,id',
-            'anio' => 'required|integer|digits:4|min:2010|max:2100',
-        ]);
-
-        $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_codigo_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
-
-        return redirect()->route('proyectos', [
-            'codigo_grupo' => $codigo,
-            'draw' => 1,
-            'start' => 0,
-            'length' => $this->perPage
-        ]);
-    }
-
-    public function proyectosPorPrograma($programaId)
-    {
-        $programa = Programa::select(["nombre"])->findOrFail($programaId);
-        return redirect()->route('proyectos', [
-            'programa' => $programaId,
-            'programa_nombre' => $programa->nombre ?? null,
-            'draw' => 1,
-            'start' => 0,
-            'length' => $this->perPage
-        ]);
-    }
-
-    public function proyectosPorAnio($programaId, $anio)
-    {
-        $programa = Programa::select(["nombre"])->findOrFail($programaId);
-        return redirect()->route('proyectos', [
-            'programa' => $programaId,
-            'programa_nombre' => $programa->nombre ?? null,
-            'anio' => $anio,
-            'draw' => 1,
-            'start' => 0,
-            'length' => $this->perPage
-        ]);
-    }
-
-    public function proyectosPorCodigo($codigo){
-        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores')->findOrFail($codigo);
-
-        return view('proyectos.mostrar_proyecto', compact('proyecto'));
-    }
-
-    public function findAll(Request $request)
+    public function index(Request $request)
     {
         if ($request->ajax()) {
             $start = $request->input('start', 0);
@@ -209,6 +117,103 @@ class ProyectoController extends Controller
         return view('proyectos.index', compact('programas', 'procedenciaCodigos', 'tipologias'));
     }
 
+
+    public function agruparProyectosPorProgramaAnio()
+    {
+        // Obtener los datos de los programas y proyectos agrupados por programa y año
+        $datos = Proyecto::with('programa')
+            ->selectRaw('programa_id, anio, COUNT(*) as cuenta_de_programa')
+            ->groupBy('programa_id', 'anio')
+            ->orderBy('programa_id')
+            ->orderBy('anio')
+            ->get();
+
+        // Calcular el total acumulado por programa
+        $totalesPorPrograma = [];
+        foreach ($datos as $dato) {
+            if (!isset($totalesPorPrograma[$dato->programa_id])) {
+                $totalesPorPrograma[$dato->programa_id] = 0;
+            }
+            $totalesPorPrograma[$dato->programa_id] += $dato->cuenta_de_programa;
+        }
+
+        $totalGeneral = Proyecto::count();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $tipologias = Tipologia::all();
+        $programas = Programa::all();
+
+        return view('programas.index', compact('datos', 'totalesPorPrograma', 'totalGeneral', 'procedenciaCodigos','tipologias','programas'));
+    }
+
+    public function buscarProyectos(Request $request){
+        $proyectos = Proyecto::withOnly(['investigadores:nombre'])
+            ->when($request->search && strlen($request->search) >= 4, function ($query) use ($request){
+                $query->where('nombre', 'like', "%{$request->search}%")
+                    ->orWhere('objetivo_general', 'like', "%{$request->search}%")
+                    ->orWhereHas('investigadores', function ($query) use ($request){
+                        $query->where('nombre', 'like', "%{$request->search}%");
+                    });
+            })
+            ->paginate($this->perPage);
+
+        $programas = Programa::all();
+        $tipologias = Tipologia::all();
+        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $search = $request->search;
+
+        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias', 'search'));
+    }
+
+    public function proyectosPorGrupoCodigo(Request $request){
+        $validatedData = $request->validate([
+            'programa_sufijo'=>'required|string',
+            'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
+            'tipologia_id'=>'required|integer|exists:tipologias,id',
+            'anio' => 'required|integer|digits:4|min:2010|max:2100',
+        ]);
+
+        $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_codigo_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
+
+        return redirect()->route('proyectos', [
+            'codigo_grupo' => $codigo,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
+    }
+
+    public function proyectosPorPrograma($programaId)
+    {
+        $programa = Programa::select(["nombre"])->findOrFail($programaId);
+        return redirect()->route('proyectos', [
+            'programa' => $programaId,
+            'programa_nombre' => $programa->nombre ?? null,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
+    }
+
+    public function proyectosPorAnio($programaId, $anio)
+    {
+        $programa = Programa::select(["nombre"])->findOrFail($programaId);
+        return redirect()->route('proyectos', [
+            'programa' => $programaId,
+            'programa_nombre' => $programa->nombre ?? null,
+            'anio' => $anio,
+            'draw' => 1,
+            'start' => 0,
+            'length' => $this->perPage
+        ]);
+    }
+
+    public function proyectosPorCodigo($codigo){
+        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores')->where('codigo', $codigo)->firstOrFail();;
+
+        return view('proyectos.mostrar_proyecto', compact('proyecto'));
+    }
+
+
     public function create(){
         $procedencias = Procedencia::all();
         $procedenciaCodigos = ProcedenciaCodigo::all();
@@ -219,7 +224,7 @@ class ProyectoController extends Controller
         return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas'));
     }
 
-    public function store(Request $request){
+    public function store(Request $request, FileUploaderInterface $uploader){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
             'objetivo_general'=>'required|string',
@@ -229,8 +234,7 @@ class ProyectoController extends Controller
             'tipologia_id'=>'required|integer|exists:tipologias,id',
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
-            'anio' => 'required|integer|digits:4|min:2010|max:2100',
-            'pdf_file' => 'nullable|mimes:pdf|max:2048',
+            'pdf_file' => 'nullable|file',
             'costo' => [
                 'required',
                 'numeric',
@@ -239,67 +243,48 @@ class ProyectoController extends Controller
             ],
             'investigadores_nombres' => 'sometimes|array',
             'investigadores_nombres.*' => 'nullable|string|max:255',
-        ]);
+        ]
+    );
+
+        // Calcular el año a partir de la fecha de inicio
+        $anio = Carbon::parse($validatedData['fecha_inicio'])->year;
 
         // Validar el doble envio de la peticion
         $exists = Proyecto::where('nombre', $request->nombre)
             ->where('objetivo_general', $request->objetivo_general)
-            ->where('anio', $request->anio)
+            ->where('anio', $anio)
             ->exists();
 
         if ($exists) {
             return back()->withErrors(['El proyecto ya fue registrado anteriormente.']);
         }
 
-        // Obtener el sufjo del programa seleccionado
-        $sufijoPrograma = Programa::find($validatedData['programa_id'])->sufijo;
-
-        // Obtener el id de la opcion del campo procedencia_codigo
-        $idProcedenciaCodigo = $validatedData['procedencia_codigo_id'];
-        // Obtener el id de la opciion del campo tiipologia
-        $idTipologia = $validatedData['tipologia_id'];
-
-        $anio = $validatedData['anio'];
-
-        $baseCodigo="{$sufijoPrograma}-{$idProcedenciaCodigo}-{$idTipologia}-{$anio}";
-        $ultimoProyecto = Proyecto::where("codigo", "like", "{$baseCodigo}%")->orderBy("codigo", "desc")->first();
-
-        if($ultimoProyecto){
-            $ultimoCodigo = $ultimoProyecto->codigo;
-            $ultimoNumeroStr = substr($ultimoCodigo, strrpos($ultimoCodigo, '-') + 1);
-            if(ctype_digit($ultimoNumeroStr)) {
-                $ultimoNumero = intval($ultimoNumeroStr);
-                $numeroIncremental = $ultimoNumero + 1;
-            }else{
-                $numeroIncremental = 1;
-            }
-        }else{
-            $numeroIncremental = 1;
-        }
-        // Generar el codigo
-        $validatedData['codigo']="{$baseCodigo}-{$numeroIncremental}";
-
         // Subir PDF
-        if(isset($validatedData['pdf_file'])){
-            $pdfSubido = $validatedData['pdf_file'];
-            $uploadResult = Cloudinary::upload($pdfSubido->getRealPath(), [
-                'folder' => 'pdfs',
-                'resource_type' => 'auto',
-            ]);
-            $validatedData['pdf_url'] = $uploadResult->getSecurePath();
+        if (isset($validatedData['pdf_file'])) {
+            try {
+                $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file']);
+            } catch (\Exception $e) {
+                return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
+            }
         }
+
+        // Eliminar anio en caso de se inserte fuera del frontend
+        unset($validatedData['anio']);
 
         $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
-
-        $proyecto = Proyecto::create($proyectoData);
+        $proyecto = new Proyecto($proyectoData);
+        $proyecto->generarCodigo();
+        $proyecto->save();
 
         // Agregar investigadores
         $investigadoresIds = [];
 
-        foreach ($validatedData["investigadores_nombres"] as $nombre) {
-            if(!empty($nombre)){
-            $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
-            $investigadoresIds[] = $investigador->id;
+        if(isset($validatedData["investigadores_nombres"])){
+            foreach ($validatedData["investigadores_nombres"] as $nombre) {
+                if(!empty($nombre)){
+                    $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
+                    $investigadoresIds[] = $investigador->id;
+                }
             }
         }
         // Asociar investigadores al proyecto attach
@@ -309,7 +294,7 @@ class ProyectoController extends Controller
             ->with('success', 'Proyecto creado exitosamente');
     }
     public function edit($codigo){
-        $proyecto = Proyecto::with('investigadores')->findOrFail($codigo);
+        $proyecto = Proyecto::with('investigadores')->where('codigo', $codigo)->firstOrFail();
         $procedencias = Procedencia::all();
         $procedenciaCodigos = ProcedenciaCodigo::all();
         $tipologias = Tipologia::all();
@@ -318,7 +303,7 @@ class ProyectoController extends Controller
 
         return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas', 'proyecto'));
     }
-    public function update(Request $request, Proyecto $proyecto){
+    public function update(Request $request, Proyecto $proyecto, FileUploaderInterface $uploader){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
             'objetivo_general'=>'required|string',
@@ -328,8 +313,7 @@ class ProyectoController extends Controller
             'tipologia_id'=>'required|integer|exists:tipologias,id',
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
-            'anio' => 'required|integer|digits:4|min:2010|max:2100',
-            'pdf_file' => 'nullable|mimes:pdf|max:2048',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
             'costo' => [
                 'required',
                 'numeric',
@@ -345,16 +329,23 @@ class ProyectoController extends Controller
         DB::beginTransaction();
         try {
             // Subir PDF
-            if(isset($validatedData['pdf_file'])){
-                $pdfSubido = $validatedData['pdf_file'];
-                $uploadResult = Cloudinary::upload($pdfSubido->getRealPath(), [
-                    'folder' => 'pdfs',
-                    'resource_type' => 'auto',
-                ]);
-                $validatedData['pdf_url'] = $uploadResult->getSecurePath();
+            if (isset($validatedData['pdf_file'])) {
+                try {
+                    $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file']);
+                } catch (\Exception $e) {
+                    return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
+                }
             }
+
             $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
-            $proyecto->update($proyectoData);
+
+            $proyecto->fill($proyectoData);
+
+            if ($proyecto->isDirty('fecha_inicio') || $proyecto->isDirty('programa_id') ||
+                $proyecto->isDirty('procedencia_codigo_id') || $proyecto->isDirty('tipologia_id')) {
+                $proyecto->generarCodigo(); // Regenerar el código
+            }
+            $proyecto->update();
 
             $investigadoresIds = $validatedData['investigadores_ids'] ?? [];
             $proyecto->investigadores()->sync($investigadoresIds);
@@ -363,11 +354,14 @@ class ProyectoController extends Controller
             foreach ($nuevosInvestigadores as $nombre) {
                 if(!empty($nombre)){
                     $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
-                    $proyecto->investigadores()->attach($investigador->id);
+                    $proyecto->investigadores()->syncWithoutDetaching([$investigador->id]);
                 }
             }
             DB::commit();
-            return redirect()->back()->with('success', 'Proyecto actualizado exitosamente');
+
+            return redirect()->route('proyectos.edit', ['proyecto' => $proyecto->codigo])
+                 ->with('success', 'Proyecto actualizado exitosamente');
+
         } catch (\Exception $e) {
 
             dd($e);

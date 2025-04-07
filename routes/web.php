@@ -36,13 +36,13 @@ Route::middleware('guest')->group(function () {
 Route::get('logout', [AdminController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/home', [ProyectoController::class, 'index'])
+    Route::get('/home', [ProyectoController::class, 'agruparProyectosPorProgramaAnio'])
         ->name('inicio');
 
     Route::prefix('/admin')->group(function () {
         Route::prefix('/proyectos')->group(function () {
             // Filters
-            Route::get('/', [ProyectoController::class, 'findAll'])
+            Route::get('/', [ProyectoController::class, 'index'])
                 ->name('proyectos');
 
             Route::get('programa/{programa}', [ProyectoController::class, 'proyectosPorPrograma'])

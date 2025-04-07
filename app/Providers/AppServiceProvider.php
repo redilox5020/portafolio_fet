@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-
+use App\Services\PdfUploaderService;
+use App\Contracts\FileUploaderInterface;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -12,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-
+        $this->app->bind(FileUploaderInterface::class, function ($app) {
+            return new PdfUploaderService();
+        });
     }
 
     /**

@@ -118,6 +118,7 @@
     }
     th {
         background-color: #4CAF50;
+        background: #8bc34a;
     }
 </style>
 @endsection

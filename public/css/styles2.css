@@ -1,6 +1,7 @@
 
 header {
     background: #0d3865;
+    background: linear-gradient(to bottom right, #003a12, #8BC34A);
     color: white;
     text-align: center;
     padding: 15px 0;

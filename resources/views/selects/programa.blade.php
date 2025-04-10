@@ -16,12 +16,12 @@
             @endif
 
             @if (session('success'))
-                <div class="alert alert-success" role="alert">
+                <div id="session-alert" class="alert alert-success" role="alert">
                     {{ session('success') }}
                 </div>
             @endif
             <div class="table-responsive">
-                <table class="table table-bordered" id="tipologiaTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="programaTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Id</th>
@@ -53,7 +53,7 @@
 
     <script>
         $(document).ready(function() {
-            const table = $('#tipologiaTable').DataTable({
+            const table = $('#programaTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {

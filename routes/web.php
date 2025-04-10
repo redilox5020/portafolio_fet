@@ -177,7 +177,7 @@ Route::middleware('auth')->group(function () {
                 ->name('roles.update');
 
             Route::delete('/delete/{rol_id}', [RoleController::class, 'destroy'])
-                ->middleware('can:roles.delete')
+                ->middleware('can:admin-access')
                 ->name('roles.delete');
         });
     });

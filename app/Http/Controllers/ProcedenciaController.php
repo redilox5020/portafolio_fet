@@ -23,7 +23,17 @@ class ProcedenciaController extends BaseSelectController
         $validatedData = $request->validate([
             'opcion'=>'required|string'
         ]);
-        Procedencia::create($validatedData);
+        $procedencia = Procedencia::create($validatedData);
+
+        if($request->ajax()){
+            return response()->json([
+                'success'=> 'Procedencia creada exitosamente',
+                'data'=> [
+                    'id' => $procedencia->id,
+                    'label' => $procedencia->opcion
+                ]
+            ]);
+        }
 
         return redirect()->back()
             ->with('success', 'Procedencia creada exitosamente');

@@ -27,7 +27,17 @@ class ProgramaController extends BaseSelectController
             'nombre'=>'required|string|max:255',
             'sufijo'=>'required|string'
         ]);
-        Programa::create($validatedData);
+        $programa = Programa::create($validatedData);
+
+        if($request->ajax()){
+            return response()->json([
+                'success'=> 'Programa creado exitosamente',
+                'data'=> [
+                    'id' => $programa->id,
+                    'label' => $programa->nombre
+                ]
+            ]);
+        }
 
         return redirect()->back()
             ->with('success', 'Programa creado exitosamente');

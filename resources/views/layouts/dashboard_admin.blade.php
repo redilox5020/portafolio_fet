@@ -283,7 +283,7 @@
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="{{ route('user.edit', auth()->user()->id) }}">
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Perfil
                             </a>
@@ -311,26 +311,34 @@
                 @include('components.opcion-select', [
                     'modalId' => 'tipologia',
                     'title' => 'Tipología',
-                    'routeName' => 'tipologia'
+                    'routeName' => 'tipologia',
+                    'selectName' => 'tipologia_id',
+                    'dataTableId' => 'tipologiaTable'
                 ])
 
                 <!-- Modal genérico para agregar otra opción -->
                 @include('components.opcion-select', [
                     'modalId' => 'procedencia',
                     'title' => 'Procedencia',
-                    'routeName' => 'procedencia'
+                    'routeName' => 'procedencia',
+                    'selectName' => 'procedencia_id',
+                    'dataTableId' => 'procedenciaTable'
                 ])
 
                 @include('components.opcion-select', [
                     'modalId' => 'procedenciaCodigo',
                     'title' => 'Procedencia_Codigo',
-                    'routeName' => 'procedencia.codigo'
+                    'routeName' => 'procedencia.codigo',
+                    'selectName' => 'procedencia_codigo_id',
+                    'dataTableId' => 'procedenciaCodigoTable'
                 ])
 
                 @include('components.opcion-select', [
                     'modalId' => 'programa',
                     'title' => 'Programa',
-                    'routeName' => 'programa'
+                    'routeName' => 'programa',
+                    'selectName' => 'programa_id',
+                    'dataTableId' => 'programaTable'
                 ])
 
             </div>
@@ -413,6 +421,81 @@ aria-hidden="true">
 
 <!-- Custom scripts for all pages-->
 <script src="{{asset("js/sb-admin-2.min.js")}}"></script>
+<script>
+$(document).ready(function () {
+    $('.ajax-form').on('submit', function (e) {
+        e.preventDefault();
+
+        let form = $(this);
+        let actionUrl = form.attr('action');
+        let modalId = form.data('modal');
+        let selectName = form.data('select');
+        let tableId = form.data('table');
+        let formData = form.serialize();
+
+        $.ajax({
+            url: actionUrl,
+            method: 'POST',
+            data: formData,
+            success: function (response) {
+                let $alert = $('#alert-' + modalId);
+                $alert.removeClass('d-none alert-danger')
+                      .addClass('alert-success alert-dismissible fade show');
+                $alert.find('.alert-message').text(response.success);
+
+                setTimeout(function () {
+                    $alert.fadeOut(500);
+                    // $alert.addClass('d-none'); viene siendo lo mismo pero sin transicion
+                }, 3000);
+
+                let nuevaOpcion = response.data;
+                if (selectName) {
+                    let $select = $('select[name="' + selectName + '"]');
+                    if ($select.length) {
+                        $select.append(new Option(nuevaOpcion.label, nuevaOpcion.id));
+                    }
+                }
+                if (tableId && $.fn.DataTable && $.fn.DataTable.isDataTable('#' + tableId)) {
+                    $('#' + tableId).DataTable().ajax.reload(null, false);
+                }
+                form[0].reset();
+            },
+            error: function (xhr) {
+                let $alert = $('#alert-' + modalId);
+                $alert.removeClass('d-none alert-success')
+                      .addClass('alert-danger alert-dismissible fade show');
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    let errorMessages = '';
+                    $.each(errors, function (key, value) {
+                        errorMessages += value + '\n';
+                    });
+                    $alert.find('.alert-message').text(errorMessages);
+                } else {
+                    $alert.find('.alert-message').text('Error en la petición AJAX');
+                }
+            }
+        });
+    });
+
+    // ocultar los alert despues de 3 segundos
+    let $alert = $('#session-alert');
+    if ($alert.length) {
+        /*
+        Se puede enviar este callback en caso de querer borrar el nodo
+        en caso contrario se establece display: none;
+
+        function () {
+            $(this).remove();
+        }
+        */
+        setTimeout(function () {
+            $alert.fadeOut(500);
+        }, 3000);
+    }
+});
+</script>
+
 @yield("scripts")
 </body>
 

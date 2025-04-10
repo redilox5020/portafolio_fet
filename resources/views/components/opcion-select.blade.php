@@ -2,7 +2,9 @@
     aria-modal="true" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="{{ route($routeName . '.store') }}" method="post">
+            <form action="{{ route($routeName . '.store') }}" method="post" class="ajax-form"
+                data-modal="{{ $modalId }}" data-select="{{ $selectName ?? '' }}"
+                data-table="{{ $dataTableId ?? '' }}">
                 <div class="modal-header">
                     <h3 class="modal-title">Crear {{ $title }}</h3>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
@@ -10,6 +12,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <div id="alert-{{ $modalId }}" class="alert alert-dismissible fade show d-none" role="alert">
+                        <span class="alert-message"></span>
+                    </div>
                     @csrf
                     <div class="group-form input-group">
                         <label for="{{ $modalId !== 'programa' ? 'opcion' : 'nombre' }}">{{ $title }}</label>

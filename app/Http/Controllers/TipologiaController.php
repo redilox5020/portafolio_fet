@@ -27,8 +27,11 @@ class TipologiaController extends BaseSelectController
 
         if($request->ajax()){
             return response()->json([
-                'seccess'=> 'Tipologia creada exitosamente',
-                'data'=> $tipologia->opcion
+                'success'=> 'Tipologia creada exitosamente',
+                'data'=> [
+                    'id' => $tipologia->id,
+                    'label' => $tipologia->opcion
+                ]
             ]);
         }
 

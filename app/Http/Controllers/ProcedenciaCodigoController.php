@@ -23,8 +23,16 @@ class ProcedenciaCodigoController extends BaseSelectController
         $validatedData = $request->validate([
             'opcion'=>'required|string'
         ]);
-        ProcedenciaCodigo::create($validatedData);
-
+        $ProcedenciaCodigo = ProcedenciaCodigo::create($validatedData);
+        if($request->ajax()){
+            return response()->json([
+                'success'=> 'Procedencia Codigo creada exitosamente',
+                'data'=> [
+                    'id' => $ProcedenciaCodigo->id,
+                    'label' => $ProcedenciaCodigo->opcion
+                ]
+            ]);
+        }
         return redirect()->back()
             ->with('success', 'Procedencia Codigo creada exitosamente');
     }

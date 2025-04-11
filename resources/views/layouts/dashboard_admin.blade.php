@@ -97,12 +97,17 @@
 
         <!-- Heading -->
         <div class="sidebar-heading">
-            Roles
+            Rutas y Permisos
         </div>
         <li class="nav-item">
             <a class="nav-link" href="{{route('roles.index')}}">
                 <i class="fa-solid fa-table-list"></i>
-                <span>Administrar Roles</span></a>
+                <span>Gestión Roles</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{route('routes.index')}}">
+                <i class="fa-solid fa-table-list"></i>
+                <span>Gestión Rutas</span></a>
         </li>
         @endcan
         <!-- Divider -->

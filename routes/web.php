@@ -9,6 +9,7 @@ use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RouteController;
 use App\Http\Controllers\InvestigadorController;
 /*
 |--------------------------------------------------------------------------
@@ -179,6 +180,16 @@ Route::middleware('auth')->group(function () {
             Route::delete('/delete/{rol_id}', [RoleController::class, 'destroy'])
                 ->middleware('can:admin-access')
                 ->name('roles.delete');
+        });
+
+        Route::prefix('/routes')->group(function () {
+            Route::get('/', [RouteController::class, 'index'])
+                ->middleware('can:admin-access')
+                ->name('routes.index');
+
+            Route::put('/update-permissions', [RouteController::class, 'updatePermissions'])
+                ->middleware('can:admin-access')
+                ->name('routes.update-permissions');
         });
     });
 });

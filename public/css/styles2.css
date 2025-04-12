@@ -4,18 +4,32 @@ header {
     background: linear-gradient(to bottom right, #003a12, #8BC34A);
     color: white;
     text-align: center;
-    padding: 15px 0;
+    padding: 15px;
     border-radius: 8px 8px 0 0;
 }
 
+header>h1{
+    /* font-size: clamp(25px, 3vw, 2.5rem); */
+    font-size: 1.25rem;
+    font-size: clamp(1.25rem, 1rem + 1.25vw, 2.5rem);
+}
+
+header>h2{
+    /* font-size: clamp(16px, 2.5vw, 1.8rem); */
+    font-size: 0.9rem;
+    font-size: clamp(0.9rem, 0.72rem + 0.9000000000000001vw, 1.8rem);
+}
+
 h1, h2 {
+    font-size: 1rem;
+    font-size: clamp(1rem, 0.8rem + 1vw, 2rem);
     margin: 5px 0;
 }
 
 .info {
     padding: 15px;
     background: #eaeaea;
-    border-radius: 8px;
+    border-radius: 0 0 8px 8px;
 }
 
 .row {
@@ -24,7 +38,7 @@ h1, h2 {
     margin-bottom: 10px;
 }
 
-label {
+/* label {
     font-weight: bold;
     margin-right: 10px;
 }
@@ -34,10 +48,10 @@ input {
     padding: 5px;
     border-radius: 5px;
     flex-grow: 1;
-}
+} */
 
 input[type="number"] {
-    width: 60px;
+    /* width: max-content; */
     text-align: center;
 }
 

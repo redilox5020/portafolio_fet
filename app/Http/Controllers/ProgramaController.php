@@ -25,7 +25,7 @@ class ProgramaController extends BaseSelectController
     public function store(Request $request){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
-            'sufijo'=>'required|string'
+            'sufijo'=>'required|string|max:255'
         ]);
         $programa = Programa::create($validatedData);
 

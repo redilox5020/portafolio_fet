@@ -21,7 +21,7 @@ class ProcedenciaController extends BaseSelectController
 
     public function store(Request $request){
         $validatedData = $request->validate([
-            'opcion'=>'required|string'
+            'opcion'=>'required|string|max:255'
         ]);
         $procedencia = Procedencia::create($validatedData);
 

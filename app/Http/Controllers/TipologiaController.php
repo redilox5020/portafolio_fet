@@ -21,7 +21,7 @@ class TipologiaController extends BaseSelectController
 
     public function store(Request $request){
         $validatedData = $request->validate([
-            'opcion'=>'required|string'
+            'opcion'=>'required|string|max:255'
         ]);
         $tipologia = Tipologia::create($validatedData);
 

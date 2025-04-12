@@ -36,11 +36,15 @@
         .group-form label {
             background-color: #ededed;
             padding: 5px;
-            text-align: right;
+            text-align: center;
             border: 1px solid #cdd3d9;
             border-radius: 5px 0 0 5px;
             margin: 0;
+            width: clamp(106px, 25%, 180px);
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
+        .form-control {height: auto;}
     </style>
 
 </head>

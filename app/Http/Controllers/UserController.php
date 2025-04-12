@@ -18,7 +18,8 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->middleware('can:admin-access');
+        $this->middleware('can:edit-user,user')->only('edit', 'update');
+        $this->middleware('can:admin-access')->only('index', 'destroy');
     }
     /**
      * Display a listing of the resource.
@@ -124,7 +125,7 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email'=> 'required|email|unique:users,email,'.$user->id,
-            'role' => 'required|string',
+            'role' => 'sometimes|string',
         ]);
 
         $userData = collect($validatedData)->except(['role'])->toArray();
@@ -133,11 +134,13 @@ class UserController extends Controller
         if($user->isDirty()){
             $user->update($userData);
         }
-        $newRole = $request->input('role');
-        if(!$user->hasRole($newRole)){
-            $user->syncRoles([$newRole]);
+        if($request->has('role') && auth()->user()->can('admin-access')){
+            $newRole = $request->input('role');
+            if(!$user->hasRole($newRole)){
+                $user->syncRoles([$newRole]);
+            }
         }
-        return redirect()->back()->with('success', 'Roles actualizados');
+        return redirect()->back()->with('success', 'Usuario actualizado');
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use App\Services\PdfUploaderService;
 use App\Contracts\FileUploaderInterface;
 class AppServiceProvider extends ServiceProvider
@@ -23,8 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('admin-access', function ($user) {
-            return $user->hasRole('super-admin');
-        });
+        //
     }
 }

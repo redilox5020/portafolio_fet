@@ -155,7 +155,6 @@ Route::middleware('auth')->group(function () {
                 ->name('user.update');
 
             Route::delete('/delete/{user_id}', [UserController::class, 'destroy'])
-                ->middleware('can:user.delete')
                 ->name('user.delete');
         });
 

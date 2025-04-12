@@ -49,10 +49,19 @@
                         @foreach ($roles as $role)
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="role" value="{{ $role->name }}"
-                                    {{ $user->hasRole($role->name) ? 'checked' : '' }}>
-                                <label class="form-check-label">{{ $role->name }}</label>
+                                    {{ $user->hasRole($role->name) ? 'checked' : '' }}
+                                    @unless(auth()->user()->hasRole('super-admin')) disabled @endunless>
+                                <label class="form-check-label">
+                                    {{ $role->name }}
+                                    @if($user->hasRole($role->name))
+                                        <span class="badge bg-primary">Actual</span>
+                                    @endif
+                                </label>
                             </div>
                         @endforeach
+                        @unless(auth()->user()->hasRole('super-admin'))
+                            <small class="text-muted">Solo los administradores pueden cambiar roles</small>
+                        @endunless
                     </div>
                 </div>
 

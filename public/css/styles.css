@@ -45,7 +45,7 @@ header {
 
 
 .button {
-    padding: 8px 12px;
+    padding: 0 8px;
     font-size: 16px;
     background-color: #ededed;
     border: 1px solid #cdd3d9;

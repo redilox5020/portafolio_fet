@@ -27,7 +27,7 @@
             <div class="group-form input-group">
                 <label for="nombre">Nombre:</label>
                 <input class="form-control @error('nombre') is-invalid @enderror" type="text" id="nombre"
-                    name="nombre" value="{{ old('nombre', $proyecto->nombre ?? '') }}" required>
+                    name="nombre" value="{{ old('nombre', $proyecto->nombre ?? '') }}" placeholder="Escribe un nombre creativo y representativo para su proyecto" required>
                 @error('nombre')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -36,7 +36,7 @@
                 <label for="objetivo_general">Objetivo General:</label>
                 <input class="form-control @error('objetivo_general') is-invalid @enderror" type="text"
                     id="objetivo_general" name="objetivo_general"
-                    value="{{ old('objetivo_general', $proyecto->objetivo_general ?? '') }}" required>
+                    value="{{ old('objetivo_general', $proyecto->objetivo_general ?? '') }}" placeholder="¿Cuál es el propósito central de este proyecto?" required>
                 @error('objetivo_general')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -162,7 +162,7 @@
                 <input id="input_add_investigador"
                     class="form-control @error('investigadores_nombres.0') is-invalid @enderror" type="text"
                     style="height: auto;" name="investigadores_nombres[]" value="{{ old('investigadores_nombres.0') }}"
-                    placeholder="Nombre del investigador">
+                    placeholder="Nombre y apellido del investigador">
                 <button type="button" class="button añadir-investigador"><i class="fa-solid fa-user-plus"></i></button>
                 @error('investigadores_nombres.0')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -187,7 +187,7 @@
             <div class="group-form input-group">
                 <label for="costo">Costo:</label>
                 <input class="form-control @error('costo') is-invalid @enderror" type="number" step="0.01"
-                    id="costo" name="costo" value="{{ old('costo', $proyecto->costo ?? '') }}" required>
+                    id="costo" name="costo" value="{{ old('costo', $proyecto->costo ?? '') }}" placeholder="¿Cuál es el presupuesto aproximado para poner en marcha su proyecto?" required>
                 @error('costo')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -209,13 +209,13 @@
                 </div>
 
             </div>
-            <div class="group-form">
+            <div class="group-form d-flex justify-content-between align-items-center">
 
                 <button class="btn btn-success" type="submit">{{ isset($proyecto) ? 'Actualizar' : 'Crear' }}
                     Proyecto</button>
+                <a href="{{ route('inicio') }}"><i class="fa-solid fa-house"></i></a>
             </div>
         </form>
-        <a href="{{ route('inicio') }}"><i class="fa-solid fa-house"></i></a>
     </div>
 @endsection
 @section('css')
@@ -244,7 +244,7 @@
                     newInput.classList.add('input-group', 'investigador-input');
                     newInput.innerHTML = `
                     <label for="investigadores_nombres[]">Nuevo</label>
-                    <input class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre del investigador" required>
+                    <input class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre y apellido del investigador" required>
                     <button type="button" class="button eliminar-investigador">
                         <i class="fa-solid fa-user-minus"></i>
                     </button>

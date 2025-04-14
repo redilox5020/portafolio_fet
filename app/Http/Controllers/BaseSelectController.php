@@ -65,12 +65,20 @@ abstract class BaseSelectController extends Controller
                 $columns,
                 $values
             ) + [
-                'acciones' => '<a  class="btn btn-danger btn-circle delete-btn"
-                                    data-id="'.$item->id.'"
-                                    data-toggle="modal"
-                                    data-target="#deleteModal">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>'
+                'acciones' => !$item->proyectos()->exists() ? '
+                <a  class="btn btn-danger btn-circle delete-btn"
+                    data-id="'.$item->id.'"
+                    data-toggle="modal"
+                    data-target="#deleteModal">
+                    <i class="fa-solid fa-trash"></i>
+                </a>' : '
+                <span class="d-inline-block"
+                      tabindex="0" data-toggle="tooltip" data-placement="top"
+                      title="No se puede eliminar '.$item->{$this->namePrimary}.' porque está asociado a uno o más proyectos">
+                      <a class="btn btn-danger btn-circle" style="pointer-events: none; opacity: 0.5">
+                          <i class="fa-solid fa-trash"></i>
+                      </a>
+                </span>'
             ];
         });
 
@@ -87,6 +95,10 @@ abstract class BaseSelectController extends Controller
         $model = $this->model::findOrFail($id);
 
         $name = $model->{$this->namePrimary} ;
+
+        if ($model->proyectos()->exists()) {
+            return redirect()->back()->withErrors(['error' => "No se puede eliminar {$name} porque está asociado a uno o más proyectos."]);
+        }
 
         $model->delete();
 

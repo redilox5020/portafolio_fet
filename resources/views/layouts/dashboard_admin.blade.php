@@ -11,7 +11,7 @@
 
     <title>Dashboard FET</title>
 
-
+    <!-- Custom fonts for this template-->
     <!--<link href="{{asset("vendor/fontawesome-free/css/all.min.css")}}" rel="stylesheet" type="text/css">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link
@@ -19,14 +19,152 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link href="{{asset("css/sb-admin-2.min.css")}}" rel="stylesheet">
-    <!-- Custom fonts for this template-->
-
-
-    @yield("css")
     <style>
+        .input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+            margin-left: -1px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
 
+        .input-group:not(.has-validation)>.dropdown-toggle:nth-last-child(n+3), .input-group:not(.has-validation)>:not(:last-child):not(.dropdown-toggle):not(.dropdown-menu) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .input-group>.form-control, .input-group>.form-select {
+            position: relative;
+            flex: 1 1 auto;
+            width: 1%;
+            min-width: 0;
+        }
+        .form-select {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #6e707e;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .form-select:focus {
+            color: #6e707e;
+            background-color: #fff;
+            border-color: #bac8f3;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        .form-control[type="file"]:not(:disabled):not([readonly]) {
+            cursor: pointer;
+        }
+
+        .form-control[type="file"]:focus {
+            color: #6e707e;
+            background-color: #fff;
+            border-color: #bac8f3;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .form-control[type="file"]::file-selector-button,
+        .form-control[type="file"]::-webkit-file-upload-button {
+            padding: 0.375rem 0.75rem;
+            margin: -0.375rem -0.75rem;
+            margin-right: 0.75rem;
+            color: #31633c;
+            font-weight: bold;
+            background-color: #e5f5e5;
+            border: 0;
+            border-right: 1px solid #ced4da;
+            border-radius: 0;
+            transition: background-color 0.15s ease-in-out;
+            pointer-events: none;
+        }
+
+        .form-control[type="file"]:hover:not(:disabled):not([readonly])::file-selector-button,
+        .form-control[type="file"]:hover:not(:disabled):not([readonly])::-webkit-file-upload-button {
+            background-color: #d7e9d7;
+        }
+        /* GAP para Bootstrap 4.6 — Estilo moderno inspirado en BS5 */
+        .gap-0 { gap: 0 !important; }
+        .gap-1 { gap: 0.25rem !important; } /* 4px */
+        .gap-2 { gap: 0.5rem !important; }  /* 8px */
+        .gap-3 { gap: 1rem !important; }    /* 16px */
+        .gap-4 { gap: 1.5rem !important; }  /* 24px */
+        .gap-5 { gap: 3rem !important; }    /* 48px */
+
+        .row-gap-1 { row-gap: 0.25rem !important; }
+        .row-gap-2 { row-gap: 0.5rem !important; }
+        .row-gap-3 { row-gap: 1rem !important; }
+        .row-gap-4 { row-gap: 1.5rem !important; }
+        .row-gap-5 { row-gap: 3rem !important; }
+
+        .column-gap-1 { column-gap: 0.25rem !important; }
+        .column-gap-2 { column-gap: 0.5rem !important; }
+        .column-gap-3 { column-gap: 1rem !important; }
+        .column-gap-4 { column-gap: 1.5rem !important; }
+        .column-gap-5 { column-gap: 3rem !important; }
+        .form-check {
+            display: block;
+            min-height: 1.5rem;
+            padding-left: 1.5em;
+            margin-bottom: .125rem;
+        }
+        .form-check-input:checked[type=radio] {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e")
+        }
+
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .form-check-input[type=radio] {
+            border-radius: 50%;
+        }
+        .form-check .form-check-input {
+            float: left;
+            margin-left: -1.5em;
+        }
+
+        .form-check-input {
+            width: 1em;
+            height: 1em;
+            margin-top: .25em;
+            vertical-align: top;
+            background-color: #fff;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            border: 1px solid rgba(0, 0, 0, .25);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        .badge{
+            color: #fff
+        }
+
+        hr {
+            margin: 1rem 0;
+            color: inherit;
+            background-color: currentColor;
+            border: 0;
+            opacity: .25;
+        }
+
+        hr:not([size]) {
+            height: 1px;
+        }
         /* label Form */
         .group-form {
             padding: 10px 0;
@@ -44,8 +182,13 @@
             overflow-wrap: break-word;
             word-break: break-word;
         }
-        .form-control {height: auto;}
+        .form-control {height: auto !important;}
     </style>
+
+    <link href="{{asset("css/sb-admin-2.min.css")}}" rel="stylesheet">
+
+    @yield("css")
+
 
 </head>
 
@@ -432,6 +575,32 @@ aria-hidden="true">
 <script src="{{asset("js/sb-admin-2.min.js")}}"></script>
 <script>
 $(document).ready(function () {
+    $.fn.tooltip.Constructor.Default = {
+        ...$.fn.tooltip.Constructor.Default,
+        trigger: 'hover',
+        delay: { show: 150, hide: 100 },
+        boundary: 'window'
+    };
+
+    const initTooltips = (context) => {
+        $(context).find('[data-toggle="tooltip"]').each(function() {
+            const $el = $(this);
+            $el.tooltip('dispose');
+            $el.tooltip({
+                title: $el.attr('data-original-title') || $el.attr('title')
+            });
+        });
+    };
+
+    initTooltips(document);
+
+    $(document).on('draw.dt', function(e, settings) {
+        setTimeout(() => initTooltips(settings.nTable), 50);
+    });
+
+    $(document).on('mouseenter', '[data-toggle="tooltip"]', function() {
+        $(this).tooltip('show');
+    });
     $('.ajax-form').on('submit', function (e) {
         e.preventDefault();
 
@@ -465,7 +634,9 @@ $(document).ready(function () {
                     }
                 }
                 if (tableId && $.fn.DataTable && $.fn.DataTable.isDataTable('#' + tableId)) {
-                    $('#' + tableId).DataTable().ajax.reload(null, false);
+                    $('#' + tableId).DataTable().ajax.reload(null, false, ()=>{
+                        initTooltips('#' + tableId);
+                    });
                 }
                 form[0].reset();
             },

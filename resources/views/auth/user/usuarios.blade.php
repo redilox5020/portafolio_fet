@@ -27,6 +27,7 @@
                             <th>Id</th>
                             <th>Nombre</th>
                             <th>Email</th>
+                            <th>Rol</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -73,6 +74,12 @@
                     {
                         data: 'email',
                         name: 'email',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'rol',
+                        name: 'rol',
                         orderable: true,
                         searchable: true
                     },

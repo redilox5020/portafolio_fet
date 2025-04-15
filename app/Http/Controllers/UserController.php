@@ -33,16 +33,24 @@ class UserController extends Controller
             $orderColumn = $request->input('order.0.column');
             $orderDir = $request->input('order.0.dir');
 
-            $query = User::select(["id", "name", "email"]);
+            $query = User::select('users.id', 'users.name', 'users.email', 'roles.name as role_name')
+                ->leftJoin('model_has_roles', function ($join) {
+                    $join->on('users.id', '=', 'model_has_roles.model_id')
+                        ->where('model_has_roles.model_type', '=', User::class);
+                })
+                ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id');
 
             //Búsqueda
             if(!empty($search)){
-                $query->where('name', 'like', "%$search%")
-                    ->orWhere('email', 'like', "%$search%");
+                $query->where(function($q) use ($search) {
+                    $q->where('users.name', 'like', "%$search%")
+                        ->orWhere('users.email', 'like', "%$search%")
+                        ->orWhere('roles.name', 'like', "%$search%");
+                });
             }
 
             //Ordenamiento
-            $columns = ['id', 'name', 'email'];
+            $columns = ['users.id', 'users.name', 'users.email', 'roles.name'];
             if(isset($columns[$orderColumn])) {
                 $orderField = $columns[$orderColumn];
                 $query->orderBy($orderField, $orderDir);
@@ -57,6 +65,7 @@ class UserController extends Controller
                     'id' => $usuario->id,
                     'nombre'=> $usuario->name,
                     'email'=> $usuario->email,
+                    'rol'=>$usuario->role_name,
                     'acciones'=> '<div class="d-flex flex-wrap gap-1 justify-content-center">
                                     <a href="'.route('user.edit', $usuario->id).'" class="btn btn-success btn-circle">
                                         <i class="fa-solid fa-pen"></i>

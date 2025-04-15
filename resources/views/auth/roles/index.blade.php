@@ -8,6 +8,29 @@
         <div class="row g-0">
             <div class="col-lg-auto">
                 <div class="card-body">
+                    <!-- Formulario para crear nuevo rol -->
+                    <form method="POST" action="{{ route('roles.store') }}">
+                        @csrf
+                        <div class="form-group">
+                            <label>Nombre del Rol</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+
+                        <h4>Permisos</h4>
+                        @foreach ($permissions as $permission)
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="permissions[]"  id="{{ $permission->id }}"
+                                    value="{{ $permission->name }}">
+                                <label class="form-check-label" for="{{ $permission->id }}">{{ $permission->name }}</label>
+                            </div>
+                        @endforeach
+
+                        <button type="submit" class="btn btn-success  mt-3">Crear Rol</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="card-body">
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -22,30 +45,11 @@
                         <div id="session-alert" class="alert alert-success" role="alert">
                             {{ session('success') }}
                         </div>
-                    @endif
-                    <!-- Formulario para crear nuevo rol -->
-                    <form method="POST" action="{{ route('roles.store') }}">
-                        @csrf
-                        <div class="form-group">
-                            <label>Nombre del Rol</label>
-                            <input type="text" name="name" class="form-control" required>
+                    @elseif (session('info'))
+                        <div id="session-alert" class="alert alert-info" role="alert">
+                            {{ session('info') }}
                         </div>
-
-                        <h4>Permisos</h4>
-                        @foreach ($permissions as $permission)
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="permissions[]"
-                                    value="{{ $permission->name }}">
-                                <label class="form-check-label">{{ $permission->name }}</label>
-                            </div>
-                        @endforeach
-
-                        <button type="submit" class="btn btn-primary mt-3">Crear Rol</button>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="card-body">
+                    @endif
                     <h3>Roles Existentes</h3>
                     <div class="container_grid">
 
@@ -59,13 +63,13 @@
                                         @csrf @method('PUT')
                                         @foreach ($permissions as $permission)
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="permissions[]"
+                                                <input class="form-check-input" type="checkbox" name="permissions[]" id="{{ "{$role->id}-{$permission->id}" }}"
                                                     value="{{ $permission->name }}"
                                                     {{ $role->hasPermissionTo($permission->name) ? 'checked' : '' }}>
-                                                <label class="form-check-label">{{ $permission->name }}</label>
+                                                <label class="form-check-label" for="{{ "{$role->id}-{$permission->id}" }}">{{ $permission->name }}</label>
                                             </div>
                                         @endforeach
-                                        <button type="submit" class="btn btn-sm btn-info mt-2">Actualizar Permisos</button>
+                                        <button type="submit" class="btn btn-sm btn-success mt-2">Actualizar Permisos</button>
                                         <a class="btn btn-sm btn-danger delete-btn mt-2" data-id="{{ $role->id }}"
                                             data-toggle="modal" data-target="#deleteModal">
                                             <i class="fa-solid fa-trash"></i>

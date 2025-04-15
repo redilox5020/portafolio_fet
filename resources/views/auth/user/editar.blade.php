@@ -48,10 +48,10 @@
                     <div class="col-sm-10">
                         @foreach ($roles as $role)
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="role" value="{{ $role->name }}"
+                                <input id="{{ $role->id }}" class="form-check-input" type="radio" name="role" value="{{ $role->name }}"
                                     {{ $user->hasRole($role->name) ? 'checked' : '' }}
                                     @unless(auth()->user()->hasRole('super-admin')) disabled @endunless>
-                                <label class="form-check-label">
+                                <label for="{{ $role->id }}" class="form-check-label">
                                     {{ $role->name }}
                                     @if($user->hasRole($role->name))
                                         <span class="badge bg-primary">Actual</span>

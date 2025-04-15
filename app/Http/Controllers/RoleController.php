@@ -24,14 +24,6 @@ class RoleController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -51,22 +43,6 @@ class RoleController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Role $role)
@@ -74,8 +50,43 @@ class RoleController extends Controller
         $request->validate([
             'permissions' => 'array',
         ]);
+        /* En caso de manajar permisos por id
+        $newPermissions = collect($request->permissions)->map(fn($id) => (int) $id)->unique()->sort()->values();
+        $currentPermissions = $role->permissions->pluck('id')->sort()->values(); */
 
-        $role->syncPermissions($request->permissions);
+        // Normaliza entrada
+        $newPermissions = collect($request->permissions)
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        $currentPermissions = $role->permissions
+            ->pluck('name')
+            ->sort()
+            ->values();
+
+
+        if ($newPermissions->toArray() === $currentPermissions->toArray()) {
+            return redirect()->route('roles.index')->with('info', 'No hubo cambios en los permisos.');
+        }
+
+        // diff -> Devuelve un nuevo arreglo con todos los elementos de la izquierda que no esten en el de la derecha.
+        // ej: newPermissions = [2,3,4,5]; currentPermissions: [1,2,3,4]
+        $toAdd = $newPermissions->diff($currentPermissions);    // [5]
+        $toRemove = $currentPermissions->diff($newPermissions); // [1]
+
+        if ($toAdd->isNotEmpty()) {
+            $role->givePermissionTo($toAdd);
+        }
+
+        if ($toRemove->isNotEmpty()) {
+            // Obtiene todos los permisios que estan en el array de nombres
+            $permissionsToRevoke = Permission::whereIn('name', $toRemove->toArray())->get();
+            $role->revokePermissionTo($permissionsToRevoke);
+        }
+        /* $role->syncPermissions($request->permissions); > No es optimo; Porque Elimina todos los registros (detach) e inserta un nuevo array (attach)
+        sin verificar si este cambia con respecto a los que ya teniamos */
 
         return redirect()->route('roles.index')->with('success', 'Permisos actualizados');
     }
@@ -86,6 +97,10 @@ class RoleController extends Controller
     public function destroy(string $id)
     {
         $rol = Role::findOrFail($id);
+
+        if ($rol->users()->exists()){
+            return redirect()->back()->withErrors(['error' => "No se puede eliminar {$rol->name} porque está asociado a uno o más usuarios."]);
+        }
 
         $rol->delete();
 

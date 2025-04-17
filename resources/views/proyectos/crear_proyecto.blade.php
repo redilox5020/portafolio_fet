@@ -123,11 +123,12 @@
             <div class="group-form container_grid" id="investigadoresContainer">
                 @if (isset($proyecto) && !empty($proyecto->investigadores))
                     @foreach ($proyecto->investigadores as $index => $investigador)
+                        @php $inputId = 'investigador_' . $investigador->id; @endphp
                         <div class="input-group investigador-input">
-                            <label for="investigadores_nombres[]">{{ $index + 1 }}</label>
+                            <label for="{{ $inputId }}">{{ $index + 1 }}</label>
                             <input type="hidden" name="investigadores_ids[]" value="{{ $investigador->id }}">
 
-                            <input class="form-control" style="height: auto;" type="text"
+                            <input id="{{ $inputId }}" class="form-control" style="height: auto;" type="text"
                                 value="{{ $investigador->nombre }}" readonly>
                             <button type="button" class="button eliminar-investigador">
                                 <i class="fa-solid fa-user-minus"></i>
@@ -141,9 +142,10 @@
                 @endif
                 @foreach ($investigadoresOld as $index => $nombre)
                     @continue($index === 0)
+                    @php $inputId = 'investigador_' . $index; @endphp
                     <div class="input-group investigador-input">
-                        <label for="investigadores_nombres[]">Nuevo {{ $index + 1 }}</label>
-                        <input class="form-control @error("investigadores_nombres.$index") is-invalid @enderror"
+                        <label for="{{ $inputId }}">Nuevo {{ $index + 1 }}</label>
+                        <input id="{{ $inputId }}" class="form-control @error("investigadores_nombres.$index") is-invalid @enderror"
                             style="height: auto;" type="text" name="investigadores_nombres[]"
                             value="{{ $nombre }}" placeholder="Nombre del investigador">
 
@@ -158,7 +160,7 @@
                 @endforeach
             </div>
             <div class="group-form input-group">
-                <label for="investigadores_nombres[]">Investigador:</label>
+                <label for="input_add_investigador">Investigador:</label>
                 <input id="input_add_investigador"
                     class="form-control @error('investigadores_nombres.0') is-invalid @enderror" type="text"
                     style="height: auto;" name="investigadores_nombres[]" value="{{ old('investigadores_nombres.0') }}"
@@ -233,6 +235,7 @@
 
             // Añadir un nuevo campo de investigador
             if (addButton) {
+                let contador = 1;
                 addButton.addEventListener('click', () => {
                     if (Array.isArray(investigadores) && investigadores.length > 0 && !hrInserted) {
                         const separator = document.createElement('hr');
@@ -242,9 +245,12 @@
                     }
                     const newInput = document.createElement('div');
                     newInput.classList.add('input-group', 'investigador-input');
+
+                    const idInput = `nuevo_investigador_${contador++}`;
+
                     newInput.innerHTML = `
-                    <label for="investigadores_nombres[]">Nuevo</label>
-                    <input class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre y apellido del investigador" required>
+                    <label for="${idInput}">Nuevo ${contador}</label>
+                    <input id="${idInput}" class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre y apellido del investigador" required>
                     <button type="button" class="button eliminar-investigador">
                         <i class="fa-solid fa-user-minus"></i>
                     </button>

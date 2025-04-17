@@ -12,8 +12,8 @@
                     <form method="POST" action="{{ route('roles.store') }}">
                         @csrf
                         <div class="form-group">
-                            <label>Nombre del Rol</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <label for="rol_input">Nombre del Rol</label>
+                            <input id="rol_input" type="text" name="name" class="form-control" required autocomplete="off">
                         </div>
 
                         <h4>Permisos</h4>

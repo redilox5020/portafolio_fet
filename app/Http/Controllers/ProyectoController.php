@@ -9,6 +9,7 @@ use App\Models\Tipologia;
 use App\Models\Programa;
 use App\Models\Proyecto;
 use App\Models\Investigador;
+use App\Models\InvestigadorProyecto;
 use DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Carbon\Carbon;
@@ -59,7 +60,7 @@ class ProyectoController extends Controller
             }
 
             // Ordenamiento
-            $columns = ['codigo', 'nombre', 'programa.nombre', 'duracion', 'costo'];
+            $columns = ['codigo', 'nombre', 'programa.nombre', 'duracion', 'costo', 'created_at'];
             if (isset($columns[$orderColumn])) {
                 $orderField = $columns[$orderColumn];
                 if ($orderField === 'duracion') {
@@ -88,6 +89,7 @@ class ProyectoController extends Controller
                     'programa' => $proyecto->programa->nombre ?? '',
                     'duracion' => $proyecto->duracion,
                     'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),
+                    'created_at' => date_format($proyecto->created_at, 'd/m/Y'),
                     'acciones' => '<div class="d-flex flex-wrap gap-1 justify-content-center">
                                     <a href="'.route('proyectos.edit', $proyecto->codigo).'" class="btn btn-success btn-circle">
                                         <i class="fa-solid fa-pen"></i>
@@ -208,9 +210,33 @@ class ProyectoController extends Controller
     }
 
     public function proyectosPorCodigo($codigo){
-        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores')->where('codigo', $codigo)->firstOrFail();;
+        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores')->where('codigo', $codigo)->firstOrFail();
 
         return view('proyectos.mostrar_proyecto', compact('proyecto'));
+    }
+
+    public function obtenerMetadatosPdf(Request $request, FileUploaderInterface $uploader){
+        $pdfUrl = $request->header('X-PDF-Url');
+
+        if (!$pdfUrl) {
+            return response()->json(['error' => 'URL no proporcionada'], 400);
+        }
+
+            $data = null;
+
+            try {
+                $data = $uploader->getDataFile($pdfUrl);
+            } catch (\Exception $e) {
+                \Log::warning("Error al acceder al PDF en Cloudinary: " . $e->getMessage());
+
+                $data = [
+                    'nombre' => 'No disponible',
+                    'descripcion' => $e->getMessage(),
+                    'tamaño' => 'N/A',
+                    'url'=>$pdfUrl
+                ];
+            }
+            return response()->json($data);
     }
 
 
@@ -259,36 +285,27 @@ class ProyectoController extends Controller
             return back()->withErrors(['El proyecto ya fue registrado anteriormente.']);
         }
 
-        // Subir PDF
-        if (isset($validatedData['pdf_file'])) {
-            try {
-                $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file']);
-            } catch (\Exception $e) {
-                return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
-            }
-        }
-
         // Eliminar anio en caso de se inserte fuera del frontend
         unset($validatedData['anio']);
 
         $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
         $proyecto = new Proyecto($proyectoData);
         $proyecto->generarCodigo();
+
+        // Subir PDF
+        if (isset($validatedData['pdf_file'])) {
+            try {
+                $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file'], $proyecto);
+            } catch (\Exception $e) {
+                return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
+            }
+        }
         $proyecto->save();
 
         // Agregar investigadores
-        $investigadoresIds = [];
+        $nuevosInvestigadores = $validatedData["investigadores_nombres"] ?? [];
 
-        if(isset($validatedData["investigadores_nombres"])){
-            foreach ($validatedData["investigadores_nombres"] as $nombre) {
-                if(!empty($nombre)){
-                    $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
-                    $investigadoresIds[] = $investigador->id;
-                }
-            }
-        }
-        // Asociar investigadores al proyecto attach
-        $proyecto->investigadores()->sync($investigadoresIds);
+        $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, []);
 
         return redirect()->back()
             ->with('success', 'Proyecto creado exitosamente');
@@ -331,7 +348,7 @@ class ProyectoController extends Controller
             // Subir PDF
             if (isset($validatedData['pdf_file'])) {
                 try {
-                    $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file']);
+                    $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file'],  $proyecto);
                 } catch (\Exception $e) {
                     return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
                 }
@@ -344,19 +361,17 @@ class ProyectoController extends Controller
             if ($proyecto->isDirty('fecha_inicio') || $proyecto->isDirty('programa_id') ||
                 $proyecto->isDirty('procedencia_codigo_id') || $proyecto->isDirty('tipologia_id')) {
                 $proyecto->generarCodigo(); // Regenerar el código
+                $proyecto->pdf_url = $proyecto->pdf_url ? $uploader->renombrarArchivo($proyecto->pdf_url, $proyecto->codigo): null;
             }
             $proyecto->update();
 
-            $investigadoresIds = $validatedData['investigadores_ids'] ?? [];
-            $proyecto->investigadores()->sync($investigadoresIds);
-
+            $idsActivos = $validatedData['investigadores_ids'] ?? [];
             $nuevosInvestigadores = $validatedData['investigadores_nombres'] ?? [];
-            foreach ($nuevosInvestigadores as $nombre) {
-                if(!empty($nombre)){
-                    $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
-                    $proyecto->investigadores()->syncWithoutDetaching([$investigador->id]);
-                }
-            }
+
+            $proyecto->eliminarInvestigadoresRemovidos($idsActivos);
+
+            $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, $idsActivos);
+
             DB::commit();
 
             return redirect()->route('proyectos.edit', ['proyecto' => $proyecto->codigo])

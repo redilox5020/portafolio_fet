@@ -41,6 +41,7 @@
                             <th>Programa</th>
                             <th>Duración</th>
                             <th>Costo (COP)</th>
+                            <th>Fecha de publicación</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -133,6 +134,12 @@
                         searchable: false
                     },
                     {
+                        data: 'created_at',
+                        name: 'created_at',
+                        orderable: true,
+                        searchable: false
+                    },
+                    {
                         data: 'acciones',
                         name: 'acciones',
                         orderable: false,
@@ -175,7 +182,7 @@
                 pageLength: 10,
                 searchDelay: 500,
                 order: [
-                    [0, 'desc']
+                    [5, 'desc']
                 ],
             }).search(initialSearch);
             if (initialSearch) {

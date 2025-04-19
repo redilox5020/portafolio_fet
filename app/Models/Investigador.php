@@ -20,6 +20,17 @@ class Investigador extends Model
 
     public function proyectos(): BelongsToMany
     {
-        return $this->belongsToMany(Proyecto::class, 'investigador_proyecto', 'investigador_id', 'proyecto_id');
+        return $this->belongsToMany(Proyecto::class)
+            ->using(InvestigadorProyecto::class)
+            ->withPivot('created_at', 'deleted_at')
+            ->wherePivotNull('deleted_at');
+    }
+
+    public function proyectosHistoricos()
+    {
+        return $this->belongsToMany(Proyecto::class)
+            ->using(InvestigadorProyecto::class)
+            ->withPivot('created_at', 'deleted_at')
+            ->wherePivotNotNull('deleted_at');
     }
 }

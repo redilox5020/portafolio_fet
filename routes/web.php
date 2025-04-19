@@ -42,6 +42,8 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('/admin')->group(function () {
         Route::prefix('/proyectos')->group(function () {
+            Route::get('/pdf/metadatos', [ProyectoController::class, 'obtenerMetadatosPdf'])
+                ->name('pdf.metadatos');
             // Filters
             Route::get('/', [ProyectoController::class, 'index'])
                 ->name('proyectos');

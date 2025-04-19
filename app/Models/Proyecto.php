@@ -103,11 +103,85 @@ class Proyecto extends Model
         return $nuevoCodigo;
     }
 
+    public function agregarInvestigadoresPorNombre(array $nombres, array $idsActivos): void
+    {
+        $idsActivosFiltrados = array_filter(
+            $idsActivos,
+            fn($id) => is_numeric($id) && $id > 0
+        );
+        $nombresNuevos = array_filter(
+            $nombres ?? [],
+            fn($nombre) => !is_null($nombre) && trim($nombre) !== ''
+        );
+        foreach ($nombresNuevos as $nombre) {
+            $this->agregarInvestigadorConRestauracionInteligente($nombre, $idsActivosFiltrados);
+        }
+    }
+
+    /**
+     * Agrega un investigador al proyecto, restaurando el vínculo si fue eliminado hace poco.
+     *
+     * @param string $nombre Nombre del investigador a agregar.
+     * @param array $idsActivos IDs de investigadores activos para evitar duplicados.
+     */
+    public function agregarInvestigadorConRestauracionInteligente(string $nombre, array $investigadoresIds): void
+    {
+        $nombre = trim($nombre);
+
+        $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
+
+        if (in_array($investigador->id, $investigadoresIds)) {
+            return;
+        }
+        $vinculoEliminado = InvestigadorProyecto::withTrashed()
+            ->where('proyecto_id', $this->id)
+            ->where('investigador_id', $investigador->id)
+            ->whereNotNull('deleted_at')
+            ->latest('deleted_at')
+            ->first();
+
+        if ($vinculoEliminado && $vinculoEliminado->deleted_at->gt(now()->subMinutes(10))) {
+            $vinculoEliminado->restore();
+        } else {
+            InvestigadorProyecto::create([
+                'proyecto_id' => $this->id,
+                'investigador_id' => $investigador->id,
+                'created_at' => now(),
+            ]);
+        }
+
+    }
+
+    public function eliminarInvestigadoresRemovidos(array $idsActivos): void
+    {
+        $idsFiltrados = array_filter($idsActivos, fn($id) => is_numeric($id) && $id > 0);
+
+        InvestigadorProyecto::where('proyecto_id', $this->id)
+            ->whereNull('deleted_at')
+            ->when(!empty($idsFiltrados), fn($query) =>
+                $query->whereNotIn('investigador_id', $idsFiltrados)
+            )
+            ->get()
+            ->each
+            ->delete();
+    }
 
 
     public function investigadores(): BelongsToMany
     {
-        return $this->belongsToMany(Investigador::class, 'investigador_proyecto', 'proyecto_id', 'investigador_id');
+        return $this->belongsToMany(Investigador::class)
+            ->using(InvestigadorProyecto::class)
+            ->withPivot('created_at', 'deleted_at')
+            ->wherePivotNull('deleted_at');
+    }
+
+    public function investigadoresHistoricos(): belongsToMany
+    {
+        return $this->belongsToMany(Investigador::class)
+            ->using(InvestigadorProyecto::class)
+            ->withPivot('created_at', 'deleted_at')
+            ->wherePivotNotNull('deleted_at')
+            ->orderByPivot('created_at', 'asc');
     }
 
     public function programa():  BelongsTo

@@ -17,9 +17,16 @@
                 {{ session('success') }}
             </div>
         @endif
-        <form id="formProyecto"
-            action="@isset($proyecto){{ route('proyectos.update', $proyecto) }}@else{{ route('proyectos.store') }}@endisset"
-            method="POST" enctype="multipart/form-data">
+        <form id="formProyecto" style="position: relative;"
+        action="@isset($proyecto){{ route('proyectos.update', $proyecto) }}@else{{ route('proyectos.store') }}@endisset"
+        method="POST" enctype="multipart/form-data">
+            <div id="loader-overlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center rounded"
+                style="z-index: 1050;  background-color: rgba(255,255,255,0.75);">
+                <div class="text-center" style="transform: translateY(-40px);">
+                    <div class="spinner-border text-success" role="status" style="width: 4rem; height: 4rem;"></div>
+                    <div class="mt-3 text-success fw-bold">Subiendo archivo, por favor espera...</div>
+                </div>
+            </div>
             @csrf
             @isset($proyecto)
                 @method('PUT')
@@ -312,7 +319,10 @@
                     }
                 })
 
-                if (!hasError) form.submit();
+                if (!hasError) {
+                    document.getElementById('loader-overlay').classList.add('show');
+                    form.submit();
+                }
             });
         });
     </script>

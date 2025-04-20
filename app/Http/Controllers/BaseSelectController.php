@@ -73,11 +73,11 @@ abstract class BaseSelectController extends Controller
                     <i class="fa-solid fa-trash"></i>
                 </a>' : '
                 <span class="d-inline-block"
-                      tabindex="0" data-toggle="tooltip" data-placement="top"
-                      title="No se puede eliminar '.$item->{$this->namePrimary}.' porque está asociado a uno o más proyectos">
-                      <a class="btn btn-danger btn-circle" style="pointer-events: none; opacity: 0.5">
-                          <i class="fa-solid fa-trash"></i>
-                      </a>
+                    tabindex="0" data-toggle="tooltip" data-placement="top"
+                    title="No se puede eliminar '.$item->{$this->namePrimary}.' porque está asociado a uno o más proyectos">
+                    <a class="btn btn-danger btn-circle" style="pointer-events: none; opacity: 0.5">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
                 </span>'
             ];
         });

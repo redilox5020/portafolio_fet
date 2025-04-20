@@ -18,13 +18,13 @@ class RouteController extends Controller
         $routes = collect(Route::getRoutes()->getRoutes())
             ->filter(function ($route) {
                 return $route->getName() &&
-                       !str_starts_with($route->getName(), 'password.') &&
-                       !str_starts_with($route->getName(), 'log') &&
-                       !str_starts_with($route->getName(), 'sanctum') &&
-                       !str_starts_with($route->getName(), 'register') &&
-                       !str_starts_with($route->getName(), 'ignition') &&
-                       !str_starts_with($route->getName(), 'routes') &&
-                       !str_starts_with($route->getName(), 'forgot');
+                    !str_starts_with($route->getName(), 'password.') &&
+                    !str_starts_with($route->getName(), 'log') &&
+                    !str_starts_with($route->getName(), 'sanctum') &&
+                    !str_starts_with($route->getName(), 'register') &&
+                    !str_starts_with($route->getName(), 'ignition') &&
+                    !str_starts_with($route->getName(), 'routes') &&
+                    !str_starts_with($route->getName(), 'forgot');
             })
             ->map(function ($route) {
                 $dbPermission = RoutePermission::where('route_name', $route->getName())->first();

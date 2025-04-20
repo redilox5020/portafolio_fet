@@ -14,6 +14,7 @@ use DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Carbon\Carbon;
 use App\Contracts\FileUploaderInterface;
+use Illuminate\Support\Facades\Log;
 
 class ProyectoController extends Controller
 {
@@ -253,7 +254,7 @@ class ProyectoController extends Controller
     public function store(Request $request, FileUploaderInterface $uploader){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
-            'objetivo_general'=>'required|string',
+            'objetivo_general'=>'required|string|max:2000',
             'programa_id'=>'required|integer|exists:programas,id',
             'procedencia_id'=>'required|integer|exists:procedencias,id',
             'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
@@ -323,7 +324,7 @@ class ProyectoController extends Controller
     public function update(Request $request, Proyecto $proyecto, FileUploaderInterface $uploader){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
-            'objetivo_general'=>'required|string',
+            'objetivo_general'=>'required|string|max:2000',
             'programa_id'=>'required|integer|exists:programas,id',
             'procedencia_id'=>'required|integer|exists:procedencias,id',
             'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
@@ -375,7 +376,7 @@ class ProyectoController extends Controller
             DB::commit();
 
             return redirect()->route('proyectos.edit', ['proyecto' => $proyecto->codigo])
-                 ->with('success', 'Proyecto actualizado exitosamente');
+                ->with('success', 'Proyecto actualizado exitosamente');
 
         } catch (\Exception $e) {
 

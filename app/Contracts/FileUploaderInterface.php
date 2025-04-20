@@ -15,4 +15,20 @@ interface FileUploaderInterface
      * @return string URL segura del archivo subido.
      */
     public function subir(UploadedFile $archivo, Proyecto $proyecto): string;
+
+    /**
+     * Obtiene los datos del archivo a partir de su URL.
+     *
+     * @param string $url
+     * @return array{nombre: mixed, descripcion: mixed, tamaño: mixed, url: string|string[], tipo: string} Datos del archivo.
+     */
+    public function getDataFile(string $url): array;
+
+    /**
+     * Renombra un archivo en el almacenamiento externo.
+     *
+     * @param string $urlActual URL actual del archivo.
+     * @param string $nuevoNombre Nuevo nombre para el archivo.
+     */
+    public function renombrarArchivo(string $urlActual, string $nuevoNombre): string;
 }

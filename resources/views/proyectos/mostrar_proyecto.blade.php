@@ -147,7 +147,7 @@
                 <div class="card-body p-3">
                     No hay ficheros asociados a este proyecto.
                 </div>
-         @endif
+        @endif
     </div>
     @if ($proyecto->investigadoresHistoricos->isNotEmpty())
         <div class="modal fade" id="historicoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -202,10 +202,12 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $(document).on("click", ".delete-btn", function() {
-                let userId = $(this).data("id");
-                let deleteUrl = "{{ route('proyectos.delete', ':id') }}".replace(':id', userId);
-                $("#deleteForm").attr("action", deleteUrl);
+            const deleteRouteTemplate = @json(route('proyectos.delete', ['id' => '__ID__']));
+
+            $(document).on('click', '.delete-btn', function () {
+                let userId = $(this).data('id');
+                let deleteUrl = deleteRouteTemplate.replace('__ID__', userId);
+                $('#deleteForm').attr('action', deleteUrl);
             });
 
             const contenedor = $('#pdf-metadata-container');

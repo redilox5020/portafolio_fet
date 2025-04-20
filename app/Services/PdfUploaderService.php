@@ -4,7 +4,7 @@ namespace App\Services;
 use Illuminate\Support\Str;
 use Cloudinary;
 use Cloudinary\Api\Exception\NotFound;
-use Cloudinary\Api\Admin\AdminApi;
+//use Cloudinary\Api\Admin\AdminApi;
 use Illuminate\Http\UploadedFile;
 use Exception;
 use App\Contracts\FileUploaderInterface;
@@ -46,7 +46,7 @@ class PdfUploaderService implements FileUploaderInterface
         return $uploadResult->getSecurePath();
     }
 
-    public function getDataFile(string $url)
+    public function getDataFile(string $url): array
     {
         try{
             $publicId = $this->extractPublicIdFromUrl($url);

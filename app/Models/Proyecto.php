@@ -179,7 +179,7 @@ class Proyecto extends Model
     {
         return $this->belongsToMany(Investigador::class)
             ->using(InvestigadorProyecto::class)
-            ->withPivot('created_at', 'deleted_at')
+            ->withPivot('id','created_at', 'deleted_at')
             ->wherePivotNotNull('deleted_at')
             ->orderByPivot('created_at', 'asc');
     }

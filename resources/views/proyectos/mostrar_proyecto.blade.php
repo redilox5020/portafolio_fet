@@ -161,6 +161,9 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <div id="alert" class="alert alert-dismissible fade show d-none" role="alert">
+                            <span class="alert-message"></span>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead class="thead-light">
@@ -170,6 +173,7 @@
                                         <th>Inicio</th>
                                         <th>Fin</th>
                                         <th>Duración</th>
+                                        <th>Seleccion</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -185,11 +189,33 @@
                                             <td>{{ $inicio->format('d/m/Y') }}</td>
                                             <td>{{ $fin->format('d/m/Y') }}</td>
                                             <td>{{ $duracion }}</td>
+                                            <td>
+                                                {{-- eliminar investigador por medio de un checkbox para poder seleccionar varios en caso de eliminacion multiple --}}
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="{{ $investigador->pivot->id }}"
+                                                        id="investigador-{{ $investigador->pivot->id }}">
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="selectAllCheckbox">
+                            <label class="form-check-label" for="selectAllCheckbox">
+                                Seleccionar todos
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Reactivar
+                        </button>
+                        <button id="deleteButton" type="submit" class="btn btn-danger btn-sm">
+                            Eliminar
+                        </button>
+
                     </div>
 
                 </div>
@@ -202,6 +228,11 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            $('#selectAllCheckbox').on('change', function() {
+                const isChecked = $(this).is(':checked');
+                $('.form-check-input').not(this).prop('checked', isChecked);
+            });
+
             const deleteRouteTemplate = @json(route('proyectos.delete', ['id' => '__ID__']));
 
             $(document).on('click', '.delete-btn', function () {
@@ -269,6 +300,68 @@
                     }
                 });
             }
+
+            $('#deleteButton').on('click', function() {
+                if (!confirm('¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.')) {
+                    return;
+                }
+                const selectedIds = [];
+                const selectedRows = [];
+                $('.form-check-input:checked').not('#selectAllCheckbox').each(function() {
+                    console.log($(this));
+                    selectedIds.push($(this).val());
+                    selectedRows.push($(this).closest('tr'));
+                });
+                if (selectedIds.length === 0) {
+                    alert('Por favor, selecciona al menos un investigador.');
+                    return;
+                }
+
+                $.ajax(
+                    {
+                        url: @json(route('investigadores.historicos.delete')),
+                        method: 'DELETE',
+                        data: {
+                            selectedIds,
+                            _token: @json(csrf_token())
+                        },
+                        success: function(response) {
+                            let $alert = $('#alert');
+                            $alert.removeClass('d-none alert-danger')
+                                .addClass('alert-success alert-dismissible fade show');
+                            $alert.find('.alert-message').text(response.message);
+
+                            selectedRows.forEach(function(row) {
+                                row.fadeOut(500, function() {
+                                    $(this).remove();
+                                });
+                            });
+                            setTimeout(function () {
+                                $alert.fadeOut(500);
+                            }, 3000);
+
+                        },
+                        error: function(xhr) {
+                            let $alert = $('#alert');
+                            $alert.removeClass('d-none alert-success')
+                                .addClass('alert-danger alert-dismissible fade show');
+                            if (xhr.status === 422) {
+                                let errors = xhr.responseJSON.errors;
+                                let errorMessages = '';
+                                $.each(errors, function (key, value) {
+                                    errorMessages += value + '\n';
+                                });
+                                $alert.find('.alert-message').text(errorMessages);
+                            }else if (xhr.status === 404) {
+                                $alert.find('.alert-message').text(xhr.responseJSON.message);
+                            } else {
+                                $alert.find('.alert-message').text('Error en la petición AJAX');
+                            }
+                            console.error('Error en la petición:', xhr);
+                        }
+                    }
+                );
+            });
         })
     </script>
 @endsection

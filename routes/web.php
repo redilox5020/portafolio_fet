@@ -167,6 +167,9 @@ Route::middleware('auth')->group(function () {
 
             Route::delete('/delete/{investigador_id}', [InvestigadorController::class, 'destroy'])
                 ->name('investigador.delete');
+
+            Route::delete('/investigador-historico', [InvestigadorController::class, 'destroyItemPivot'])
+                ->name('investigadores.historicos.delete');
         });
 
         Route::prefix('/roles')->group(function () {

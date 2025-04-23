@@ -34,7 +34,7 @@ export function removerFilas(rows, bodyTSelector = '#historicoTable') {
  * @param {Array} investigadores - Lista de objetos con { pivot_id, restore }
  * @param {string} bodyTSelector - Selector del tbody de la tabla
  */
-export function removerFilasPorPivot(investigadores, bodyTSelector = '#historicoTable') {
+export function removerFilasPorPivot(investigadores, rows, bodyTSelector = '#historicoTable') {
     const bodyTable = $(bodyTSelector);
     let filasProcesadas = 0;
     let filasTotales = 0;
@@ -42,20 +42,18 @@ export function removerFilasPorPivot(investigadores, bodyTSelector = '#historico
     investigadores.forEach(inv => {
         if (!inv.restore || !inv.pivot_id) return;
 
-        const filaAEliminar = $(`${bodyTSelector} tr[data-pivot-id="${inv.pivot_id}"]`);
+        const filaAEliminar = rows.find(el =>
+            el.data('pivot-id') === inv.pivot_id
+        );
 
-        const filasHistoricas = $(`${bodyTSelector} tr`).filter(function () {
-            return (
-                $(this).data('investigador-id') === inv.investigador_id &&
-                $(this).data('pivot-id') !== inv.pivot_id
-            );
-        });
+        const filasHistoricas = rows.filter(el =>
+            el.data('investigador-id') === inv.investigador_id &&
+            el.data('pivot-id') !== inv.pivot_id
+        );
 
-        filasHistoricas.each(function () {
-            $(this).find('td').eq(5).text('si');
-        });
+        filasHistoricas.forEach(el => el.find('td').eq(5).text('si'));
 
-        if (filaAEliminar.length) {
+        if (filaAEliminar) {
             filasTotales++;
             filaAEliminar.fadeOut(500, function () {
                 $(this).remove();

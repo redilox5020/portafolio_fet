@@ -74,7 +74,10 @@ function eliminarSeleccionados() {
 
 function reactivarSeleccionados() {
     const { ids, rows } = recogerSeleccionados();
-
+    const todosActivos = rows.every(row =>
+        row.find('td').eq(5).text().trim().toLowerCase() === 'si'
+    );
+    if (todosActivos) return mostrarToast('warning', 'No puedes reactivar investigadores activos.');
     if (ids.length === 0) return mostrarToast('warning', 'Selecciona al menos un investigador.');
     if (!confirm('¿Deseas reactivar los investigadores seleccionados?')) return;
 
@@ -90,7 +93,7 @@ function reactivarSeleccionados() {
         success: function (response) {
             mostrarToast('success', response.message, true, true);
             mostrarAlerta('success', response.message);
-            removerFilasPorPivot(response.investigadoresRestaurados);
+            removerFilasPorPivot(response.investigadoresRestaurados, rows);
             insertarActivos(response.investigadoresRestaurados);
             if(response.errores && response.errores.length > 0){
                 response.errores.forEach(function(error) {
@@ -130,7 +133,7 @@ function mostrarToast(tipo, mensaje, autohide = true, startNew = false, duracion
         <div id="${id}" class="toast font-weight-bold text-gray-900 mb-2" role="alert"
             data-delay="${duracion}" data-autohide="${autohide}"
             style="background-color: ${colores[tipo]} !important;">
-            <div class="toast-header" style="background-color: ${colores[tipo]} !important;">
+            <div class="toast-header text-gray-900" style="background-color: ${colores[tipo]} !important;">
                 <strong class="mr-auto">${iconos[tipo]} ${tipo.toUpperCase()}</strong>
                 <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
                     <span aria-hidden="true">&times;</span>

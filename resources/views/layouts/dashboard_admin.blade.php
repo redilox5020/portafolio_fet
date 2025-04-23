@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <link rel="icon" type="image/x-icon" href="{{ asset('img/favicon/favicon.ico') }}">
 
     <title>Dashboard FET</title>
 
@@ -293,7 +294,7 @@
 
                 <!-- Page Heading -->
                 @yield("main")
-
+                <div id="toast-container" class="position-fixed bottom-0 right-0 p-3" style="z-index: 1055; right: 0; bottom: 0;"></div>
 
                 <!-- Modal genérico para agregar tipología -->
                 @include('components.opcion-select', [
@@ -391,7 +392,7 @@ aria-hidden="true">
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-            <form id="deleteForm" action="#" method="POST" class="d-inline">
+            <form id="deleteForm" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-danger">Eliminar</button>

@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
                 ->middleware('can:proyecto.edit')
                 ->name('proyectos.update');
 
+            Route::post('{proyecto}/reactivar-investigadores', [InvestigadorController::class, 'reactivarInvestigadores'])
+                ->name('investigadores.historicos.reactivar');
 
         });
 

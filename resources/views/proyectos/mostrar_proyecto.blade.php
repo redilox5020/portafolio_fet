@@ -30,7 +30,7 @@
                 </div>
             </div>
         </div>
-        <div class="card-body">
+        <div id="container-main" class="card-body">
             <table class="table table-sm table-borderless table-hover">
                 <tbody>
                     <tr>
@@ -110,7 +110,7 @@
 
                 <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
 
-                <div class="row">
+                <div id="container-investigadores-activos" class="row">
                     @foreach ($proyecto->investigadores as $investigador)
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
                             <div class="card h-100 shadow-sm">
@@ -162,7 +162,7 @@
                     </div>
                     <div class="modal-body">
                         <div id="alert" class="alert alert-dismissible fade show d-none" role="alert">
-                            <span class="alert-message"></span>
+                            <span class="alert-message" style="white-space: pre-line;line-height: 1.3;"></span>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
@@ -173,27 +173,31 @@
                                         <th>Inicio</th>
                                         <th>Fin</th>
                                         <th>Duración</th>
+                                        <th>Revinculado?</th>
                                         <th>Seleccion</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="historicoTable">
                                     @foreach ($proyecto->investigadoresHistoricos as $investigador)
                                         @php
                                             $inicio = \Carbon\Carbon::parse($investigador->pivot->created_at);
                                             $fin = \Carbon\Carbon::parse($investigador->pivot->deleted_at);
                                             $duracion = $inicio->diffForHumans($fin, true);
                                         @endphp
-                                        <tr>
+                                        <tr data-pivot-id="{{ $investigador->pivot->id }}" data-investigador-id="{{ $investigador->id }}">
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $investigador->nombre }}</td>
                                             <td>{{ $inicio->format('d/m/Y') }}</td>
                                             <td>{{ $fin->format('d/m/Y') }}</td>
                                             <td>{{ $duracion }}</td>
+                                            <td>{{ in_array($investigador->id, $proyecto->investigadores()->pluck('investigadores.id')->toArray())? "si": "no" }}</td>
                                             <td>
                                                 {{-- eliminar investigador por medio de un checkbox para poder seleccionar varios en caso de eliminacion multiple --}}
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="{{ $investigador->pivot->id }}"
-                                                        id="investigador-{{ $investigador->pivot->id }}">
+                                                    <input class="form-check-input" type="checkbox"
+                                                    value="{{ $investigador->pivot->id }}"
+                                                    data-investigador-id="{{ $investigador->id }}"
+                                                    id="investigador-{{ $investigador->pivot->id }}">
                                                 </div>
                                             </td>
                                         </tr>
@@ -209,7 +213,7 @@
                                 Seleccionar todos
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-success btn-sm">
+                        <button id="reactivateButton" type="submit" class="btn btn-success btn-sm">
                             Reactivar
                         </button>
                         <button id="deleteButton" type="submit" class="btn btn-danger btn-sm">
@@ -226,7 +230,7 @@
 @section('css')
 @endsection
 @section('scripts')
-    <script>
+{{--     <script>
         $(document).ready(function() {
             $('#selectAllCheckbox').on('change', function() {
                 const isChecked = $(this).is(':checked');
@@ -302,21 +306,27 @@
             }
 
             $('#deleteButton').on('click', function() {
-                if (!confirm('¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.')) {
-                    return;
-                }
+                $('#deleteButton').prop('disabled', true);
+                $('#reactivateButton').prop('disabled', true);
+
                 const selectedIds = [];
                 const selectedRows = [];
+
                 $('.form-check-input:checked').not('#selectAllCheckbox').each(function() {
                     console.log($(this));
                     selectedIds.push($(this).val());
                     selectedRows.push($(this).closest('tr'));
                 });
+
                 if (selectedIds.length === 0) {
                     alert('Por favor, selecciona al menos un investigador.');
+                    $(this).prop('disabled', false);
+                    $('#reactivateButton').prop('disabled', false);
                     return;
                 }
-
+                if (!confirm('¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.')) {
+                    return;
+                }
                 $.ajax(
                     {
                         url: @json(route('investigadores.historicos.delete')),
@@ -331,9 +341,23 @@
                                 .addClass('alert-success alert-dismissible fade show');
                             $alert.find('.alert-message').text(response.message);
 
+                            let rowsProcessed = 0;
                             selectedRows.forEach(function(row) {
                                 row.fadeOut(500, function() {
                                     $(this).remove();
+                                    rowsProcessed++;
+
+                                    if (rowsProcessed === selectedRows.length) {
+                                        if ($('#historicoTable').children().length === 0) {
+                                            $('#historicoTable').html('<tr><td colspan="6" class="text-center">No hay investigadores historicos.</td></tr>');
+                                            $('#deleteButton').prop('disabled', true);
+                                            $('#reactivateButton').prop('disabled', true);
+                                            $('#selectAllCheckbox').prop('disabled', true);
+                                        } else {
+                                            $('#deleteButton').prop('disabled', false);
+                                            $('#reactivateButton').prop('disabled', false);
+                                        }
+                                    }
                                 });
                             });
                             setTimeout(function () {
@@ -357,11 +381,189 @@
                             } else {
                                 $alert.find('.alert-message').text('Error en la petición AJAX');
                             }
-                            console.error('Error en la petición:', xhr);
+                            $('#deleteButton').prop('disabled', false);
+                            $('#reactivateButton').prop('disabled', false);
                         }
                     }
                 );
             });
+
+            $('#reactivateButton').on('click', function() {
+                habilitarDeshabilitarBotones(true);
+                const selectedIds = [];
+                const selectedRows = [];
+                const indexInvestigadores = @json($indexInvestigadores ?? 1);
+
+                $('.form-check-input:checked').not('#selectAllCheckbox').each(function() {
+                    selectedIds.push($(this).data('investigador-id'));
+                    selectedRows.push($(this).closest('tr'));
+                });
+
+                if (selectedIds.length === 0) {
+                    alert('Por favor, selecciona al menos un investigador.');
+                    habilitarDeshabilitarBotones(false);
+                    return;
+                }
+                if (!confirm('¿Estás seguro de que quieres reactivar este proyecto? Esta acción no se puede deshacer.')) {
+                    habilitarDeshabilitarBotones(false);
+                    return;
+                }
+                $.ajax(
+                    {
+                        url: @json(route('investigadores.historicos.reactivar', $proyecto->id)),
+                        method: 'POST',
+                        data: {
+                            selectedIds,
+                            _token: @json(csrf_token())
+                        },
+                        success: function(response) {
+                            let $alert = $('#alert');
+                            $alert.removeClass('d-none alert-danger')
+                                .addClass('alert-success alert-dismissible fade show');
+                            $alert.find('.alert-message').text(response.message);
+                            mostrarToast('success', response.message, true, true);
+
+                            response.investigadoresRestaurados.forEach(function(investigador) {
+                                const row = $('#historicoTable').find('tr').filter(function() {
+                                    return $(this).find('td').eq(1).text().trim() === investigador.nombre;
+                                });
+                                if (row.length && investigador.restore) {
+                                    row.fadeOut(500, function() {
+                                        $(this).remove();
+                                    });
+                                }
+                                if ($('#container-investigadores-activos').length) {
+                                    $(`
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                            <div class="card h-100 shadow-sm">
+                                                <div class="card-body">
+                                                    <h5 class="card-title text-primary">
+                                                        <i class="fas fa-user mr-2"></i> Investigador ${indexInvestigadores}
+                                                    </h5>
+                                                    <p class="card-text text-muted mb-0">${investigador.nombre}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).hide().appendTo('#container-investigadores-activos').fadeIn(500);
+                                } else{
+                                    $(`
+                                    <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
+                                        <div id="container-investigadores-activos" class="row">
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                                                <div class="card h-100 shadow-sm">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title text-primary">
+                                                            <i class="fas fa-user mr-2"></i> Investigador ${indexInvestigadores}
+                                                        </h5>
+                                                        <p class="card-text text-muted mb-0">${investigador.nombre}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).hide().appendTo('#container-main').fadeIn(500);
+                                }
+                            });
+                            if(response.errores && response.errores.length > 0){
+                                response.errores.forEach(function(error) {
+                                    mostrarToast('warning', error, false);
+                                });
+                            }
+                            setTimeout(function () {
+                                $alert.fadeOut(500);
+                            }, 3000);
+
+                        },
+                        error: function(xhr) {
+                            let $alert = $('#alert');
+                            $alert.removeClass('d-none alert-success')
+                                .addClass('alert-danger alert-dismissible fade show');
+                            if (xhr.status === 422 || xhr.status === 400) {
+                                let errors = xhr.responseJSON.errors;
+                                let errorMessages = '';
+                                $.each(errors, function (key, value) {
+                                    errorMessages += value + '\n';
+                                });
+                                console.log(errorMessages);
+                                $alert.find('.alert-message').text(errorMessages);
+                                mostrarToast('danger', mensaje);
+                            }else if (xhr.status === 404) {
+                                $alert.find('.alert-message').text(xhr.responseJSON.message);
+                            }else {
+                                $alert.find('.alert-message').text('Error en la petición AJAX');
+                            }
+                        },
+                        complete: function() {
+                            habilitarDeshabilitarBotones(false);
+                        }
+                    }
+                );
+            })
         })
-    </script>
+        $(document).on('hidden.bs.modal', function () {
+            $('.toast').toast('hide');
+        });
+
+        function habilitarDeshabilitarBotones(flag){
+            $('#deleteButton').prop('disabled', flag);
+            $('#reactivateButton').prop('disabled', flag);
+            $('#selectAllCheckbox').prop('disabled', flag);
+        }
+        function mostrarToast(tipo, mensaje, autohide = true, startNew = false,  duracion = 5000) {
+
+            if (startNew) {
+                    $('#toast-container').empty();
+            }
+
+            const iconos = {
+                success: '✅',
+                warning: '⚠️',
+                danger: '❌',
+                info: 'ℹ️'
+            };
+            const colores = {
+                success: '#e4ffc4',
+                warning: '#FFEB3B',
+                danger: '#dc3545',
+                info: '#17a2b8'
+            };
+
+            const id = 'toast-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+            const toastHTML = `
+                <div id="${id}" class="toast font-weight-bold text-gray-900 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-delay="${duracion}" data-autohide="${autohide}" style="background-color: ${colores[tipo]} !important;">
+                    <div class="toast-header text-gray-900" style="background-color: ${colores[tipo]} !important;">
+                        <strong class="mr-auto">${iconos[tipo] || ''} ${tipo.toUpperCase()}</strong>
+                        <button type="button" class="ml-2 mb-1 close text-gray-900" data-dismiss="toast" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        ${mensaje}
+                    </div>
+                </div>
+            `;
+
+            $('#toast-container').append(toastHTML);
+            const $nuevoToast = $('#' + id);
+            $nuevoToast.toast('show');
+
+            // Eliminar el toast del DOM cuando desaparezca
+            $nuevoToast.on('hidden.bs.toast', function () {
+                $(this).remove();
+            });
+        }
+
+    </script> --}}
+<script>
+    window.appData = {
+        indexActual : @json($indexInvestigadores ?? 1),
+        csrf: '{{ csrf_token() }}',
+        rutas: {
+            eliminar: @json(route('proyectos.delete', ['id' => '__ID__'])),
+            reactivar: '{{ route('investigadores.historicos.reactivar', $proyecto->id) }}',
+            eliminarRegistroHistorico: '{{ route('investigadores.historicos.delete') }}'
+        }
+    };
+</script>
+@vite('resources/js/mostrar_proyecto.js')
 @endsection

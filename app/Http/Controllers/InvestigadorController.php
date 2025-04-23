@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Investigador;
 use App\Models\InvestigadorProyecto;
+use App\Models\Proyecto;
 
 class InvestigadorController extends BaseSelectController
 {
@@ -30,7 +31,7 @@ class InvestigadorController extends BaseSelectController
             return response()->json(['success' => false, 'message' => 'No se encontraron investigadores.'], 404);
         }
         foreach ($investigadorProyecto as $investigador) {
-            $investigador->forceDelete();
+            //$investigador->forceDelete();
         }
         return response()->json(
             [
@@ -41,25 +42,44 @@ class InvestigadorController extends BaseSelectController
         );
     }
 
-    /* try {
-            foreach ($selectedIds as $id) {
-                $investigadorProyecto = InvestigadorProyecto::find($id);
-                if ($investigadorProyecto) {
-                    $investigadorProyecto->delete();
-                }
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'Investigador eliminado correctamente',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al eliminar el investigador: ' . $e->getMessage(),
-            ]);
+    public function reactivarInvestigadores(Request $request, Proyecto $proyecto)
+    {
+        $selectedIds = $request->input('selectedIds', []);
+
+        if (empty($selectedIds)) {
+            return response()->json(['success' => false, 'message' => 'No se seleccionó ningún investigador.'], 400);
         }
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al eliminar el investigador',
-        ]); */
+
+        $ids = array_map('intval', $selectedIds);
+
+        $investigadoresRestaurados = [];
+        $errores = [];
+
+        foreach ($ids as $id) {
+            $restaurado = $proyecto->agregarInvestigadorConRestauracionInteligente(
+                null,
+                $proyecto->investigadores()->pluck('investigadores.id')->toArray(),
+                $id
+            );
+            if ($restaurado) {
+                $investigadoresRestaurados[] = $restaurado;
+            }else{
+                $investigador = $proyecto->investigadores()->find($id);
+                $errores[] = $investigador
+                    ? "{$investigador->nombre} ya fue revinculado con antelación."
+                    : "El investigador con ID {$id} no se encuentra vinculado al proyecto.";
+            }
+        }
+        return response()->json(
+            [
+                'success' => true,
+                'ids' => $ids,
+                'investigadoresRestaurados' => $investigadoresRestaurados,
+                'errores' => $errores,
+                'message' => empty($errores)
+                    ? 'Investigadores reactivados correctamente.'
+                    : 'Algunos investigadores no pudieron ser reactivados.',
+            ]
+        );
+    }
 }

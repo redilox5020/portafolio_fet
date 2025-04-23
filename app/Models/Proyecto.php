@@ -124,14 +124,14 @@ class Proyecto extends Model
      * @param string $nombre Nombre del investigador a agregar.
      * @param array $idsActivos IDs de investigadores activos para evitar duplicados.
      */
-    public function agregarInvestigadorConRestauracionInteligente(string $nombre, array $investigadoresIds): void
+    public function agregarInvestigadorConRestauracionInteligente(?string $nombre, array $investigadoresIds, ?int $investigadorId = null)
     {
-        $nombre = trim($nombre);
+        $investigador = $investigadorId
+            ? Investigador::find($investigadorId)
+            : Investigador::firstOrCreate(['nombre' => trim($nombre)]);
 
-        $investigador = Investigador::firstOrCreate(['nombre' => $nombre]);
-
-        if (in_array($investigador->id, $investigadoresIds)) {
-            return;
+        if (!$investigador || in_array($investigador->id, $investigadoresIds)) {
+            return null;
         }
         $vinculoEliminado = InvestigadorProyecto::withTrashed()
             ->where('proyecto_id', $this->id)
@@ -140,15 +140,26 @@ class Proyecto extends Model
             ->latest('deleted_at')
             ->first();
 
-        if ($vinculoEliminado && $vinculoEliminado->deleted_at->gt(now()->subMinutes(10))) {
+        if ($vinculoEliminado && $vinculoEliminado->deleted_at->gt(now()->subHours(24))) {
             $vinculoEliminado->restore();
-        } else {
-            InvestigadorProyecto::create([
-                'proyecto_id' => $this->id,
+            return [
+                'restore' => true,
+                'nombre' => $investigador->nombre,
                 'investigador_id' => $investigador->id,
-                'created_at' => now(),
-            ]);
+                'pivot_id' => $vinculoEliminado->id,
+            ];
         }
+        $nuevoVinculo = InvestigadorProyecto::create([
+            'proyecto_id' => $this->id,
+            'investigador_id' => $investigador->id,
+            'created_at' => now(),
+        ]);
+        return [
+            'restore' => false,
+            'nombre' => $investigador->nombre,
+            'investigador_id' => $investigador->id,
+            'pivot_id' => $nuevoVinculo->id,
+        ];
 
     }
 

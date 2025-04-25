@@ -84,7 +84,11 @@ class ProyectoController extends Controller
 
                 return [
                     'codigo' => $proyecto->codigo,
-                    'nombre_link' => '<a href="'.route('proyecto.por.codigo', $proyecto->codigo).'">'.$proyecto->nombre.'</a>',
+                    'nombre_link' => '<div class="text-truncate-multiline" data-fulltext="'.htmlspecialchars($proyecto->nombre).'">
+                        <a href="'.route('proyecto.por.codigo', $proyecto->codigo).'" class="d-block">
+                        '.$proyecto->nombre.'
+                        </a>
+                    </div>',
                     'programa' => $proyecto->programa->nombre ?? '',
                     'duracion' => $proyecto->duracion,
                     'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),

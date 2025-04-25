@@ -33,7 +33,16 @@
                 </div>
             @endif
             <div class="table-responsive">
-                <table class="table table-bordered" id="proyectosTable" width="100%" cellspacing="0">
+                <table class="table " id="proyectosTable" width="100%" cellspacing="0">
+                    <colgroup>
+                        <col style="width: 10%;"> <!-- Código -->
+                        <col style="width: 35%;"> <!-- Nombre del Proyecto -->
+                        <col style="width: 15%;"> <!-- Programa -->
+                        <col style="width: 10%;"> <!-- Duración -->
+                        <col style="width: 10%;"> <!-- Costo -->
+                        <col style="width: 10%;"> <!-- Fecha -->
+                        <col style="width: 10%;"> <!-- Acciones -->
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Código</th>
@@ -67,6 +76,19 @@
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
         }
+
+        .text-truncate-multiline {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .tooltip-inner {
+            max-width: 300px;
+            white-space: normal;
+            word-break: break-word;
+        }
     </style>
 @endsection
 
@@ -75,6 +97,34 @@
     <script src="{{ asset('vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 
     <script>
+        function isTextTruncated(element) {
+            if (element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight) {
+                return true;
+            }
+            const range = document.createRange();
+            range.setStart(element, 0);
+            range.setEnd(element, element.childNodes.length);
+            return range.getBoundingClientRect().width > element.getBoundingClientRect().width;
+        }
+
+        const initOptimizedTooltips = (context) => {
+            $(context).find('.text-truncate-multiline').each(function() {
+                const container = this;
+                const link = $(container).find('a')[0];
+                const fullText = $(container).data('fulltext');
+
+                requestAnimationFrame(() => {
+                    const $link = $(link);
+                    if (isTextTruncated(container) || isTextTruncated(link)) {
+                        $link.attr('title', fullText)
+                            .tooltip('dispose')
+                            .tooltip();
+                    } else {
+                        $link.removeAttr('title').tooltip('dispose');
+                    }
+                });
+            });
+        };
         $(document).ready(function() {
             const urlParams = new URLSearchParams(window.location.search);
             const initialSearch = urlParams.get('search') || '';
@@ -184,6 +234,12 @@
                 order: [
                     [5, 'desc']
                 ],
+                drawCallback: function(settings) {
+                    initOptimizedTooltips(settings.nTable);
+                },
+                initComplete: function() {
+                    initOptimizedTooltips(this.api().table().container());
+                }
             }).search(initialSearch);
             if (initialSearch) {
                 updateTitleAndUrl(initialSearch);
@@ -200,7 +256,7 @@
                     @if (request('codigo_grupo'))
                         titulo.html(
                             `Proyectos filtrados por grupo de códigos: <code>{{ request('codigo_grupo') }}</code>`
-                            );
+                        );
                     @elseif (request('programa_nombre') && request('anio'))
                         titulo.html(`Proyectos de {{ request('programa_nombre') }} - Año {{ request('anio') }}`);
                     @elseif (request('programa_nombre'))

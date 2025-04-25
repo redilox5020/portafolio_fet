@@ -31,102 +31,53 @@
             </div>
         </div>
         <div id="container-main" class="card-body">
-            <table class="table table-sm table-borderless table-hover">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Objetivo general</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->objetivo_general }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Programa</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->programa->nombre }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Procedencia</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->procedencia->opcion }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Tipologia</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->tipologia->opcion }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Duracion</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->duracion }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Costo</div>
-                        </td>
-                        <td>
-                            ${{ number_format($proyecto->costo, 2, ',', '.') }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="font-weight-bold">Año</div>
-                        </td>
-                        <td>
-                            {{ $proyecto->anio }}
-                        </td>
-                    </tr>
-                    @if ($proyecto->pdf_url)
-                        <tr>
-                            <td>
-                                <div class="font-weight-bold">Url fichero</div>
-                            </td>
-                            <td>
-                                <a href="{{ $proyecto->pdf_url }}" target="_blank"
-                                    rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
-                            </td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
+            <dl class="row">
+                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Objetivo general</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->objetivo_general }}</dd>
 
+                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Programa</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->programa->nombre }}</dd>
+
+                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Procedencia</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->procedencia->opcion }}</dd>
+
+                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Tipologia</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->tipologia->opcion }}</dd>
+
+                <dt class="col-xl-2 col-md-3 col-sm-4">Duracion</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->duracion }}</dd>
+
+                <dt class="col-xl-2 col-md-3 col-sm-4">Costo</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ number_format($proyecto->costo) }}</dd>
+
+                <dt class="col-xl-2 col-md-3 col-sm-4">Año</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->anio }}</dd>
+
+                @if ($proyecto->pdf_url)
+                <dt class="col-xl-2 col-md-3 col-sm-4">Url fichero</dt>
+                <dd class="col-xl-10 col-md-9 col-sm-8">
+                    <a href="{{ $proyecto->pdf_url }}" target="_blank"
+                        rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
+                </dd>
+                @endif
+            </dl>
             @if ($proyecto->investigadores->isNotEmpty())
-                @php
-                    $indexInvestigadores = 1;
-                @endphp
-
-                <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
-
-                <div id="container-investigadores-activos" class="row">
-                    @foreach ($proyecto->investigadores as $investigador)
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary">
-                                        <i class="fas fa-user mr-2"></i> Investigador {{ $indexInvestigadores }}
-                                    </h5>
-                                    <p class="card-text text-muted mb-0">{{ $investigador->nombre }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        @php
-                            $indexInvestigadores++;
-                        @endphp
-                    @endforeach
+            <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
+            <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
+                <div class="row" id="tarjetas-investigadores">
+                @include('proyectos.partials.investigadores', [
+                    'investigadores' => $investigadoresPaginados
+                ])
                 </div>
+                <div class="position-relative">
+                    <div id="spinner-paginador" class="position-absolute top-50 start-50 translate-middle d-none">
+                        <div class="spinner-border text-info" role="status"></div>
+                    </div>
+                    @include('proyectos.partials.paginacion', ['paginator' => $investigadoresPaginados])
+                </div>
+            </div>
+            @else
+            <p>No hay investigadores activos.</p>
             @endif
         </div>
     </div>

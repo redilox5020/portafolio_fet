@@ -7,6 +7,23 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function inicializarEventos() {
+
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        cargarPaginaInvestigadores(url);
+    });
+
+    $(window).on('popstate', function(event) {
+        if (event.state?.url) {
+            cargarPaginaInvestigadores(event.state.url);
+        }
+        else {
+            const currentUrl = window.location.href;
+            cargarPaginaInvestigadores(currentUrl);
+        }
+    });
+
     $(document).on('click', '.delete-btn', function (event) {
         event.preventDefault();
 
@@ -221,6 +238,38 @@ function cargarMetadatosPDF() {
             $('#loader-container').hide();
             console.log("🔵 Loader ocultado");
             contenedor.show();
+        }
+    });
+}
+
+function cargarPaginaInvestigadores(url) {
+    const containerTarjetas = $('#tarjetas-investigadores');
+    const containerPaginacion = $('#paginacion-investigadores');
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        beforeSend: function () {
+            containerPaginacion.html('<div class="col-12 text-center my-3"><div class="spinner-border text-info" role="status"></div></div>');
+            containerTarjetas.fadeTo(200, 0.5);
+        },
+        success: function (response) {
+            if (response?.tarjetas?.trim() && response?.paginacion?.trim()) {
+                containerTarjetas.html(response.tarjetas).fadeTo(300, 1);
+                containerPaginacion.html(response.paginacion);
+
+                if (window.location.href !== url) {
+                    window.history.pushState({ url: url }, '', url);
+                }
+            } else {
+                containerTarjetas.html('<p class="text-danger">No se encontraron investigadores.</p>').fadeTo(300, 1);
+                containerPaginacion.html('');
+            }
+        },
+        error: function (xhr) {
+            containerPaginacion.html('<p class="text-danger">Error al cargar los investigadores.</p>');
+            manejarErrores(xhr);
         }
     });
 }

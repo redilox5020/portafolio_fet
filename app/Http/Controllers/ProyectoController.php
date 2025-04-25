@@ -8,13 +8,11 @@ use App\Models\ProcedenciaCodigo;
 use App\Models\Tipologia;
 use App\Models\Programa;
 use App\Models\Proyecto;
-use App\Models\Investigador;
-use App\Models\InvestigadorProyecto;
 use DB;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Carbon\Carbon;
 use App\Contracts\FileUploaderInterface;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 
 class ProyectoController extends Controller
 {
@@ -210,10 +208,39 @@ class ProyectoController extends Controller
         ]);
     }
 
-    public function proyectosPorCodigo($codigo){
-        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores')->where('codigo', $codigo)->firstOrFail();
+    public function proyectosPorCodigo(Request $request, $codigo){
+        $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores', 'investigadoresHistoricos')->where('codigo', $codigo)->firstOrFail();
+        $investigadoresPaginados = $proyecto->investigadores()->paginate(8);
 
-        return view('proyectos.mostrar_proyecto', compact('proyecto'));
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tarjetas' => View::make('proyectos.partials.investigadores', [
+                    'investigadores' => $investigadoresPaginados
+                ])->render(),
+                'paginacion' => View::make('proyectos.partials.paginacion', [
+                    'paginator' => $investigadoresPaginados
+                ])->render(),
+            ]);
+        }
+
+        return view('proyectos.mostrar_proyecto', compact('proyecto', 'investigadoresPaginados'));
+    }
+
+    public function investigadoresParciales($id)
+    {
+        $proyecto = Proyecto::findOrFail($id);
+        $investigadores = $proyecto->investigadores()->paginate(8);
+
+        return response()->json([
+            'tarjetas' => View::make('proyectos.partials.investigadores', [
+                'investigadores' => $investigadores
+            ])->render(),
+            'paginacion' => View::make('proyectos.partials.paginacion', [
+                'paginator' => $investigadores
+            ])->render(),
+        ]);
+
     }
 
     public function obtenerMetadatosPdf(Request $request, FileUploaderInterface $uploader){

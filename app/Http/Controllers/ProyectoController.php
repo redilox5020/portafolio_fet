@@ -8,118 +8,114 @@ use App\Models\ProcedenciaCodigo;
 use App\Models\Tipologia;
 use App\Models\Programa;
 use App\Models\Proyecto;
+use App\Http\Controllers\DataTable\BaseDataTableController;
 use DB;
 use Carbon\Carbon;
 use App\Contracts\FileUploaderInterface;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
-class ProyectoController extends Controller
+class ProyectoController extends BaseDataTableController
 {
     public $perPage = 10;
 
-    public function index(Request $request)
+    public function __construct()
     {
-        if ($request->ajax()) {
-            $start = $request->input('start', 0);
-            $length = $request->input('length', 10);
-            $search = $request->input('search.value');
-            $orderColumn = $request->input('order.0.column');
-            $orderDir = $request->input('order.0.dir');
+        $this->model = Proyecto::class;
+        $this->view = 'proyectos.index';
+        $this->keyPrimary = 'codigo';
+        $this->perPage = 10;
 
-            $query = Proyecto::with(['programa', 'procedenciaCodigo', 'tipologia', 'investigadores:nombre']);
+        $this->columns = [
+            'codigo',
+            'nombre',
+            'programa.nombre',
+            'duracion',
+            'costo_formateado',
+            'created_at'
+        ];
 
-            // Aplicar filtros existentes si están presentes
+        $this->searchFields = [
+            'nombre',
+            'objetivo_general',
+            'investigadores.nombre',
+            'programa.nombre',
+        ];
 
-            if ($request->has('programa_id')) {
-                $query->whereHas('programa', function($eq) use ($request) {
-                    $eq->where('id', $request->programa_id);
-                });
-            }
+        $this->withRelations = [
+            'programa',
+            'procedenciaCodigo',
+            'tipologia',
+            'investigadores:nombre'
+        ];
 
-            if ($request->has('anio')) {
-                $query->where('anio', $request->anio);
-            }
+        $this->filters = [
+            'programa_id' => function($query, $value) {
+                $query->whereHas('programa', fn($q) => $q->where('id', $value));
+            },
+            'anio' => fn($query, $value) => $query->where('anio', $value),
+            'codigo_grupo' => fn($query, $value) => $query->where('codigo', 'like', $value . '%')
+        ];
+    }
 
-            if ($request->has('codigo_grupo')) {
-                $query->where('codigo', 'like', $request->codigo_grupo . '%');
-            }
-
-
-            //
-            if (!empty($search)) {
-                $query->when(strlen($search) >= 4, function ($q) use ($search){
-                    $q->where('nombre', 'like', "%$search%")
-                    ->orWhere('objetivo_general', 'like', "%$search%")
-                    ->orWhereHas('investigadores', function($q) use ($search) {
-                        $q->where('nombre', 'like', "%$search%");
-                    });
-
-                });
-            }
-
-            // Ordenamiento
-            $columns = ['codigo', 'nombre', 'programa.nombre', 'duracion', 'costo', 'created_at'];
-            if (isset($columns[$orderColumn])) {
-                $orderField = $columns[$orderColumn];
-                if ($orderField === 'duracion') {
-                    // Ordenar por la diferencia en días
-                    $query->orderByRaw('DATEDIFF(fecha_fin, fecha_inicio) ' . $orderDir);
-                }
-                elseif (str_contains($orderField, '.')) {
-                    $relation = explode('.', $orderField)[0];
-                    $query->whereHas($relation, function($q) use ($orderField, $orderDir) {
-                        $q->orderBy(explode('.', $orderField)[1], $orderDir);
-                    });
-                } else {
-                    $query->orderBy($orderField, $orderDir);
-                }
-            }
-
-            $total = $query->count();
-            $proyectos = $query->skip($start)->take($length)->get();
-
-            $data = $proyectos->map(function($proyecto) {
-                $csrfToken = csrf_token();
-
-                return [
-                    'codigo' => $proyecto->codigo,
-                    'nombre_link' => '<div class="text-truncate-multiline" data-fulltext="'.htmlspecialchars($proyecto->nombre).'">
-                        <a href="'.route('proyecto.por.codigo', $proyecto->codigo).'" class="d-block">
-                        '.$proyecto->nombre.'
-                        </a>
-                    </div>',
-                    'programa' => $proyecto->programa->nombre ?? '',
-                    'duracion' => $proyecto->duracion,
-                    'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),
-                    'created_at' => date_format($proyecto->created_at, 'd/m/Y'),
-                    'acciones' => '<div class="d-flex flex-wrap gap-1 justify-content-center">
-                                    <a href="'.route('proyectos.edit', $proyecto->codigo).'" class="btn btn-success btn-circle">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a  class="btn btn-danger btn-circle delete-btn"
-                                    data-id="'.$proyecto->codigo.'"
-                                    data-toggle="modal"
-                                    data-target="#deleteModal">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
-                                </div>'
-                ];
-            });
-
-            return response()->json([
-                'draw' => $request->input('draw'),
-                'recordsTotal' => Proyecto::count(),
-                'recordsFiltered' => $total,
-                'data' => $data
-            ]);
+    protected function customOrderBy($query, $field, $direction)
+    {
+        if ($field === 'duracion') {
+            $query->orderByRaw('DATEDIFF(fecha_fin, fecha_inicio) ' . $direction);
+        }elseif ($field === 'costo_formateado') {
+            $query->orderBy('proyectos.costo', $direction);
+        }else {
+            parent::applyCustomOrder($query, $field, $direction);
         }
+    }
 
-        $programas = Programa::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
+/*     public function getBaseData($item)
+    {
+        return array_map(function($field) use ($item) {
+            switch ($field) {
+                case 'programa':
+                    return $item->programa->nombre ?? null;
+                case 'costo_formateado':
+                    return '$'.number_format($item->costo, 2, ',', '.');
+                case 'created_at':
+                    return $item->created_at->format('d/m/Y');
+                case 'nombre_link':
+                    return view('components.opcion-link', ['model' => $item, 'route' => 'proyectos', 'param'=>['search'=>$item->codigo]])->render();
+                case 'acciones':
+                    return '<div class="d-flex flex-wrap gap-1 justify-content-center">
+                        <a href="'.route('proyectos.edit', $item->codigo).'" class="btn btn-success btn-circle">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        '.$this->getActionButtons($item).'
+                    </div>';
+                default:
+                    return $item->$field ?? null;
+            }
+        }, $this->columns);
+    }
+ */
+    protected function transformResults($results)
+    {
+        return $results->map(function($proyecto) {
+            return [
+                'codigo' => $proyecto->codigo,
+                'nombre_link' => view('components.opcion-link', ['model' => $proyecto, 'route' => 'proyecto.por.codigo', 'param'=>$proyecto->codigo])->render(),
+                'programa' => $proyecto->programa_nombre ?? ($proyecto->programa->nombre ?? ''),
+                'duracion' => $proyecto->duracion,
+                'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),
+                'created_at' => $proyecto->created_at->format('d/m/Y'),
+                'acciones' => view('components.action-buttons', ['id_model' => $proyecto->{$this->keyPrimary}, 'route' => 'proyectos'])->render()
+            ];
+        });
+    }
 
-        return view('proyectos.index', compact('programas', 'procedenciaCodigos', 'tipologias'));
+    protected function getViewData()
+    {
+        return [
+            'programas' => Programa::all(),
+            'procedenciaCodigos' => ProcedenciaCodigo::all(),
+            'tipologias' => Tipologia::all()
+        ];
     }
 
 

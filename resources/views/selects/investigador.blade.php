@@ -26,6 +26,7 @@
                         <tr>
                             <th>Id</th>
                             <th>Nombre</th>
+                            <th>Proyectos</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -57,7 +58,19 @@
                 serverSide: true,
                 ajax: {
                     url: "{{ route('investigador.index') }}",
-                    type: "GET"
+                    type: "GET",
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                        xhr.setRequestHeader('Accept', 'application/json');
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                            window.location.href = '{{ route('login') }}';
+                        } else {
+                            console.error("Error desconocido en DataTables:", xhr);
+                        }
+                    }
                 },
                 columns: [{
                         data: 'id',
@@ -66,6 +79,12 @@
                     {
                         data: 'nombre',
                         name: 'nombre',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'proyectos_count',
+                        name: 'proyectos',
                         orderable: true,
                         searchable: true
                     },

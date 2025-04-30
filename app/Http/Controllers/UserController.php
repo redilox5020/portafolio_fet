@@ -6,119 +6,52 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use App\Http\Controllers\DataTable\BaseJoinDataTableController;
 
-use App\Models\Procedencia;
-use App\Models\ProcedenciaCodigo;
-use App\Models\Tipologia;
-use App\Models\Programa;
-use App\Models\Proyecto;
-
-class UserController extends Controller
+class UserController extends BaseJoinDataTableController
 {
 
     public function __construct()
     {
         $this->middleware('can:edit-user,user')->only('edit', 'update');
         $this->middleware('can:admin-access')->only('index', 'destroy');
+
+        $this->model = User::class;
+        $this->view = 'auth.user.usuarios';
+        $this->columns = [
+            'users.id',
+            'users.name',
+            'users.email',
+            'roles.name'
+        ];
+        $this->selectFields = [
+            'users.id',
+            'users.name',
+            'users.email',
+            'roles.name as role_name'
+        ];
+        $this->joins = [
+            ['model_has_roles', function($join) {
+                $join->on('users.id', '=', 'model_has_roles.model_id')
+                    ->where('model_has_roles.model_type', '=', User::class);
+            }],
+            ['roles', 'model_has_roles.role_id', '=', 'roles.id']
+        ];
     }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    protected function transformResults($usuarios)
     {
-        if($request->ajax()){
-            $start = $request->input('start', 0);
-            $length = $request->input('length', 10);
-            $search = $request->input('search.value');
-            $orderColumn = $request->input('order.0.column');
-            $orderDir = $request->input('order.0.dir');
-
-            $query = User::select('users.id', 'users.name', 'users.email', 'roles.name as role_name')
-                ->leftJoin('model_has_roles', function ($join) {
-                    $join->on('users.id', '=', 'model_has_roles.model_id')
-                        ->where('model_has_roles.model_type', '=', User::class);
-                })
-                ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id');
-
-            //Búsqueda
-            if(!empty($search)){
-                $query->where(function($q) use ($search) {
-                    $q->where('users.name', 'like', "%$search%")
-                        ->orWhere('users.email', 'like', "%$search%")
-                        ->orWhere('roles.name', 'like', "%$search%");
-                });
-            }
-
-            //Ordenamiento
-            $columns = ['users.id', 'users.name', 'users.email', 'roles.name'];
-            if(isset($columns[$orderColumn])) {
-                $orderField = $columns[$orderColumn];
-                $query->orderBy($orderField, $orderDir);
-            }
-
-            $total = $query->count();
-            $usuarios = $query->skip($start)->take($length)->get();
-
-            $data = $usuarios->map(function($usuario){
-                $csrfToken = csrf_token();
-                return [
-                    'id' => $usuario->id,
-                    'nombre'=> $usuario->name,
-                    'email'=> $usuario->email,
-                    'rol'=>$usuario->role_name,
-                    'acciones'=> '<div class="d-flex flex-wrap gap-1 justify-content-center">
-                                    <a href="'.route('user.edit', $usuario->id).'" class="btn btn-success btn-circle">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a  class="btn btn-danger btn-circle delete-btn"
-                                    data-id="'.$usuario->id.'"
-                                    data-toggle="modal"
-                                    data-target="#deleteModal">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </a>
-                                </div>'
-                ];
-            });
-
-            return response()->json([
-                'draw'=> $request->input('draw'),
-                'recordsTotal' => User::count(),
-                'recordsFiltered' => $total,
-                'data' => $data
-            ]);
-        }
-        $usuarios = User::paginate();
-
-        return view('auth.user.usuarios', compact('usuarios'));
+        return $usuarios->map(function($usuario) {
+            return [
+                'id' => $usuario->id,
+                'nombre' => view('components.opcion-link', ['model' => $usuario, 'route' => 'proyectos', 'param'=>['search'=>$usuario->name]])->render(),
+                'email' => $usuario->email,
+                'rol' => $usuario->role_name,
+                'acciones' => view('components.action-buttons', ['id_model' => $usuario->id, 'route' => 'user'])->render()
+            ];
+        });
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
 
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
         $roles = Role::all();

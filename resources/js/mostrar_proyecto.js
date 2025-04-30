@@ -214,7 +214,7 @@ function cargarMetadatosPDF() {
         success: function (res) {
             contenedor.html(`
                 <div class="table-responsive">
-                    <table class="table mb-0">
+                    <table class="table table-sm mb-0">
                         <thead><tr>
                             <th>Fichero</th><th>Descripción</th><th>Tamaño</th><th>Formato</th><th></th>
                         </tr></thead>

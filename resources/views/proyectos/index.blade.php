@@ -2,7 +2,7 @@
 @section('main')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h3 id="titulo-proyectos" class="h3 mb-2 text-gray-800">
+            <h3 id="titulo-proyectos" class="h3 m-0 text-gray-800">
                 @if (request('codigo_grupo'))
                     Proyectos filtrados por grupo de códigos: <code>{{ request('codigo_grupo') }}</code>
                 @elseif(request('programa_nombre') && request('anio'))
@@ -155,6 +155,18 @@
                             d.codigo_grupo = "{{ request('codigo_grupo') }}";
                         @endif
 
+                    },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                        xhr.setRequestHeader('Accept', 'application/json');
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                            window.location.href = '{{ route('login') }}';
+                        } else {
+                            console.error("Error desconocido en DataTables:", xhr);
+                        }
                     }
                 },
                 columns: [{

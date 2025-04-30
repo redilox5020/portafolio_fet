@@ -54,50 +54,52 @@
                 <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->anio }}</dd>
 
                 @if ($proyecto->pdf_url)
-                <dt class="col-xl-2 col-md-3 col-sm-4">Url fichero</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">
-                    <a href="{{ $proyecto->pdf_url }}" target="_blank"
-                        rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
-                </dd>
+                    <dt class="col-xl-2 col-md-3 col-sm-4">Url fichero</dt>
+                    <dd class="col-xl-10 col-md-9 col-sm-8">
+                        <a href="{{ $proyecto->pdf_url }}" target="_blank"
+                            rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
+                    </dd>
                 @endif
             </dl>
             @if ($proyecto->investigadores->isNotEmpty())
-            <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
-            <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
-                <div class="row" id="tarjetas-investigadores">
-                @include('proyectos.partials.investigadores', [
-                    'investigadores' => $investigadoresPaginados
-                ])
-                </div>
-                <div class="position-relative">
-                    <div id="spinner-paginador" class="position-absolute top-50 start-50 translate-middle d-none">
-                        <div class="spinner-border text-info" role="status"></div>
+                <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
+                <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
+                    <div class="row" id="tarjetas-investigadores">
+                        @include('proyectos.partials.investigadores', [
+                            'investigadores' => $investigadoresPaginados,
+                        ])
                     </div>
-                    @include('proyectos.partials.paginacion', ['paginator' => $investigadoresPaginados])
+                    <div class="position-relative">
+                        <div id="spinner-paginador" class="position-absolute top-50 start-50 translate-middle d-none">
+                            <div class="spinner-border text-info" role="status"></div>
+                        </div>
+                        @include('proyectos.partials.paginacion', [
+                            'paginator' => $investigadoresPaginados,
+                        ])
+                    </div>
                 </div>
-            </div>
             @else
-            <p>No hay investigadores activos.</p>
+                <p>No hay investigadores activos.</p>
             @endif
         </div>
     </div>
-    <div class="card border-info shadow mb-4">
-        <div class="card-header p-2 bg-info text-white">
+    <div class="card border-info shadow">
+        <div class="card-header bg-info text-white">
             <h6 class="m-0 font-weight-bold">Ficheros en este proyecto:</h6>
         </div>
         @if ($proyecto->pdf_url)
-                <div id="loader-container" style="display: none;">
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status">
-                        </div>
+            <div id="loader-container" style="display: none;">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
                     </div>
-                    <p class="text-center mt-2">Cargando metadatos del PDF...</p>
                 </div>
-                <div id="pdf-metadata-container" class="card-body p-0" data-url="{{ $proyecto->pdf_url }}"></div>
+                <p class="text-center mt-2">Cargando metadatos del PDF...</p>
+            </div>
+            <div id="pdf-metadata-container" class="card-body p-0" data-url="{{ $proyecto->pdf_url }}"></div>
         @else
-                <div class="card-body p-3">
-                    No hay ficheros asociados a este proyecto.
-                </div>
+            <div class="card-body p-3">
+                No hay ficheros asociados a este proyecto.
+            </div>
         @endif
     </div>
     @if ($proyecto->investigadoresHistoricos->isNotEmpty())
@@ -135,20 +137,22 @@
                                             $fin = \Carbon\Carbon::parse($investigador->pivot->deleted_at);
                                             $duracion = $inicio->diffForHumans($fin, true);
                                         @endphp
-                                        <tr data-pivot-id="{{ $investigador->pivot->id }}" data-investigador-id="{{ $investigador->id }}">
+                                        <tr data-pivot-id="{{ $investigador->pivot->id }}"
+                                            data-investigador-id="{{ $investigador->id }}">
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $investigador->nombre }}</td>
                                             <td>{{ $inicio->format('d/m/Y') }}</td>
                                             <td>{{ $fin->format('d/m/Y') }}</td>
                                             <td>{{ $duracion }}</td>
-                                            <td>{{ in_array($investigador->id, $proyecto->investigadores()->pluck('investigadores.id')->toArray())? "si": "no" }}</td>
+                                            <td>{{ in_array($investigador->id, $proyecto->investigadores()->pluck('investigadores.id')->toArray()) ? 'si' : 'no' }}
+                                            </td>
                                             <td>
                                                 {{-- eliminar investigador por medio de un checkbox para poder seleccionar varios en caso de eliminacion multiple --}}
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox"
-                                                    value="{{ $investigador->pivot->id }}"
-                                                    data-investigador-id="{{ $investigador->id }}"
-                                                    id="investigador-{{ $investigador->pivot->id }}">
+                                                        value="{{ $investigador->pivot->id }}"
+                                                        data-investigador-id="{{ $investigador->id }}"
+                                                        id="investigador-{{ $investigador->pivot->id }}">
                                                 </div>
                                             </td>
                                         </tr>
@@ -179,18 +183,28 @@
     @endif
 @endsection
 @section('css')
+    <style>
+        .table thead th {
+            border-width: 1px;
+        }
+        .table td,
+        .table th {
+            border-top: none;
+            vertical-align: middle;
+        }
+    </style>
 @endsection
 @section('scripts')
-<script>
-    window.appData = {
-        indexActual : @json($indexInvestigadores ?? 1),
-        csrf: '{{ csrf_token() }}',
-        rutas: {
-            eliminar: @json(route('proyectos.delete', ['id' => '__ID__'])),
-            reactivar: '{{ route('investigadores.historicos.reactivar', $proyecto->id) }}',
-            eliminarRegistroHistorico: '{{ route('investigadores.historicos.delete') }}'
-        }
-    };
-</script>
-@vite('resources/js/mostrar_proyecto.js')
+    <script>
+        window.appData = {
+            indexActual: @json($indexInvestigadores ?? 1),
+            csrf: '{{ csrf_token() }}',
+            rutas: {
+                eliminar: @json(route('proyectos.delete', ['id' => '__ID__'])),
+                reactivar: '{{ route('investigadores.historicos.reactivar', $proyecto->id) }}',
+                eliminarRegistroHistorico: '{{ route('investigadores.historicos.delete') }}'
+            }
+        };
+    </script>
+    @vite('resources/js/mostrar_proyecto.js')
 @endsection

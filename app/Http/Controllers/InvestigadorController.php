@@ -12,10 +12,26 @@ class InvestigadorController extends BaseSelectController
     public function __construct()
     {
         $this->model = Investigador::class;
-        $this->fields = ['nombre'];
-        $this->columns = ['id', 'nombre'];
-        $this->view = 'selects.investigador';
+        $this->searchFields = ['nombre'];
+        $this->columns = ['id', 'nombre', 'proyectos_count'];
         $this->namePrimary = "nombre";
+        parent::__construct();
+    }
+
+    protected function buildBaseQuery()
+    {
+        return parent::buildBaseQuery()
+            ->withCount('proyectos');
+    }
+
+    public function getBaseData($item)
+    {
+        return array_map(function($field) use ($item) {
+            if($field !== 'nombre'){
+                return $item->$field ?? null;
+            }
+            return view('components.opcion-link', ['model' => $item, 'route' => 'proyectos', 'param'=>['search'=>$item->$field]])->render();
+        }, $this->columns);
     }
 
     public function destroyItemPivot(Request $request)

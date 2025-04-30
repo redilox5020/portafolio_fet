@@ -2,7 +2,7 @@
 @section('main')
     <div class="card">
         <div class="card-header">
-            <h2>Administrar Roles</h2>
+            <h2 class="m-0">Administrar Roles</h2>
         </div>
 
         <div class="row g-0">
@@ -56,7 +56,7 @@
                         @foreach ($roles as $role)
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>{{ $role->name }}</h5>
+                                    <h5 class="m-0">{{ $role->name }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="{{ route('roles.update', $role->id) }}">

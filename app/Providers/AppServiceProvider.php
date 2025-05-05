@@ -5,6 +5,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\ServiceProvider;
 use App\Services\PdfUploaderService;
 use App\Contracts\FileUploaderInterface;
+use Carbon\Carbon;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -22,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        setlocale(LC_TIME, 'es_ES.UTF-8');
+        Carbon::setLocale('es');
+        
         Str::macro('toReadableSize', function ($bytes) {
             if (!is_numeric($bytes)) {
                 return 'N/A';

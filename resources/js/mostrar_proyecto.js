@@ -2,6 +2,32 @@ import { removerFilas, removerFilasPorPivot, deshabilitarControles } from './uti
 import { asignarActionAlFormulario } from './utils/modalUtils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
+    const $lucesDelCirculo = document.querySelectorAll('.luces-circulo');
+
+    const estadoFinal = window.appData.estadoColor;
+
+    let contadorDeLuz = 0;
+    let intervalo;
+
+    const mostrarLuz = () => {
+        $lucesDelCirculo.forEach(luz => {
+            luz.classList.remove('red', 'yellow', 'green');
+        });
+
+        const luzActual = $lucesDelCirculo[contadorDeLuz];
+        const colorActual = luzActual.getAttribute('color');
+
+        luzActual.classList.add(colorActual);
+
+        if (colorActual === estadoFinal) {
+            clearInterval(intervalo);
+        } else {
+            contadorDeLuz++;
+        }
+    };
+
+    intervalo = setInterval(mostrarLuz, 300);
+
     inicializarEventos();
     cargarMetadatosPDF();
 });

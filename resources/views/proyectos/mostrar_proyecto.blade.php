@@ -50,10 +50,10 @@
                         <dd class="col-xl-10 col-md-9 col-sm-8 mb-0">
                             <dl class="row mb-0">
                                 <dt class="col-sm-4">Fecha de inicio</dt>
-                                <dd class="col-sm-8">{{$proyecto->fecha_inicio}}</dd>
+                                <dd class="col-sm-8">{{ $proyecto->fecha_inicio->translatedFormat('j \d\e F \d\e Y') }}</dd>
 
                                 <dt class="col-sm-4">Fecha final</dt>
-                                <dd class="col-sm-8">{{$proyecto->fecha_fin}}</dd>
+                                <dd class="col-sm-8">{{$proyecto->fecha_fin->translatedFormat('j \d\e F \d\e Y')}}</dd>
 
                                 <dt class="col-sm-4">Total</dt>
                                 <dd class="col-sm-8">{{ $proyecto->duracion }}</dd>
@@ -77,33 +77,32 @@
                 </div>
                 <div class="container-semaforo col-lg-1 col-md-2 col-sm-2">
                     <div class="semaforo">
-                        <span class="luces-circulo red" color = "red"></span>
-                        <span class="luces-circulo" color="yellow"></span>
-                        <span class="luces-circulo" color="green"></span>
+                        <span class="luces-circulo red" color="red"></span>
+                        <span class="luces-circulo " color="yellow"></span>
+                        <span class="luces-circulo " color="green"></span>
                     </div>
                     <div class="stick"></div>
                 </div>
-                <div class="floor"></div>
             </div>
-        </div>
-        <div class="background-floor">
+            <div class="background-floor mb-3">
+                    <h3 class="m-0 text-white font-weight-bold">Investigadores Activos</h3>
+            </div>
             @if ($proyecto->investigadores->isNotEmpty())
-                <h3 class="mb-4 text-primary font-weight-bold text-center">Investigadores Activos</h3>
-                <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
-                    <div class="row" id="tarjetas-investigadores">
-                        @include('proyectos.partials.investigadores', [
-                            'investigadores' => $investigadoresPaginados,
-                        ])
-                    </div>
-                    <div class="position-relative">
-                        <div id="spinner-paginador" class="position-absolute top-50 start-50 translate-middle d-none">
-                            <div class="spinner-border text-info" role="status"></div>
-                        </div>
-                        @include('proyectos.partials.paginacion', [
-                            'paginator' => $investigadoresPaginados,
-                        ])
-                    </div>
+            <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
+                <div class="row" id="tarjetas-investigadores">
+                    @include('proyectos.partials.investigadores', [
+                        'investigadores' => $investigadoresPaginados,
+                    ])
                 </div>
+                <div class="position-relative">
+                    <div id="spinner-paginador" class="position-absolute top-50 start-50 translate-middle d-none">
+                        <div class="spinner-border text-info" role="status"></div>
+                    </div>
+                    @include('proyectos.partials.paginacion', [
+                        'paginator' => $investigadoresPaginados,
+                    ])
+                </div>
+            </div>
             @else
                 <p>No hay investigadores activos.</p>
             @endif
@@ -209,77 +208,7 @@
     @endif
 @endsection
 @section('css')
-    <style>
-        .table thead th {
-            border-width: 1px;
-        }
-        .table td,
-        .table th {
-            border-top: none;
-            vertical-align: middle;
-        }
-        .container-semaforo{
-            display: flex;
-            flex-direction: column;
-            place-items: center;
-        }
-        .semaforo{
-            width: 63px;
-            height: 146px;
-            border-radius: 30px;
-            display: grid;
-            place-items: center;
-            background-color: #2c3e50;
-            padding: 10px;
-        }
-        .luces-circulo{
-            display: block;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background-color: rgb(0, 0,0,0.3);
-            position: relative;
-        }
-        .luces-circulo::after{
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border-right: 4px solid rgb(255, 255,255,0.6);
-            top: 5%;
-        }
-        .stick{
-            width: 8px;
-            flex-grow: 1;
-            min-height: 90px;
-            background-color: rgb(44 62 80);
-        }
-        .floor{
-            width: calc(100% + 16px);
-            height: 2px;
-            background-color: #005011;
-            margin-right: -8px;
-            margin-left: -8px;
-            /* box-shadow: 0 0 10px 1px #a5682a; */
-        }
-        .background-floor{
-            background: linear-gradient(180deg, #4caf5085 0%, #8bc34a7a 25%, #cddc3980 50%, #ffffff87 75%, rgb(255 255 255 / 45%) 100%);
-            padding: 1.25rem;
-        }
-        .red{
-            background-color: #c0392b;
-            box-shadow: 0 0 10px 1px #c0392b;
-        }
-        .yellow{
-            background-color: #f1c40f;
-            box-shadow: 0 0 10px 1px #f1c40f;
-        }
-        .green{
-            background-color: #2ecc71;
-            box-shadow: 0 0 10px 1px #2ecc71;
-        }
-    </style>
+    @vite('resources/css/mostrar_proyecto.css')
 @endsection
 @section('scripts')
     <script>

@@ -223,8 +223,17 @@ class ProyectoController extends BaseDataTableController
                 ])->render(),
             ]);
         }
+        $fechaActual = Carbon::now();
 
-        return view('proyectos.mostrar_proyecto', compact('proyecto', 'investigadoresPaginados'));
+        $estadoColor = 'red';
+
+        if ($fechaActual->greaterThan($proyecto->fecha_fin)) {
+            $estadoColor = 'green';
+        } elseif ($fechaActual->between($proyecto->fecha_inicio, $proyecto->fecha_fin)) {
+            $estadoColor = 'yellow';
+        }
+
+        return view('proyectos.mostrar_proyecto', compact('proyecto', 'investigadoresPaginados', 'estadoColor'));
     }
 
     public function investigadoresParciales($id)

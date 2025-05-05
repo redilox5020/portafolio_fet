@@ -26,6 +26,12 @@ class Proyecto extends Model
         'costo',
         'pdf_url'
     ];
+
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_fin' => 'datetime',
+    ];
+
     public function getDuracionAttribute()
     {
         $fechaInicio = Carbon::parse($this->fecha_inicio);

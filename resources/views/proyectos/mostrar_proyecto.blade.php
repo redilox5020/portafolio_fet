@@ -30,39 +30,65 @@
                 </div>
             </div>
         </div>
-        <div id="container-main" class="card-body">
-            <dl class="row">
-                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Objetivo general</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->objetivo_general }}</dd>
+        <div id="container-main" class="card-body pb-0">
+            <div class="row align-items-stretch">
+                <div class="col-lg-11 col-md-10 col-sm-10">
+                    <dl class="row">
+                        <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Objetivo general</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->objetivo_general }}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Programa</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->programa->nombre }}</dd>
+                        <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Programa</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->programa->nombre }}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Procedencia</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->procedencia->opcion }}</dd>
+                        <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Procedencia</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->procedencia->opcion }}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Tipologia</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->tipologia->opcion }}</dd>
+                        <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Tipologia</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->tipologia->opcion }}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4">Duracion</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->duracion }}</dd>
+                        <dt class="col-xl-2 col-md-3 col-sm-4">Duracion</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8 mb-0">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Fecha de inicio</dt>
+                                <dd class="col-sm-8">{{$proyecto->fecha_inicio}}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4">Costo</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ number_format($proyecto->costo) }}</dd>
+                                <dt class="col-sm-4">Fecha final</dt>
+                                <dd class="col-sm-8">{{$proyecto->fecha_fin}}</dd>
 
-                <dt class="col-xl-2 col-md-3 col-sm-4">Año</dt>
-                <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->anio }}</dd>
+                                <dt class="col-sm-4">Total</dt>
+                                <dd class="col-sm-8">{{ $proyecto->duracion }}</dd>
+                            </dl>
+                        </dd>
 
-                @if ($proyecto->pdf_url)
-                    <dt class="col-xl-2 col-md-3 col-sm-4">Url fichero</dt>
-                    <dd class="col-xl-10 col-md-9 col-sm-8">
-                        <a href="{{ $proyecto->pdf_url }}" target="_blank"
-                            rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
-                    </dd>
-                @endif
-            </dl>
+                        <dt class="col-xl-2 col-md-3 col-sm-4">Costo</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ number_format($proyecto->costo) }}</dd>
+
+                        <dt class="col-xl-2 col-md-3 col-sm-4">Año</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->anio }}</dd>
+
+                        @if ($proyecto->pdf_url)
+                            <dt class="col-xl-2 col-md-3 col-sm-4">Url fichero</dt>
+                            <dd class="col-xl-10 col-md-9 col-sm-8">
+                                <a href="{{ $proyecto->pdf_url }}" target="_blank"
+                                    rel="noopener noreferrer">{{ $proyecto->pdf_url }}</a>
+                            </dd>
+                        @endif
+                    </dl>
+                </div>
+                <div class="container-semaforo col-lg-1 col-md-2 col-sm-2">
+                    <div class="semaforo">
+                        <span class="luces-circulo red" color = "red"></span>
+                        <span class="luces-circulo" color="yellow"></span>
+                        <span class="luces-circulo" color="green"></span>
+                    </div>
+                    <div class="stick"></div>
+                </div>
+                <div class="floor"></div>
+            </div>
+        </div>
+        <div class="background-floor">
             @if ($proyecto->investigadores->isNotEmpty())
-                <h3 class="mb-4 text-secondary font-weight-bold">Investigadores Activos</h3>
+                <h3 class="mb-4 text-primary font-weight-bold text-center">Investigadores Activos</h3>
                 <div id="container-investigadores-activos" data-proyecto-id="{{ $proyecto->id }}">
                     <div class="row" id="tarjetas-investigadores">
                         @include('proyectos.partials.investigadores', [
@@ -192,12 +218,74 @@
             border-top: none;
             vertical-align: middle;
         }
+        .container-semaforo{
+            display: flex;
+            flex-direction: column;
+            place-items: center;
+        }
+        .semaforo{
+            width: 63px;
+            height: 146px;
+            border-radius: 30px;
+            display: grid;
+            place-items: center;
+            background-color: #2c3e50;
+            padding: 10px;
+        }
+        .luces-circulo{
+            display: block;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: rgb(0, 0,0,0.3);
+            position: relative;
+        }
+        .luces-circulo::after{
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border-right: 4px solid rgb(255, 255,255,0.6);
+            top: 5%;
+        }
+        .stick{
+            width: 8px;
+            flex-grow: 1;
+            min-height: 90px;
+            background-color: rgb(44 62 80);
+        }
+        .floor{
+            width: calc(100% + 16px);
+            height: 2px;
+            background-color: #005011;
+            margin-right: -8px;
+            margin-left: -8px;
+            /* box-shadow: 0 0 10px 1px #a5682a; */
+        }
+        .background-floor{
+            background: linear-gradient(180deg, #4caf5085 0%, #8bc34a7a 25%, #cddc3980 50%, #ffffff87 75%, rgb(255 255 255 / 45%) 100%);
+            padding: 1.25rem;
+        }
+        .red{
+            background-color: #c0392b;
+            box-shadow: 0 0 10px 1px #c0392b;
+        }
+        .yellow{
+            background-color: #f1c40f;
+            box-shadow: 0 0 10px 1px #f1c40f;
+        }
+        .green{
+            background-color: #2ecc71;
+            box-shadow: 0 0 10px 1px #2ecc71;
+        }
     </style>
 @endsection
 @section('scripts')
     <script>
         window.appData = {
             indexActual: @json($indexInvestigadores ?? 1),
+            estadoColor: '{{ $estadoColor }}',
             csrf: '{{ csrf_token() }}',
             rutas: {
                 eliminar: @json(route('proyectos.delete', ['id' => '__ID__'])),

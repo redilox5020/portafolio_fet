@@ -180,7 +180,7 @@
             <div class="group-form input-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
                 <input class="form-control @error('fecha_inicio') is-invalid @enderror" type="date" id="fecha_inicio"
-                    name="fecha_inicio" value="{{ old('fecha_inicio', $proyecto->fecha_inicio ?? '') }}" required>
+                    name="fecha_inicio" value="{{ old('fecha_inicio', isset($proyecto) && $proyecto->fecha_inicio ? $proyecto->fecha_inicio->format('Y-m-d') : '') }}" required>
                 @error('fecha_inicio')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -188,7 +188,7 @@
             <div class="group-form input-group">
                 <label for="fecha_fin">Fecha de Fin:</label>
                 <input class="form-control @error('fecha_fin') is-invalid @enderror" type="date" id="fecha_fin"
-                    name="fecha_fin" value="{{ old('fecha_fin', $proyecto->fecha_fin ?? '') }}" required>
+                    name="fecha_fin" value="{{ old('fecha_fin', isset($proyecto) && $proyecto->fecha_fin ? $proyecto->fecha_fin->format('Y-m-d') : '') }}" required>
                 @error('fecha_fin')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

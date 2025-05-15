@@ -46,7 +46,7 @@ class UserController extends BaseJoinDataTableController
                 'nombre' => view('components.opcion-link', ['model' => $usuario, 'route' => 'proyectos', 'param'=>['search'=>$usuario->name]])->render(),
                 'email' => $usuario->email,
                 'rol' => $usuario->role_name,
-                'acciones' => view('components.action-buttons', ['id_model' => $usuario->id, 'route' => 'user'])->render()
+                'acciones' => view('components.action-buttons', ['id_model' => $usuario->id, 'route' => 'user', 'is_modal'=>false])->render()
             ];
         });
     }

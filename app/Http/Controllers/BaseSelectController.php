@@ -41,7 +41,8 @@ abstract class BaseSelectController extends BaseDataTableController
                 'success' => 'Registro creado exitosamente',
                 'data' => [
                     'id' => $item->id,
-                    'label' => $item->opcion
+                    'label' => $item->{$this->columns[1]},
+                    ...($this->columns[2] === 'model_type' ? ['model' => $item->{$this->columns[2]}] : []),
                 ]
             ]);
         }

@@ -104,7 +104,7 @@ class ProyectoController extends BaseDataTableController
                 'duracion' => $proyecto->duracion,
                 'costo_formateado' => '$'.number_format($proyecto->costo, 2, ',', '.'),
                 'created_at' => $proyecto->created_at->format('d/m/Y'),
-                'acciones' => view('components.action-buttons', ['id_model' => $proyecto->{$this->keyPrimary}, 'route' => 'proyectos'])->render()
+                'acciones' => view('components.action-buttons', ['id_model' => $proyecto->{$this->keyPrimary}, 'route' => 'proyectos', 'is_modal'=>false])->render()
             ];
         });
     }
@@ -210,6 +210,7 @@ class ProyectoController extends BaseDataTableController
 
     public function proyectosPorCodigo(Request $request, $codigo){
         $proyecto = Proyecto::with('programa', 'procedencia', 'tipologia', 'investigadores', 'investigadoresHistoricos')->where('codigo', $codigo)->firstOrFail();
+        $tipologiasProducto = Tipologia::where('model_type', 'producto')->get();
         $investigadoresPaginados = $proyecto->investigadores()->paginate(8);
 
         if ($request->ajax()) {
@@ -233,7 +234,7 @@ class ProyectoController extends BaseDataTableController
             $estadoColor = 'yellow';
         }
 
-        return view('proyectos.mostrar_proyecto', compact('proyecto', 'investigadoresPaginados', 'estadoColor'));
+        return view('proyectos.mostrar_proyecto', compact('proyecto', 'investigadoresPaginados', 'estadoColor', 'tipologiasProducto'));
     }
 
     public function investigadoresParciales($id)
@@ -280,7 +281,7 @@ class ProyectoController extends BaseDataTableController
     public function create(){
         $procedencias = Procedencia::all();
         $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
+        $tipologias = Tipologia::where('model_type', 'proyecto')->get();
         $programas = Programa::all();
 
 

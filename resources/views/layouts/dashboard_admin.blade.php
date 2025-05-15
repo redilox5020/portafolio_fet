@@ -20,9 +20,9 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link href="{{asset("css/bootstrap5-styles.css")}}" rel="stylesheet">
-
     <link href="{{asset("css/sb-admin-2.min.css")}}" rel="stylesheet">
+
+    <link href="{{asset("css/bootstrap5-styles.css")}}" rel="stylesheet">
 
     @yield("css")
 
@@ -438,6 +438,64 @@ $(document).ready(function () {
     $(document).on('mouseenter', '[data-toggle="tooltip"]', function() {
         $(this).tooltip('show');
     });
+
+    /*
+        Los siguientes eventos son necesario al momento de alternar entre modales en bootstrap 4.6;
+        Desde bootstrap 5.2 se hace nativamente con la combinacion de atributos:
+        data-bs-toggle, data-bs-target
+    */
+    $('[data-target="#modal-tipologia"]').on('click', function () {
+        let targetModal = $(this).data('target');
+        let desde = $(this).data('desde')?? 'externo';
+        let paddingRight = $('body').css('padding-right');
+
+        $('#modal-crear-producto').modal('hide');
+
+        $('#modal-crear-producto').on('hidden.bs.modal', function () {
+            $('body').addClass('modal-open').css('padding-right', paddingRight);
+            $('#modal-crear-producto').off('hidden.bs.modal');
+        });
+
+        $(targetModal).attr('data-desde', desde);
+    });
+
+    /*$('[id^="modal-"]').on('show.bs.modal', function () {
+        let desde = $(this).attr('data-desde');
+        $(this).find('.volver-modal-anterior').toggle(desde !== 'externo');
+    }); */
+
+    let modalStack = [];
+    $('[id^="modal-"]').on('show.bs.modal', function () {
+        const id = $(this).attr('id');
+
+        modalStack = modalStack.filter(modalId => modalId !== id);
+        modalStack.push(id);
+
+        const hayAnterior = modalStack.length > 1;
+
+        const $btnVolver = $(this).find('.volver-modal-anterior');
+        $btnVolver.prop('disabled', !hayAnterior);
+        console.log('Stack actualizado:', modalStack);
+    });
+
+    $('.volver-modal-anterior').on('click', function () {
+        const modalActual = $('.modal.show');
+        const idActual = modalActual.attr('id');
+
+        modalActual.modal('hide');
+
+        modalActual.on('hidden.bs.modal', function () {
+            modalStack.pop();
+
+            const idAnterior = modalStack[modalStack.length - 1];
+            console.log('index:'+idAnterior)
+            if (idAnterior) {
+                $('#' + idAnterior).modal('show');
+            }
+            modalActual.off('hidden.bs.modal');
+        });
+    });
+
     $('.ajax-form').on('submit', function (e) {
         e.preventDefault();
 
@@ -448,25 +506,35 @@ $(document).ready(function () {
         let tableId = form.data('table');
         let formData = form.serialize();
 
+        console.log(formData);
+
         $.ajax({
             url: actionUrl,
             method: 'POST',
             data: formData,
             success: function (response) {
                 let $alert = $('#alert-' + modalId);
-                $alert.removeClass('d-none alert-danger')
-                      .addClass('alert-success alert-dismissible fade show');
+                $alert.stop(true, true)
+                    .removeClass('d-none alert-danger')
+                    .addClass('alert-success alert-dismissible fade show')
+                    .hide()
+                    .fadeIn(500);
                 $alert.find('.alert-message').text(response.success);
 
                 setTimeout(function () {
-                    $alert.fadeOut(500);
+                    $alert.stop(true, true)
+                        .fadeOut(500)
+                        .queue(function(next) {
+                            $(this).addClass('d-none');
+                            next();
+                        });
                     // $alert.addClass('d-none'); viene siendo lo mismo pero sin transicion
                 }, 3000);
 
                 let nuevaOpcion = response.data;
                 if (selectName) {
                     let $select = $('select[name="' + selectName + '"]');
-                    if ($select.length) {
+                    if ($select.length && $select.data('model') === nuevaOpcion.model) {
                         $select.append(new Option(nuevaOpcion.label, nuevaOpcion.id));
                     }
                 }

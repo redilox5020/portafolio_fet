@@ -172,4 +172,4 @@ hr:not([size]) {
     overflow-wrap: break-word;
     word-break: break-word;
 }
-.form-control {height: auto !important;}
+.form-control {height: auto;}

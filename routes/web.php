@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RouteController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InvestigadorController;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -197,6 +198,30 @@ Route::middleware('auth')->group(function () {
             Route::put('/update-permissions', [RouteController::class, 'updatePermissions'])
                 ->middleware('can:admin-access')
                 ->name('routes.update-permissions');
+        });
+
+        Route::prefix('/productos')->group(function () {
+
+            Route::get('/', [ProductoController::class, 'index'])
+                ->name('productos.index');
+
+            Route::get('/{producto_id}/view', [ProductoController::class, 'show'])
+                ->name('productos.show');
+
+            Route::get('crear', [ProductoController::class, 'create'])
+                ->middleware('can:producto.create')
+                ->name('productos.create');
+
+            Route::post('crear', [ProductoController::class, 'store'])
+                ->middleware('can:producto.create')
+                ->name('productos.store');
+
+            Route::put('{producto_id}/actualizar', [ProductoController::class, 'update'])
+                ->name("productos.update");
+
+            Route::delete('/delete/{producto_id}', [ProductoController::class, 'destroy'])
+                ->middleware('can:producto.delete')
+                ->name('productos.delete');
         });
     });
 });

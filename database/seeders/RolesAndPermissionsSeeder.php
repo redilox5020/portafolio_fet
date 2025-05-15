@@ -43,6 +43,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'programa.edit',
             'programa.delete',
             'programa.view',
+
+            'producto.create',
+            'producto.edit',
+            'producto.delete',
+            'producto.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,14 +63,16 @@ class RolesAndPermissionsSeeder extends Seeder
                                     'tipologia.create', 'tipologia.edit', 'tipologia.view',
                                     'procedencia.create', 'procedencia.edit', 'procedencia.view',
                                     'procedencia.codigo.create', 'procedencia.codigo.edit', 'procedencia.codigo.view',
-                                    'programa.create', 'programa.edit', 'programa.view']);
+                                    'programa.create', 'programa.edit', 'programa.view',
+                                    'producto.create', 'producto.edit', 'producto.view']);
 
         $creator = Role::create(['name' => 'creator']);
         $creator->givePermissionTo(['proyecto.create', 'proyecto.view',
                                     'tipologia.create', 'tipologia.view',
                                     'procedencia.create', 'procedencia.view',
                                     'procedencia.codigo.create', 'procedencia.codigo.view',
-                                    'programa.create','programa.view']);
+                                    'programa.create','programa.view',
+                                    'producto.create', 'producto.view']);
 
 
     }

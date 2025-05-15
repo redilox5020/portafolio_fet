@@ -13,9 +13,15 @@
                     style="">
                     <div class="dropdown-header">Acciones:</div>
                     @if ($proyecto->investigadoresHistoricos->isNotEmpty())
-                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#historicoModal">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#modal-historico-investigadores">
                             <i class="fa-solid fa-clock-rotate-left fa-sm fa-fw mr-2 text-gray-400"></i>
                             Historico de Investigadores
+                        </a>
+                    @endif
+                    @if ($estadoColor === 'green')
+                        <a id="btn-abrir-modal-crear-producto" class="dropdown-item" href="#modal-crear-producto" data-toggle="modal">
+                            <i class="fa-solid fa-plus fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Crear Producto
                         </a>
                     @endif
                     <a class="dropdown-item" href="{{ route('proyectos.edit', $proyecto->codigo) }}">
@@ -108,6 +114,15 @@
             @endif
         </div>
     </div>
+
+    <div class="card border-info shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <h6 class="m-0 font-weight-bold">Productos en este proyecto:</h6>
+        </div>
+        @include('productos.index')
+
+    </div>
+
     <div class="card border-info shadow">
         <div class="card-header bg-info text-white">
             <h6 class="m-0 font-weight-bold">Ficheros en este proyecto:</h6>
@@ -127,8 +142,9 @@
             </div>
         @endif
     </div>
+
     @if ($proyecto->investigadoresHistoricos->isNotEmpty())
-        <div class="modal fade" id="historicoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        <div class="modal fade" id="modal-historico-investigadores" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
@@ -199,6 +215,7 @@
                         <button id="deleteButton" type="submit" class="btn btn-danger btn-sm">
                             Eliminar
                         </button>
+                        <button class="btn btn-secondary volver-modal-anterior" type="button" disabled>Volver</button>
 
                     </div>
 
@@ -206,9 +223,18 @@
             </div>
         </div>
     @endif
+
+    @if ($estadoColor === 'green')
+        @include('productos.create', [
+            'proyecto_id' => $proyecto->id,
+            'tipologias' => $tipologiasProducto,
+            'investigadores' => $proyecto->investigadores
+        ])
+    @endif
 @endsection
 @section('css')
     @vite('resources/css/mostrar_proyecto.css')
+    @stack('style')
 @endsection
 @section('scripts')
     <script>
@@ -224,4 +250,5 @@
         };
     </script>
     @vite('resources/js/mostrar_proyecto.js')
+    @stack("scripts")
 @endsection

@@ -28,9 +28,30 @@
                             <label for="sufijo">Sufijo</label>
                             <input class="form-control" type="text" name="sufijo" id="sufijo" required>
                         </div>
+                    @elseif ($modalId === 'tipologia')
+                    <div class="row">
+                        <label for="roles" class="col-sm-4 col-form-label pl-3">Elegir Modelo:</label>
+                        <div class="col-sm-8">
+                                <div class="form-check">
+                                    <input id="proyecto_model" class="form-check-input" type="radio" name="model_type" value="proyecto" checked>
+                                    <label for="proyecto_model" class="form-check-label">
+                                        Proyecto
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input id="producto_model" class="form-check-input" type="radio" name="model_type" value="producto">
+                                    <label for="producto_model" class="form-check-label">
+                                        Producto
+                                    </label>
+                                </div>
+                        </div>
+                    </div>
                     @endif
                 </div>
                 <div class="modal-footer">
+
+                    <button class="btn btn-secondary volver-modal-anterior" type="button" disabled>Volver</button>
+
                     <button class="btn btn-success" type="submit">Guardar</button>
                 </div>
             </form>

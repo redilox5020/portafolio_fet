@@ -26,6 +26,7 @@
                         <tr>
                             <th>Id</th>
                             <th>Opcion</th>
+                            <th>Modelo</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -78,6 +79,12 @@
                     {
                         data: 'opcion',
                         name: 'opcion',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'model_type',
+                        name: 'Modelo',
                         orderable: true,
                         searchable: true
                     },

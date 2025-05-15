@@ -12,7 +12,8 @@ class Tipologia extends Model
     public $timestamps = false;
 
     protected $fillable= [
-        'opcion'
+        'opcion',
+        'model_type'
     ];
 
     public function proyectos(): HasMany

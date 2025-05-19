@@ -330,23 +330,44 @@ class ProyectoController extends BaseDataTableController
         $proyecto = new Proyecto($proyectoData);
         $proyecto->generarCodigo();
 
-        // Subir PDF
-        if (isset($validatedData['pdf_file'])) {
-            try {
-                $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file'], $proyecto);
-            } catch (\Exception $e) {
-                return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
+        $creador = auth()->user();
+        $proyecto->creador()->associate($creador);
+        $proyecto->registered_by_name = $creador->name;
+        $proyecto->registered_by_email = $creador->email;
+
+        DB::beginTransaction();
+
+        try {
+            $proyecto->save();
+
+            // Subir PDF
+            if (isset($validatedData['pdf_file'])) {
+                $datosSubida = $uploader->subir($validatedData['pdf_file'], $proyecto);
+                $proyecto->archivos->create($datosSubida);
+                $proyecto->pdf_url = $datosSubida['url'];
+                $proyecto->save();
             }
+
+            // Agregar investigadores
+            $nuevosInvestigadores = $validatedData["investigadores_nombres"] ?? [];
+
+            $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, []);
+
+            DB::commit();
+            return redirect()->back()
+                ->with('success', 'Proyecto creado exitosamente');
+
+        }catch (\Exception $e){
+            DB::rollBack();
+
+            if (isset($datosSubida['file_id'])) {
+                $uploader->eliminar($datosSubida['file_id']);
+            }
+
+            return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
+
         }
-        $proyecto->save();
 
-        // Agregar investigadores
-        $nuevosInvestigadores = $validatedData["investigadores_nombres"] ?? [];
-
-        $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, []);
-
-        return redirect()->back()
-            ->with('success', 'Proyecto creado exitosamente');
     }
     public function edit($codigo){
         $proyecto = Proyecto::with('investigadores')->where('codigo', $codigo)->firstOrFail();
@@ -395,6 +416,11 @@ class ProyectoController extends BaseDataTableController
             $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
 
             $proyecto->fill($proyectoData);
+
+            $actualizador = auth()->user();
+            $proyecto->actualizador()->associate($actualizador);
+            $proyecto->last_modified_by_name = $actualizador->name;
+            $proyecto->last_modified_by_email = $actualizador->email;
 
             if ($proyecto->isDirty('fecha_inicio') || $proyecto->isDirty('programa_id') ||
                 $proyecto->isDirty('procedencia_codigo_id') || $proyecto->isDirty('tipologia_id')) {

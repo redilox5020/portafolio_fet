@@ -12,9 +12,9 @@ interface FileUploaderInterface
      *
      * @param UploadedFile $archivo
      * @param Proyecto $proyecto
-     * @return string URL segura del archivo subido.
+     * @return array datos del archivo subido.
      */
-    public function subir(UploadedFile $archivo, Proyecto $proyecto): string;
+    public function subir(UploadedFile $archivo, Proyecto $proyecto): array;
 
     /**
      * Obtiene los datos del archivo a partir de su URL.
@@ -31,4 +31,6 @@ interface FileUploaderInterface
      * @param string $nuevoNombre Nuevo nombre para el archivo.
      */
     public function renombrarArchivo(string $urlActual, string $nuevoNombre): string;
+
+    public function eliminar(string $publicId): void;
 }

@@ -25,6 +25,10 @@ class Proyecto extends Model
         'fecha_fin',
         'anio',
         'costo',
+        'registered_by_name',
+        'registered_by_email',
+        'last_modified_by_name',
+        'last_modified_by_email',
         'pdf_url'
     ];
 
@@ -202,6 +206,16 @@ class Proyecto extends Model
             ->orderByPivot('created_at', 'asc');
     }
 
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'registered_by');
+    }
+
+    public function actualizador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_modified_by');
+    }
+
     public function programa():  BelongsTo
     {
         return $this->belongsTo(Programa::class);
@@ -225,6 +239,11 @@ class Proyecto extends Model
     public function productos(): HasMany
     {
         return $this->hasMany(Producto::class);
+    }
+
+    public function archivos()
+    {
+        return $this->morphMany(Archivo::class, 'archivable');
     }
 
     protected static function boot()

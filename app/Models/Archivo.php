@@ -31,9 +31,9 @@ class Archivo extends Model
         return $this->driver;
     }
 
-    public function archivos()
+    public function archivable()
     {
-        return $this->morphMany(Archivo::class, 'archivable');
+        return $this->morphTo();
     }
 
     public function subidoPor()

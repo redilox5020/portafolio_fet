@@ -22,7 +22,7 @@ class PdfUploaderService implements FileUploaderInterface
         $this->maxSize = $maxSizeMB * 1024 * 1024;
     }
 
-    public function subir(?UploadedFile $archivo, Proyecto $proyecto): string
+    public function subir(?UploadedFile $archivo, Proyecto $proyecto): array
     {
         if (!$archivo->isValid()) {
             throw new Exception("El archivo PDF no es válido o está dañado.");
@@ -43,7 +43,15 @@ class PdfUploaderService implements FileUploaderInterface
             'context' => ['descripcion' => $proyecto->nombre]
         ]);
 
-        return $uploadResult->getSecurePath();
+        return [
+            'nombre_original' => $archivo->getClientOriginalName(),
+            'file_id' => $uploadResult->getPublicId(),
+            'url' => $uploadResult->getSecurePath(),
+            'mime_type' => $archivo->getClientMimeType(),
+            'tamanio' => $archivo->getSize(),
+            'descripcion' => $proyecto->nombre,
+            'subido_por' => auth()->id()
+        ];
     }
 
     public function getDataFile(string $url): array
@@ -89,6 +97,18 @@ class PdfUploaderService implements FileUploaderInterface
         }
     }
 
+    public function eliminar(string $publicId): void
+    {
+        try {
+            Cloudinary::destroy($publicId, [
+                'invalidate' => true
+            ]);
+        } catch (NotFound $e) {
+            throw new \Exception("El archivo no existe o ya fue eliminado de Cloudinary.");
+        } catch (\Exception $e) {
+            throw new \Exception("Error al eliminar el archivo en Cloudinary: " . $e->getMessage());
+        }
+    }
 
     private function extractPublicIdFromUrl($url): string
     {

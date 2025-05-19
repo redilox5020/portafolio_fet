@@ -343,7 +343,7 @@ class ProyectoController extends BaseDataTableController
             // Subir PDF
             if (isset($validatedData['pdf_file'])) {
                 $datosSubida = $uploader->subir($validatedData['pdf_file'], $proyecto);
-                $proyecto->archivos->create($datosSubida);
+                $proyecto->archivos()->create($datosSubida);
                 $proyecto->pdf_url = $datosSubida['url'];
                 $proyecto->save();
             }

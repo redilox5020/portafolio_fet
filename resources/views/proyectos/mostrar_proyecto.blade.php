@@ -28,7 +28,7 @@
                         <i class="fa-solid fa-pen-to-square fa-sm fa-fw mr-2 text-gray-400"></i>
                         Editar Proyecto
                     </a>
-                    <a class="dropdown-item delete-btn" data-id="{{ $proyecto->codigo }}" data-toggle="modal"
+                    <a class="dropdown-item delete-proyecto-btn" data-id="{{ $proyecto->codigo }}" data-toggle="modal"
                         data-target="#deleteModal" href="#">
                         <i class="fa-solid fa-trash fa-sm fa-fw mr-2 text-gray-400"></i>
                         Eliminar Proyecto

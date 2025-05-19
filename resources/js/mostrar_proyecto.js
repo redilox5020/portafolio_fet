@@ -50,7 +50,7 @@ function inicializarEventos() {
         }
     });
 
-    $(document).on('click', '.delete-btn', function (event) {
+    $(document).on('click', '.delete-proyecto-btn', function (event) {
         event.preventDefault();
 
         const userId = $(this).data('id');

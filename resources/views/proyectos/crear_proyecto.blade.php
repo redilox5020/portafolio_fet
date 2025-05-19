@@ -57,8 +57,8 @@
                         -- Selecciona un programa --
                     </option>
                     @foreach ($programas as $programa)
-                        <option value="{{ $programa->id }}" @selected(old('programa_id', $proyecto->programa->id ?? '') == $programa->id)>
-                            {{ $programa->nombre }}</option>
+                        <option value="{{ $programa->id }}" @selected(old('programa_id', $proyecto->programa->id ?? '') == $programa->id)
+                            >{{ $programa->nombre }}</option>
                     @endforeach
                 </select>
                 <button type="button" class="button" data-toggle="modal" data-target="#modal-programa"><i
@@ -108,7 +108,7 @@
             <div class="group-form input-group">
                 <label for="tipologia_id">Tipología:</label>
                 <select class="form-select @error('tipologia_id') is-invalid @enderror" id="tipologia_id"
-                    name="tipologia_id" required>
+                    name="tipologia_id" data-model="proyecto" required>
                     <option value="" disabled
                         {{ old('tipologia_id', $proyecto->tipologia->id ?? '') == '' ? 'selected' : '' }}>
                         -- Selecciona una tipología --

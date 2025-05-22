@@ -124,12 +124,23 @@ class ProductoController extends BaseDataTableController
             ->with('success', 'Producto actualizado exitosamente');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, int $id)
     {
         $producto = Producto::findOrFail($id);
+        if ($producto->archivos()->exists()) {
+            if (!$request->ajax()) {
+                return redirect()->back()->withErrors(['No se puede eliminar el producto porque tiene archivos asociados.']);
+            }
+            return response()->json([
+                'error' => 'No se puede eliminar el producto porque tiene archivos asociados.'
+            ], 422);
+        }
 
         $producto->delete();
 
+        if (!$request->ajax()) {
+            return redirect()->back()->with('success', 'Producto eliminado exitosamente');
+        }
         return response()->json([
             'success' => 'Producto eliminado exitosamente'
         ]);

@@ -11,6 +11,7 @@ class Archivo extends Model
     use HasFactory;
 
     protected $fillable = [
+        'driver',
         'nombre_original',
         'file_id',
         'url',

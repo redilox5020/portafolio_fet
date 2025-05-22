@@ -24,6 +24,10 @@
                             Crear Producto
                         </a>
                     @endif
+                    <a class="dropdown-item" href="#modal-subir-archivo" data-toggle="modal">
+                        <i class="fa-solid fa-upload fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Subir archivo
+                    </a>
                     <a class="dropdown-item" href="{{ route('proyectos.edit', $proyecto->codigo) }}">
                         <i class="fa-solid fa-pen-to-square fa-sm fa-fw mr-2 text-gray-400"></i>
                         Editar Proyecto
@@ -123,25 +127,10 @@
 
     </div>
 
-    <div class="card border-info shadow">
-        <div class="card-header bg-info text-white">
-            <h6 class="m-0 font-weight-bold">Ficheros en este proyecto:</h6>
-        </div>
-        @if ($proyecto->pdf_url)
-            <div id="loader-container" style="display: none;">
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border text-primary" role="status">
-                    </div>
-                </div>
-                <p class="text-center mt-2">Cargando metadatos del PDF...</p>
-            </div>
-            <div id="pdf-metadata-container" class="card-body p-0" data-url="{{ $proyecto->pdf_url }}"></div>
-        @else
-            <div class="card-body p-3">
-                No hay ficheros asociados a este proyecto.
-            </div>
-        @endif
-    </div>
+    @include('archivos.listar', [
+        'modelType' => 'proyecto',
+        'model' => $proyecto
+    ])
 
     @if ($proyecto->investigadoresHistoricos->isNotEmpty())
         <div class="modal fade" id="modal-historico-investigadores" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -231,6 +220,10 @@
             'investigadores' => $proyecto->investigadores
         ])
     @endif
+    @include('archivos.subir', [
+        'modelType' => 'proyecto',
+        'modelId' => $proyecto->id
+    ])
 @endsection
 @section('css')
     @vite('resources/css/mostrar_proyecto.css')

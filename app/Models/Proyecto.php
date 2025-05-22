@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\HasArchivos;
 
 class Proyecto extends Model
 {
-    use HasFactory;
+    use HasFactory, HasArchivos;
 
     protected $fillable = [
         'codigo',
@@ -239,11 +240,6 @@ class Proyecto extends Model
     public function productos(): HasMany
     {
         return $this->hasMany(Producto::class);
-    }
-
-    public function archivos()
-    {
-        return $this->morphMany(Archivo::class, 'archivable');
     }
 
     protected static function boot()

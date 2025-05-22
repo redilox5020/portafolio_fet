@@ -3,7 +3,8 @@
 namespace App\Providers;
 use Illuminate\Support\Str;
 use Illuminate\Support\ServiceProvider;
-use App\Services\PdfUploaderService;
+use App\Services\CloudinaryUploaderService;
+use App\Services\LocalStorageUploaderService;
 use App\Contracts\FileUploaderInterface;
 use Carbon\Carbon;
 class AppServiceProvider extends ServiceProvider
@@ -13,8 +14,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(FileUploaderInterface::class, function ($app) {
-            return new PdfUploaderService();
+        $this->app->bind(CloudinaryUploaderService::class, function ($app) {
+            return new CloudinaryUploaderService(
+                config('filesystems.cloudinary_folder', 'pdfs'),
+                config('filesystems.max_file_size_mb', 10)
+            );
+        });
+
+        $this->app->bind(LocalStorageUploaderService::class, function ($app) {
+            return new LocalStorageUploaderService(
+                config('filesystems.local_folder', 'pdfs'),
+                config('filesystems.max_file_size_mb', 10),
+                config('filesystems.public_disk', 'public')
+            );
         });
     }
 
@@ -25,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
     {
         setlocale(LC_TIME, 'es_ES.UTF-8');
         Carbon::setLocale('es');
-        
+
         Str::macro('toReadableSize', function ($bytes) {
             if (!is_numeric($bytes)) {
                 return 'N/A';

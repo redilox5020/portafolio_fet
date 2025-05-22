@@ -12,6 +12,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RouteController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InvestigadorController;
+use App\Http\Controllers\ArchivoController;
 use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
@@ -43,9 +44,22 @@ Route::middleware('auth')->group(function () {
         ->name('inicio');
 
     Route::prefix('/admin')->group(function () {
+
+        Route::group(['prefix' => 'archivos', 'as' => 'archivos.'], function () {
+            Route::get('/{modelType}/{modelId}', [ArchivoController::class, 'obtenerMetadatos'])
+                ->name('obtener.metadatos');
+
+            Route::post('/{modelType}/{modelId}', [ArchivoController::class, 'subirArchivo'])
+                ->name('subir');
+
+            Route::delete('/{fileId}', [ArchivoController::class, 'eliminarArchivo'])
+                ->name('eliminar');
+
+            Route::put('/{fileId}/renombrar', [ArchivoController::class, 'renombrarArchivo'])
+                ->name('renombrar');
+        });
+
         Route::prefix('/proyectos')->group(function () {
-            Route::get('/pdf/metadatos', [ProyectoController::class, 'obtenerMetadatosPdf'])
-                ->name('pdf.metadatos');
             // Filters
             Route::get('/', [ProyectoController::class, 'index'])
                 ->name('proyectos');

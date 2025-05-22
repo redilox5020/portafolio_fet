@@ -206,6 +206,7 @@
                     <label for="pdf_file">Anexar PDF</label>
                     <input class="form-control @error('pdf_file') is-invalid @enderror" type="file" name="pdf_file"
                         id="pdf_file" accept="application/pdf">
+                    <input class="form-control" type="text" name="descripcion_archivo" placeholder="Descripción" />
                     @error('pdf_file')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -218,10 +219,20 @@
                 </div>
 
             </div>
+            <div class="group-form">
+                <div class="input-group">
+                    <label for="storage_type" class="form-label">Destino del archivo:</label>
+                    <select name="driver" id="storage_type" class="form-select" required>
+                        <option value="cloudinary">Cloudinary (proveedor externo)</option>
+                        <option value="local">Almacenamiento local (laravel storage)</option>
+                    </select>
+                </div>
+                <div class="form-text text-muted">
+                    Seleccione dónde desea almacenar el archivo PDF del proyecto
+                </div>
+            </div>
             <div class="group-form d-flex justify-content-between align-items-center">
-
-                <button class="btn btn-success" type="submit">{{ isset($proyecto) ? 'Actualizar' : 'Crear' }}
-                    Proyecto</button>
+                <button class="btn btn-success" type="submit">{{ isset($proyecto) ? 'Actualizar' : 'Crear' }} Proyecto</button>
                 <a href="{{ route('inicio') }}"><i class="fa-solid fa-house"></i></a>
             </div>
         </form>

@@ -1,5 +1,8 @@
 import { removerFilas, removerFilasPorPivot, deshabilitarControles } from './utils/tablaUtils.js';
 import { asignarActionAlFormulario } from './utils/modalUtils.js';
+import { cargarMetadatosPDF, subirPdf } from './archivos.js';
+import { csrfToken, eliminarHistoricoRoute, reactivarRoute } from './utils/routeUtils.js';
+import { mostrarAlerta } from './utils/toastUtils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const $lucesDelCirculo = document.querySelectorAll('.luces-circulo');
@@ -33,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function inicializarEventos() {
+    $('#formSubirArchivo').on('submit', function (e) {
+        e.preventDefault();
+        const actionUrl = $(this).attr('action');
+        subirPdf(this, actionUrl);
+
+    });
 
     $(document).on('click', '.pagination a', function(e) {
         e.preventDefault();
@@ -153,43 +162,6 @@ function reactivarSeleccionados() {
     });
 }
 
-function mostrarAlerta(tipo, mensaje) {
-    const $alert = $('#alert');
-    $alert.removeClass('d-none alert-success alert-danger')
-        .addClass(`alert-${tipo} alert-dismissible fade show`);
-    $alert.find('.alert-message').text(mensaje);
-    setTimeout(() => $alert.fadeOut(500), 3000);
-}
-
-function mostrarToast(tipo, mensaje, autohide = true, startNew = false, duracion = 5000) {
-    if (startNew) $('#toast-container').empty();
-
-    const iconos = {
-        success: '✅', warning: '⚠️', danger: '❌', info: 'ℹ️'
-    };
-    const colores = {
-        success: '#e4ffc4', warning: '#FFEB3B', danger: '#dc3545', info: '#17a2b8'
-    };
-
-    const id = `toast-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const toastHTML = `
-        <div id="${id}" class="toast font-weight-bold text-gray-900 mb-2" role="alert"
-            data-delay="${duracion}" data-autohide="${autohide}"
-            style="background-color: ${colores[tipo]} !important;">
-            <div class="toast-header text-gray-900" style="background-color: ${colores[tipo]} !important;">
-                <strong class="mr-auto">${iconos[tipo]} ${tipo.toUpperCase()}</strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">${mensaje}</div>
-        </div>`;
-
-    $('#toast-container').append(toastHTML);
-    $(`#${id}`).toast('show').on('hidden.bs.toast', function () {
-        $(this).remove();
-    });
-}
 let index = parseInt(indexActual()) ?? 1;
 function insertarActivos(investigadores) {
     investigadores.forEach((inv) => {
@@ -220,52 +192,6 @@ function manejarErrores(xhr) {
     } else {
         mostrarAlerta('danger', 'Error inesperado.');
     }
-}
-
-function cargarMetadatosPDF() {
-    console.log("🔵 Cargando metadatos PDF");
-    const contenedor = $('#pdf-metadata-container');
-    const pdfUrl = contenedor.data('url');
-    if (!pdfUrl) return;
-
-    $('#loader-container').show();
-    contenedor.hide();
-
-    let loaderTimeout = setTimeout(() => {console.log("🔵 Loader mostrado");$('#loader-container').fadeIn(200)}, 300);
-
-    $.ajax({
-        url: 'pdf/metadatos',
-        method: 'GET',
-        headers: { 'X-PDF-Url': pdfUrl },
-        success: function (res) {
-            contenedor.html(`
-                <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                        <thead><tr>
-                            <th>Fichero</th><th>Descripción</th><th>Tamaño</th><th>Formato</th><th></th>
-                        </tr></thead>
-                        <tbody><tr>
-                            <td>${res.nombre}</td>
-                            <td>${res.descripcion}</td>
-                            <td>${res.tamaño}</td>
-                            <td>Adobe PDF</td>
-                            <td><a href="${res.url}" class="btn btn-success btn-sm">Descargar</a></td>
-                        </tr></tbody>
-                    </table>
-                </div>
-            `);
-        },
-        error: () => contenedor.html(`<div class="alert alert-danger">Error al cargar metadatos.</div>`),
-        complete: function () {
-            console.log("🔵 complete cargado");
-            /* Evita que el loader se muestre si la carga es rápida, ejemplo cuando los metadatos solicitados ya estan en caché
-            un caso practico cuando salimos a otra ruta y regresamos, el navegador ya tiene la respuesta. */
-            clearTimeout(loaderTimeout);
-            $('#loader-container').hide();
-            console.log("🔵 Loader ocultado");
-            contenedor.show();
-        }
-    });
 }
 
 function cargarPaginaInvestigadores(url) {
@@ -300,18 +226,7 @@ function cargarPaginaInvestigadores(url) {
     });
 }
 
-function eliminarHistoricoRoute() {
-    return window.appData.rutas.eliminarRegistroHistorico;
-}
-
-function reactivarRoute() {
-    return window.appData.rutas.reactivar;
-}
-
-function csrfToken() {
-    return window.appData.csrf;
-}
-
 function indexActual() {
     return window.appData.indexActual;
 }
+

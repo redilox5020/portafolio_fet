@@ -11,7 +11,7 @@ use App\Models\Proyecto;
 use App\Http\Controllers\DataTable\BaseDataTableController;
 use DB;
 use Carbon\Carbon;
-use App\Contracts\FileUploaderInterface;
+use App\Enums\FileDriver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
@@ -40,6 +40,7 @@ class ProyectoController extends BaseDataTableController
             'objetivo_general',
             'investigadores.nombre',
             'programa.nombre',
+            'registered_by_name'
         ];
 
         $this->withRelations = [
@@ -253,31 +254,6 @@ class ProyectoController extends BaseDataTableController
 
     }
 
-    public function obtenerMetadatosPdf(Request $request, FileUploaderInterface $uploader){
-        $pdfUrl = $request->header('X-PDF-Url');
-
-        if (!$pdfUrl) {
-            return response()->json(['error' => 'URL no proporcionada'], 400);
-        }
-
-            $data = null;
-
-            try {
-                $data = $uploader->getDataFile($pdfUrl);
-            } catch (\Exception $e) {
-                \Log::warning("Error al acceder al PDF en Cloudinary: " . $e->getMessage());
-
-                $data = [
-                    'nombre' => 'No disponible',
-                    'descripcion' => $e->getMessage(),
-                    'tamaño' => 'N/A',
-                    'url'=>$pdfUrl
-                ];
-            }
-            return response()->json($data);
-    }
-
-
     public function create(){
         $procedencias = Procedencia::all();
         $procedenciaCodigos = ProcedenciaCodigo::all();
@@ -288,7 +264,7 @@ class ProyectoController extends BaseDataTableController
         return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas'));
     }
 
-    public function store(Request $request, FileUploaderInterface $uploader){
+    public function store(Request $request){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
             'objetivo_general'=>'required|string|max:2000',
@@ -298,7 +274,9 @@ class ProyectoController extends BaseDataTableController
             'tipologia_id'=>'required|integer|exists:tipologias,id',
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
-            'pdf_file' => 'nullable|file',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+            'descripcion_archivo' => 'required_with:pdf_file|string|max:255',
+            'driver' => 'required|string|in:cloudinary,local',
             'costo' => [
                 'required',
                 'numeric',
@@ -326,7 +304,10 @@ class ProyectoController extends BaseDataTableController
         // Eliminar anio en caso de se inserte fuera del frontend
         unset($validatedData['anio']);
 
-        $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
+        $driver = FileDriver::tryFrom($validatedData['driver']);
+        unset($validatedData['driver']);
+
+        $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file', 'descripcion_archivo'])->toArray();
         $proyecto = new Proyecto($proyectoData);
         $proyecto->generarCodigo();
 
@@ -342,7 +323,9 @@ class ProyectoController extends BaseDataTableController
 
             // Subir PDF
             if (isset($validatedData['pdf_file'])) {
+                $uploader = \App\Factories\FileUploaderFactory::create($driver);
                 $datosSubida = $uploader->subir($validatedData['pdf_file'], $proyecto);
+                $datosSubida['descripcion'] = $validatedData['descripcion_archivo'];
                 $proyecto->archivos()->create($datosSubida);
                 $proyecto->pdf_url = $datosSubida['url'];
                 $proyecto->save();
@@ -379,7 +362,7 @@ class ProyectoController extends BaseDataTableController
 
         return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas', 'proyecto'));
     }
-    public function update(Request $request, Proyecto $proyecto, FileUploaderInterface $uploader){
+    public function update(Request $request, Proyecto $proyecto){
         $validatedData = $request->validate([
             'nombre'=>'required|string|max:255',
             'objetivo_general'=>'required|string|max:2000',
@@ -390,6 +373,8 @@ class ProyectoController extends BaseDataTableController
             'fecha_inicio'=>'required|date',
             'fecha_fin'=>'required|date|after:fecha_inicio',
             'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+            'descripcion_archivo' => 'required_with:pdf_file|string|max:255',
+            'driver' => 'required|string|in:cloudinary,local',
             'costo' => [
                 'required',
                 'numeric',
@@ -402,12 +387,19 @@ class ProyectoController extends BaseDataTableController
             'investigadores_nombres.*' => 'nullable|string|max:255',
         ]);
 
+        $driver = FileDriver::tryFrom($validatedData['driver']);
+        unset($validatedData['driver']);
+
         DB::beginTransaction();
         try {
             // Subir PDF
             if (isset($validatedData['pdf_file'])) {
                 try {
-                    $validatedData['pdf_url'] = $uploader->subir($validatedData['pdf_file'],  $proyecto);
+                    $uploader = \App\Factories\FileUploaderFactory::create($driver);
+                    $datosSubida = $uploader->subir($validatedData['pdf_file'], $proyecto);
+                    $datosSubida['descripcion'] = $validatedData['descripcion_archivo'];
+                    $proyecto->archivos()->create($datosSubida);
+                    $validatedData['pdf_url'] = $datosSubida['url'];
                 } catch (\Exception $e) {
                     return back()->withErrors(['pdf_file' => $e->getMessage()])->withInput();
                 }
@@ -450,7 +442,18 @@ class ProyectoController extends BaseDataTableController
     }
 
     public function destroy(String $codigo){
-        DB::delete('delete from proyectos where codigo = ?', [$codigo]);
+        $proyecto = Proyecto::where('codigo', $codigo)->firstOrFail();
+        $archivos = $proyecto->archivos;
+        $proyecto->archivos()->delete();
+        $proyecto->delete();
+        foreach ($archivos as $archivo) {
+            try {
+                $uploader = \App\Factories\FileUploaderFactory::create($archivo->driver);
+                $uploader->eliminar($archivo->file_id);
+            } catch (\Exception $e) {
+                Log::error("Error al eliminar el archivo: " . $e->getMessage());
+            }
+        }
         return redirect()->route('proyectos')->with('success', "Proyecto eliminado correctamente");
     }
 }

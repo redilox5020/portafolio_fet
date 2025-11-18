@@ -320,9 +320,9 @@
 
                 @include('components.opcion-select', [
                     'modalId' => 'procedenciaCodigo',
-                    'title' => 'Procedencia_Codigo',
+                    'title' => 'Detalle',
                     'routeName' => 'procedencia.codigo',
-                    'selectName' => 'procedencia_codigo_id',
+                    'selectName' => 'procedencia_detalle_id',
                     'dataTableId' => 'procedenciaCodigoTable'
                 ])
 
@@ -414,176 +414,8 @@ aria-hidden="true">
 
 <!-- Custom scripts for all pages-->
 <script src="{{asset("js/sb-admin-2.min.js")}}"></script>
-<script>
-$(document).ready(function () {
-    $.fn.tooltip.Constructor.Default = {
-        ...$.fn.tooltip.Constructor.Default,
-        trigger: 'hover',
-        delay: { show: 150, hide: 100 },
-        boundary: 'window'
-    };
 
-    const initTooltips = (context) => {
-        $(context).find('[data-toggle="tooltip"]').each(function() {
-            const $el = $(this);
-            $el.tooltip('dispose');
-            $el.tooltip({
-                title: $el.attr('data-original-title') || $el.attr('title')
-            });
-        });
-    };
-
-    initTooltips(document);
-
-    $(document).on('draw.dt', function(e, settings) {
-        setTimeout(() => initTooltips(settings.nTable), 50);
-    });
-
-    $(document).on('mouseenter', '[data-toggle="tooltip"]', function() {
-        $(this).tooltip('show');
-    });
-
-    /*
-        Los siguientes eventos son necesario al momento de alternar entre modales en bootstrap 4.6;
-        Desde bootstrap 5.2 se hace nativamente con la combinacion de atributos:
-        data-bs-toggle, data-bs-target
-    */
-    $('[data-target="#modal-tipologia"]').on('click', function () {
-        let targetModal = $(this).data('target');
-        let desde = $(this).data('desde')?? 'externo';
-        let paddingRight = $('body').css('padding-right');
-
-        $('#modal-crear-producto').modal('hide');
-
-        $('#modal-crear-producto').on('hidden.bs.modal', function () {
-            $('body').addClass('modal-open').css('padding-right', paddingRight);
-            $('#modal-crear-producto').off('hidden.bs.modal');
-        });
-
-        $(targetModal).attr('data-desde', desde);
-    });
-
-    /*$('[id^="modal-"]').on('show.bs.modal', function () {
-        let desde = $(this).attr('data-desde');
-        $(this).find('.volver-modal-anterior').toggle(desde !== 'externo');
-    }); */
-
-    let modalStack = [];
-    $('[id^="modal-"]').on('show.bs.modal', function () {
-        const id = $(this).attr('id');
-
-        modalStack = modalStack.filter(modalId => modalId !== id);
-        modalStack.push(id);
-
-        const hayAnterior = modalStack.length > 1;
-
-        const $btnVolver = $(this).find('.volver-modal-anterior');
-        $btnVolver.prop('disabled', !hayAnterior);
-        console.log('Stack actualizado:', modalStack);
-    });
-
-    $('.volver-modal-anterior').on('click', function () {
-        const modalActual = $('.modal.show');
-        const idActual = modalActual.attr('id');
-
-        modalActual.modal('hide');
-
-        modalActual.on('hidden.bs.modal', function () {
-            modalStack.pop();
-
-            const idAnterior = modalStack[modalStack.length - 1];
-            console.log('index:'+idAnterior)
-            if (idAnterior) {
-                $('#' + idAnterior).modal('show');
-            }
-            modalActual.off('hidden.bs.modal');
-        });
-    });
-
-    $('.ajax-form').on('submit', function (e) {
-        e.preventDefault();
-
-        let form = $(this);
-        let actionUrl = form.attr('action');
-        let modalId = form.data('modal');
-        let selectName = form.data('select');
-        let tableId = form.data('table');
-        let formData = form.serialize();
-
-        console.log(formData);
-
-        $.ajax({
-            url: actionUrl,
-            method: 'POST',
-            data: formData,
-            success: function (response) {
-                let $alert = $('#alert-' + modalId);
-                $alert.stop(true, true)
-                    .removeClass('d-none alert-danger')
-                    .addClass('alert-success alert-dismissible fade show')
-                    .hide()
-                    .fadeIn(500);
-                $alert.find('.alert-message').text(response.success);
-
-                setTimeout(function () {
-                    $alert.stop(true, true)
-                        .fadeOut(500)
-                        .queue(function(next) {
-                            $(this).addClass('d-none');
-                            next();
-                        });
-                    // $alert.addClass('d-none'); viene siendo lo mismo pero sin transicion
-                }, 3000);
-
-                let nuevaOpcion = response.data;
-                if (selectName) {
-                    let $select = $('select[name="' + selectName + '"]');
-                    if ($select.length && $select.data('model') === nuevaOpcion.model) {
-                        $select.append(new Option(nuevaOpcion.label, nuevaOpcion.id));
-                    }
-                }
-                if (tableId && $.fn.DataTable && $.fn.DataTable.isDataTable('#' + tableId)) {
-                    $('#' + tableId).DataTable().ajax.reload(null, false, ()=>{
-                        initTooltips('#' + tableId);
-                    });
-                }
-                form[0].reset();
-            },
-            error: function (xhr) {
-                let $alert = $('#alert-' + modalId);
-                $alert.removeClass('d-none alert-success')
-                      .addClass('alert-danger alert-dismissible fade show');
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let errorMessages = '';
-                    $.each(errors, function (key, value) {
-                        errorMessages += value + '\n';
-                    });
-                    $alert.find('.alert-message').text(errorMessages);
-                } else {
-                    $alert.find('.alert-message').text('Error en la petición AJAX');
-                }
-            }
-        });
-    });
-
-    // ocultar los alert despues de 3 segundos
-    let $alert = $('#session-alert');
-    if ($alert.length) {
-        /*
-        Se puede enviar este callback en caso de querer borrar el nodo
-        en caso contrario se establece display: none;
-
-        function () {
-            $(this).remove();
-        }
-        */
-        setTimeout(function () {
-            $alert.fadeOut(500);
-        }, 3000);
-    }
-});
-</script>
+@vite(['resources/js/admin/dashboard.js'])
 
 @yield("scripts")
 <script src="{{ asset('js/modal-accessibility.js') }}"></script>

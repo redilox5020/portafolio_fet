@@ -11,4 +11,13 @@ class ProcedenciaController extends BaseSelectController
         $this->model = Procedencia::class;
         parent::__construct();
     }
+
+    public function opciones()
+    {
+        $procedencias = Procedencia::select('id', 'opcion')
+            ->orderBy('opcion')
+            ->get();
+
+        return response()->json($procedencias);
+    }
 }

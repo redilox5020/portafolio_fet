@@ -12,10 +12,19 @@ class Investigador extends Model
 
     protected $table = 'investigadores';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
-        'nombre'
+        'nombre',
+        'email',
+        'tipo_documento',
+        'documento',
+        'telefono',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function proyectos(): BelongsToMany

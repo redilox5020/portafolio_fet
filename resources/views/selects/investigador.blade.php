@@ -1,8 +1,23 @@
 @extends('layouts.dashboard_admin')
 @section('main')
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h3 class="h3 mb-2 text-gray-800">Investigadores</h3>
+
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-800"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink"
+                    style="">
+                    <div class="dropdown-header">Acciones:</div>
+                    <a id="btn-abrir-modal-crear-investigador" class="dropdown-item" href="#modal-crear-investigador" data-toggle="modal">
+                        <i class="fa-solid fa-plus fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Crear Investigador
+                    </a>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             @if ($errors->any())
@@ -26,6 +41,9 @@
                         <tr>
                             <th>Id</th>
                             <th>Nombre</th>
+                            <th>Documento</th>
+                            <th>Correo</th>
+                            <th>Telefono</th>
                             <th>Proyectos</th>
                             <th>Acciones</th>
                         </tr>
@@ -37,6 +55,7 @@
             <a href="{{ route('inicio') }}" class="btn btn-secondary mt-3">Volver al inicio</a>
         </div>
     </div>
+    @include('investigadores.create')
 @endsection
 @section('css')
     <link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
@@ -79,6 +98,24 @@
                     {
                         data: 'nombre',
                         name: 'nombre',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'documento',
+                        name: 'documento',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'email',
+                        name: 'email',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'telefono',
+                        name: 'telefono',
                         orderable: true,
                         searchable: true
                     },
@@ -142,4 +179,5 @@
     </script>
     <!-- Page level custom scripts -->
     <script src="{{ asset('js/demo/datatables-demo.js') }}"></script>
+    @stack("scripts")
 @endsection

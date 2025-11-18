@@ -2,7 +2,7 @@ import { removerFilas, removerFilasPorPivot, deshabilitarControles } from './uti
 import { asignarActionAlFormulario } from './utils/modalUtils.js';
 import { cargarMetadatosPDF, subirPdf } from './archivos.js';
 import { csrfToken, eliminarHistoricoRoute, reactivarRoute } from './utils/routeUtils.js';
-import { mostrarAlerta } from './utils/toastUtils.js';
+import { mostrarAlerta, mostrarToast } from './utils/toastUtils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const $lucesDelCirculo = document.querySelectorAll('.luces-circulo');

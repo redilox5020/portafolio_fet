@@ -46,6 +46,20 @@
                                 </div>
                         </div>
                     </div>
+                    @elseif ($modalId === 'procedenciaCodigo')
+                    <div class="group-form input-group">
+                        <label for="procedencia_id_modal">Procedencia:</label>
+                        <select class="form-select"
+                                id="procedencia_id_modal"
+                                name="procedencia_id"
+                                data-endpoint="{{ route('procedencia.opciones') }}"
+                                required>
+                            <option value="" disabled selected>-- Selecciona una procedencia --</option>
+                        </select>
+                        <small class="form-text text-muted d-none" id="procedencia-loading">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando opciones...
+                        </small>
+                    </div>
                     @endif
                 </div>
                 <div class="modal-footer">

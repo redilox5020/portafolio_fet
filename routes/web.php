@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TipologiaController;
 use App\Http\Controllers\ProcedenciaController;
-use App\Http\Controllers\ProcedenciaCodigoController;
+use App\Http\Controllers\ProcedenciaDetalleController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
@@ -129,6 +129,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ProcedenciaController::class, 'index'])
                 ->name('procedencia.index');
 
+            Route::get('/opciones', [ProcedenciaController::class, 'opciones'])->name('procedencia.opciones');
+
             Route::post('crear', [ProcedenciaController::class, 'store'])
                 ->middleware('can:procedencia.create')
                 ->name('procedencia.store');
@@ -139,14 +141,16 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('/procedencia-codigos')->group(function () {
-            Route::get('/', [ProcedenciaCodigoController::class, 'index'])
+            Route::get('/', [ProcedenciaDetalleController::class, 'index'])
                 ->name('procedencia.codigo.index');
 
-            Route::post('crear', [ProcedenciaCodigoController::class, 'store'])
+            Route::get('/{procedencia}', [ProyectoController::class, 'getProcedenciaDetalles']);
+
+            Route::post('crear', [ProcedenciaDetalleController::class, 'store'])
                 ->middleware('can:procedencia.codigo.create')
                 ->name('procedencia.codigo.store');
 
-            Route::delete('/delete/{procedencia_codigo_id}', [ProcedenciaCodigoController::class, 'destroy'])
+            Route::delete('/delete/{procedencia_codigo_id}', [ProcedenciaDetalleController::class, 'destroy'])
                 ->middleware('can:procedencia.codigo.delete')
                 ->name('procedencia.codigo.delete');
         });
@@ -181,6 +185,18 @@ Route::middleware('auth')->group(function () {
         Route::prefix('/investigadores')->group(function () {
             Route::get('/', [InvestigadorController::class, "index"])
                 ->name('investigador.index');
+
+            Route::get('/search', [InvestigadorController::class, 'search'])
+                ->name('investigador.search');
+
+            Route::get('/{investigador_id}/view', [InvestigadorController::class, 'show'])
+                ->name('investigador.show');
+
+            Route::post('crear', [InvestigadorController::class, 'store'])
+                ->name('investigador.store');
+
+            Route::put('{investigador_id}/actualizar', [InvestigadorController::class, 'update'])
+                ->name("investigador.update");
 
             Route::delete('/delete/{investigador_id}', [InvestigadorController::class, 'destroy'])
                 ->name('investigador.delete');

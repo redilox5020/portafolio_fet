@@ -40,11 +40,19 @@ abstract class BaseSelectController extends BaseDataTableController
             return response()->json([
                 'success' => 'Registro creado exitosamente',
                 'data' => [
-                    'id' => $item->id,
-                    'label' => $item->{$this->columns[1]},
-                    ...($this->columns[2] === 'model_type' ? ['model' => $item->{$this->columns[2]}] : []),
+                        'id' => $item->id,
+                        'label' => $item->{$this->columns[1]},
+                    ] + (
+                        isset($this->columns[2]) && $this->columns[2] === 'model_type'
+                            ? ['model' => $item->{$this->columns[2]}]
+                            : (
+                                isset($this->columns[2]) && $this->columns[2] === 'procedencia_id'
+                                    ? ['parent_id' => $item->{$this->columns[2]}]
+                                    : []
+                            )
+                    ),
                 ]
-            ]);
+            );
         }
 
         return redirect()->back()

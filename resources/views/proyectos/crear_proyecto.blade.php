@@ -69,42 +69,41 @@
             </div>
             <div class="group-form input-group">
                 <label for="procedencia_id">Procedencia:</label>
-                <select class="form-select @error('procedencia_id') is-invalid @enderror" id="procedencia_id"
-                    name="procedencia_id" required>
-                    <option value="" disabled
-                        {{ old('procedencia_id', $proyecto->procedencia->id ?? '') == '' ? 'selected' : '' }}>
-                        -- Selecciona una procedencia --
-                    </option>
+                <select class="form-select @error('procedencia_id') is-invalid @enderror"
+                        id="procedencia_id" name="procedencia_id" required>
+                    <option value="" disabled selected>-- Selecciona una procedencia --</option>
                     @foreach ($procedencias as $procedencia)
-                        <option value="{{ $procedencia->id }}" @selected(old('procedencia_id', $proyecto->procedencia->id ?? '') == $procedencia->id)>
-                            {{ $procedencia->opcion }}</option>
+                        <option value="{{ $procedencia->id }}"
+                            @selected(old('procedencia_id', $proyecto->procedencia_id ?? '') == $procedencia->id)>
+                            {{ $procedencia->opcion }}
+                        </option>
                     @endforeach
                 </select>
-                <button type="button" class="button" data-toggle="modal" data-target="#modal-procedencia"><i
-                        class="fa-solid fa-plus"></i></button>
+                <button type="button" class="button" data-toggle="modal" data-target="#modal-procedencia">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
                 @error('procedencia_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
             <div class="group-form input-group">
-                <label for="procedencia_codigo_id">Procedencia Código:</label>
-                <select class="form-select @error('procedencia_codigo_id') is-invalid @enderror" id="procedencia_codigo_id"
-                    name="procedencia_codigo_id" required>
-                    <option value="" disabled
-                        {{ old('procedencia_codigo_id', $proyecto->procedenciaCodigo->id ?? '') == '' ? 'selected' : '' }}>
-                        -- Selecciona un codigo de procedencia --
-                    </option>
-                    @foreach ($procedenciaCodigos as $procedenciaCodigo)
-                        <option value="{{ $procedenciaCodigo->id }}" @selected(old('procedencia_codigo_id', $proyecto->procedenciaCodigo->id ?? '') == $procedenciaCodigo->id)>
-                            {{ $procedenciaCodigo->opcion }}</option>
-                    @endforeach
+                <label for="procedencia_detalle_id">Detalle procedencia:</label>
+                <select class="form-select @error('procedencia_codigo_id') is-invalid @enderror"
+                        id="procedencia_detalle_id"
+                        name="procedencia_detalle_id"
+                        data-old-value="{{ old('procedencia_detalle_id', $proyecto->procedencia_detalle_id ?? '') }}"
+                        data-parent="procedencia_id" required disabled>
+                    <option value="" disabled selected>-- Primero selecciona una procedencia --</option>
                 </select>
-                <button type="button" class="button" data-toggle="modal" data-target="#modal-procedenciaCodigo"><i
-                        class="fa-solid fa-plus"></i></button>
+                <button type="button" class="button" data-toggle="modal" data-target="#modal-procedenciaCodigo">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
                 @error('procedencia_codigo_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+
             <div class="group-form input-group">
                 <label for="tipologia_id">Tipología:</label>
                 <select class="form-select @error('tipologia_id') is-invalid @enderror" id="tipologia_id"
@@ -124,57 +123,67 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            @php
-                $investigadoresOld = old('investigadores_nombres', []);
-            @endphp
-            <div class="group-form container_grid" id="investigadoresContainer">
-                @if (isset($proyecto) && !empty($proyecto->investigadores))
-                    @foreach ($proyecto->investigadores as $index => $investigador)
-                        @php $inputId = 'investigador_' . $investigador->id; @endphp
-                        <div class="input-group investigador-input">
-                            <label for="{{ $inputId }}">{{ $index + 1 }}</label>
-                            <input type="hidden" name="investigadores_ids[]" value="{{ $investigador->id }}">
-
-                            <input id="{{ $inputId }}" class="form-control" style="height: auto;" type="text"
-                                value="{{ $investigador->nombre }}" readonly>
-                            <button type="button" class="button eliminar-investigador">
-                                <i class="fa-solid fa-user-minus"></i>
-                            </button>
-                        </div>
-                    @endforeach
-                @endif
-                {{-- cuando salta una validacion en el backend --}}
-                @if (!empty($proyecto->investigadores) && count($investigadoresOld) > 1)
-                    <hr style="grid-column: 1 / -1;">
-                @endif
-                @foreach ($investigadoresOld as $index => $nombre)
-                    @continue($index === 0)
-                    @php $inputId = 'investigador_' . $index; @endphp
-                    <div class="input-group investigador-input">
-                        <label for="{{ $inputId }}">Nuevo {{ $index + 1 }}</label>
-                        <input id="{{ $inputId }}" class="form-control @error("investigadores_nombres.$index") is-invalid @enderror"
-                            style="height: auto;" type="text" name="investigadores_nombres[]"
-                            value="{{ $nombre }}" placeholder="Nombre del investigador">
-
-                        <button type="button" class="button eliminar-investigador">
-                            <i class="fa-solid fa-user-minus"></i>
-                        </button>
-                        @error("investigadores_nombres.$index")
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-
-                    </div>
-                @endforeach
-            </div>
             <div class="group-form input-group">
-                <label for="input_add_investigador">Investigador:</label>
-                <input id="input_add_investigador"
-                    class="form-control @error('investigadores_nombres.0') is-invalid @enderror" type="text"
-                    style="height: auto;" name="investigadores_nombres[]" value="{{ old('investigadores_nombres.0') }}"
-                    placeholder="Nombre y apellido del investigador">
-                <button type="button" class="button añadir-investigador"><i class="fa-solid fa-user-plus"></i></button>
-                @error('investigadores_nombres.0')
-                    <div class="invalid-feedback">{{ $message }}</div>
+                <label for="investigadores_select">Investigador(es):</label>
+
+                <select class_form-select"
+                        id="investigadores_select"
+                        name="investigadores_ids[]"
+                        multiple="multiple"
+                        required>
+
+                    {{--
+                    Sección para el modo EDICIÓN:
+                    Precargamos los investigadores que ya están asociados al proyecto.
+                    Select2 los leerá y mostrará automáticamente.
+                    --}}
+                    @if (isset($proyecto) && $proyecto->investigadores)
+                        @foreach ($proyecto->investigadores as $investigador)
+                            <option value="{{ $investigador->id }}" selected>
+                                {{ $investigador->nombre }} ({{ $investigador->documento ?? 'N/A' }})
+                            </option>
+                        @endforeach
+                    @endif
+
+                    {{--
+                    Sección para ERRORES DE VALIDACIÓN:
+                    Si el backend falla, repoblamos el select con los IDs que
+                    el usuario había enviado.
+                    --}}
+                    @if (old('investigadores_ids'))
+                        @foreach (old('investigadores_ids') as $investigadorId)
+                            {{-- Evitar duplicados si ya estaba en el modo edición --}}
+                            @if (isset($proyecto) && $proyecto->investigadores->contains($investigadorId))
+                                @continue
+                            @endif
+
+                            {{--
+                            Necesitamos encontrar el investigador para mostrar su nombre.
+                            Esto asume que pasas una variable $investigadoresOld desde el controlador
+                            o que puedes obtenerla de alguna manera.
+                            Si es muy complejo, puedes omitir esto, pero el Select2
+                            mostrará solo los IDs.
+
+                            Forma simple (requiere un pequeño ajuste en el controlador al fallar):
+                            --}}
+                            @isset($investigadoresOld) {{-- El controlador debe pasar esto --}}
+                                @php $investigador = $investigadoresOld->firstWhere('id', $investigadorId); @endphp
+                                @if($investigador)
+                                <option value="{{ $investigador->id }}" selected>
+                                    {{ $investigador->nombre }} ({{ $investigador->documento ?? 'N/A' }})
+                                </option>
+                                @endif
+                            @endisset
+                        @endforeach
+                    @endif
+
+                </select>
+
+                @error('investigadores_ids')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+                @error('investigadores_ids.*')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
             </div>
             <div class="group-form input-group">
@@ -240,99 +249,60 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('investigadoresContainer');
-            const addButton = document.querySelector('.añadir-investigador');
-            const form = document.getElementById('formProyecto');
-            let hrInserted = false;
-            let investigadores = @json($proyecto->investigadores ?? []);
-
-            // Añadir un nuevo campo de investigador
-            if (addButton) {
-                let contador = 1;
-                addButton.addEventListener('click', () => {
-                    if (Array.isArray(investigadores) && investigadores.length > 0 && !hrInserted) {
-                        const separator = document.createElement('hr');
-                        separator.style.gridColumn = '1 / -1';
-                        container.appendChild(separator);
-                        hrInserted = true;
-                    }
-                    const newInput = document.createElement('div');
-                    newInput.classList.add('input-group', 'investigador-input');
-
-                    const idInput = `nuevo_investigador_${contador++}`;
-
-                    newInput.innerHTML = `
-                    <label for="${idInput}">Nuevo ${contador}</label>
-                    <input id="${idInput}" class="form-control" style="height: auto;" type="text" name="investigadores_nombres[]" placeholder="Nombre y apellido del investigador" required>
-                    <button type="button" class="button eliminar-investigador">
-                        <i class="fa-solid fa-user-minus"></i>
-                    </button>
-                `;
-                    container.appendChild(newInput);
-                });
+        document.addEventListener('submit', function(e) {
+            if (e.target.id === 'formProyecto') {
+                 document.getElementById('loader-overlay').classList.add('show');
             }
+        });
 
-            // Delegación de eventos para eliminar investigadores
-            container.addEventListener('click', function(event) {
-                if (event.target.closest('.eliminar-investigador')) {
-                    const investigadorDiv = event.target.closest('.investigador-input');
-                    if (investigadorDiv && container.contains(investigadorDiv)) {
-                        container.removeChild(investigadorDiv);
+        // Inicialización de Select2
+        $(document).ready(function() {
+            $('#investigadores_select').select2({
+                theme: "bootstrap-5",
+                placeholder: 'Busca un investigador por nombre o documento',
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('investigador.search') }}", //
+                    dataType: 'json',
+                    delay: 250, // Esperar 250ms antes de buscar
+                    data: function(params) {
+                        return {
+                            q: params.term,
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        console.log(data, params)
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination.more
+                            }
+                        };
+                    },
+                    cache: true
+                },
+                language: {
+                    // Traducciones básicas
+                    noResults: function() {
+                        return "No se encontraron resultados";
+                    },
+                    searching: function() {
+                        return "Buscando...";
+                    },
+                    inputTooShort: function(args) {
+                        var remainingChars = args.minimum - args.input.length;
+                        return 'Por favor, introduce ' + remainingChars + ' o más caracteres';
                     }
-                }
-            });
-
-            // Validar investigadores antes de enviar el formulario
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const inputs = container.querySelectorAll('input[name="investigadores_nombres[]"]');
-                const inputAddInvestigador = document.getElementById('input_add_investigador');
-                const nombres = new Set();
-                let hasError = false;
-
-                const investigadoresExistentes = investigadores.map(i => i.nombre.trim().toLowerCase());
-
-                const validarInput = (input, esOpcional = false) => {
-                    const valor = input.value.trim().toLowerCase();
-                    if (valor === '' && esOpcional) {
-                        return true;
-                    }
-                    if (valor === '') {
-                        alert("No se permiten nombres de investigadores vacíos.");
-                        input.focus();
-                        return false;
-                    }
-                    if (nombres.has(valor)) {
-                        alert(`El investigador "${input.value}" ya fue agregado.`);
-                        input.focus();
-                        return false;
-                    }
-                    if (investigadoresExistentes.includes(valor)) {
-                        alert(`El investigador "${input.value}" ya existe en este proyecto.`);
-                        input.focus();
-                        return false;
-                    }
-                    nombres.add(valor);
-                    return true;
-                }
-
-                if (!validarInput(inputAddInvestigador, true)) {
-                    hasError = true;
-                }
-                inputs.forEach(input => {
-                    if (!validarInput(input)) {
-                        hasError = true;
-                    }
-                })
-
-                if (!hasError) {
-                    document.getElementById('loader-overlay').classList.add('show');
-                    form.submit();
                 }
             });
         });

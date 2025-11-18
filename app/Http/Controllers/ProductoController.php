@@ -44,7 +44,7 @@ class ProductoController extends BaseDataTableController
                 'titulo' => view('components.opcion-link', ['model' => $producto,'title'=>$producto->{$this->keyPrimary}, 'route' => 'productos.show', 'param'=>$producto->id])->render(),
                 'tipologia' => $producto->tipologia,
                 'enlace' => $producto->enlace,
-                'acciones' => view('components.action-buttons', ['id_model' => $producto->id, 'is_modal' => true])->render()
+                'acciones' => view('components.action-buttons', ['id_model' => $producto->id, 'is_modal' => true, 'modal' => "#modal-crear-producto"])->render()
             ];
         });
     }

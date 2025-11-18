@@ -1,4 +1,4 @@
-@props(['id_model', 'route', 'is_modal'])
+@props(['id_model', 'route', 'is_modal', 'modal'])
 
 <div class="d-flex flex-wrap gap-1 justify-content-center">
     @if ($is_modal)
@@ -6,7 +6,7 @@
         class="btn btn-success btn-circle edit-btn"
         data-id="{{ $id_model }}"
         data-toggle="modal"
-        data-target="#modal-crear-producto">
+        data-target="{{ $modal }}">
         <i class="fa-solid fa-pen"></i>
     </button>
     @else

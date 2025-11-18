@@ -6,15 +6,23 @@ use Illuminate\Http\Request;
 use App\Models\Investigador;
 use App\Models\InvestigadorProyecto;
 use App\Models\Proyecto;
+use Illuminate\Validation\Rule;
 
 class InvestigadorController extends BaseSelectController
 {
     public function __construct()
     {
         $this->model = Investigador::class;
-        $this->searchFields = ['nombre'];
-        $this->columns = ['id', 'nombre', 'proyectos_count'];
+        $this->searchFields = ['nombre', 'documento', 'email', 'telefono'];
+        $this->columns = ['id', 'nombre', 'documento', 'email','telefono', 'proyectos_count'];
         $this->namePrimary = "nombre";
+        $this->formFieldValidated = [
+            'nombre' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255|unique:investigadores,email',
+            'tipo_documento' => 'nullable|string|max:8',
+            'documento' => 'nullable|string|max:50|unique:investigadores,documento',
+            'telefono' => 'nullable|string|max:20',
+        ];
         parent::__construct();
     }
 
@@ -24,15 +32,119 @@ class InvestigadorController extends BaseSelectController
             ->withCount('proyectos');
     }
 
-    public function getBaseData($item)
+
+    protected function transformResults($results)
     {
-        return array_map(function($field) use ($item) {
-            if($field !== 'nombre'){
-                return $item->$field ?? null;
+        return $results->map(function ($investigador) {
+            $data = [];
+
+            foreach ($this->columns as $field) {
+                if ($field === "documento") {
+                    $data[$field] = $investigador['tipo_documento'] . ' ' . $investigador['documento'];
+                } elseif ($field === "nombre") {
+                    $data[$field] = view('components.opcion-link', [
+                        'model' => $investigador,
+                        'route' => 'proyectos',
+                        'param' => ['search' => $investigador->$field]
+                    ])->render();
+                } else {
+                    $data[$field] = $investigador->$field ?? null;
+                }
             }
-            return view('components.opcion-link', ['model' => $item, 'route' => 'proyectos', 'param'=>['search'=>$item->$field]])->render();
-        }, $this->columns);
+
+            $data['acciones'] = view('components.action-buttons', [
+                'id_model' => $investigador->id,
+                'is_modal' => true,
+                'modal' => '#modal-crear-investigador'
+            ])->render();
+
+            return $data;
+        });
     }
+
+    /**
+     * Busca investigadores para Select2.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $term = $request->input('q');
+        $page = $request->input('page', 1);
+
+        if (!$term) {
+            return response()->json(['results' => [], 'pagination' => ['more' => false]]);
+        }
+
+        $query = Investigador::query()
+            ->where('nombre', 'LIKE', '%' . $term . '%')
+            ->orWhere('documento', 'LIKE', '%' . $term . '%');
+
+        $investigadores = $query->paginate(10, ['id', 'nombre', 'tipo_documento', 'documento'], 'page', $page);
+
+        // Formatear la respuesta para Select2
+        $results = $investigadores->getCollection()->map(function ($investigador) {
+            return [
+                'id' => $investigador->id,
+                'text' => $investigador->nombre . ' (' . $investigador->tipo_documento .' - '. $investigador->documento . ')'
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $investigadores->hasMorePages()
+            ]
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $investigador = $this->model::findOrFail($id);
+
+        if($request->ajax()){
+            return response()->json($investigador);
+        }
+
+        //return view('investigador.show', compact('investigador'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('investigadores', 'email')->ignore($id),
+            ],
+            'tipo_documento' => 'nullable|string|max:8',
+            'documento' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('investigadores', 'documento')->ignore($id),
+            ],
+            'telefono' => 'nullable|string|max:20',
+        ]);
+
+
+        $investigador = $this->model::findOrFail($id);
+        $investigador->update($validatedData);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => 'Investigador actualizado exitosamente',
+                'data' => $investigador
+            ]);
+        }
+
+        return redirect()->route('investigador.index')
+            ->with('success', 'Investigador actualizado exitosamente');
+    }
+
 
     public function destroyItemPivot(Request $request)
     {

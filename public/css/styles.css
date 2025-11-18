@@ -64,7 +64,7 @@ header {
 .form-control:disabled, .form-control[readonly] {
     background-color: #F1F8E9;
 }
-#investigadoresContainer:not(:has(*)) {
+#investigadoresContainer:not(:has(*)), #file-container:not(:has(*))  {
     display: none;
 }
 

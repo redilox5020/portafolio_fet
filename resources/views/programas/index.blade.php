@@ -17,10 +17,10 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="procedencia_codigo_id">Procedencia Código:</label>
-                <select class="form-select" id="procedencia_codigo_id" name="procedencia_codigo_id" required>
-                    @foreach($procedenciaCodigos as $procedenciaCodigo)
-                    <option value="{{ $procedenciaCodigo->id }}">{{ $procedenciaCodigo->opcion }}</option>
+                <label for="procedencia_id">Procedencia:</label>
+                <select class="form-select" id="procedencia_id" name="procedencia_id" required>
+                    @foreach($procedencias as $procedencia)
+                    <option value="{{ $procedencia->id }}">{{ $procedencia->opcion }}</option>
                     @endforeach
                 </select>
             </div>

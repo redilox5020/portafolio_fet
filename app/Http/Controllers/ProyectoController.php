@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Procedencia;
-use App\Models\ProcedenciaCodigo;
+use App\Models\ProcedenciaDetalle;
 use App\Models\Tipologia;
 use App\Models\Programa;
+use App\Models\Investigador;
 use App\Models\Proyecto;
 use App\Http\Controllers\DataTable\BaseDataTableController;
 use DB;
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use App\Enums\FileDriver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
+use Illuminate\Validation\Rule;
 
 class ProyectoController extends BaseDataTableController
 {
@@ -39,13 +41,14 @@ class ProyectoController extends BaseDataTableController
             'nombre',
             'objetivo_general',
             'investigadores.nombre',
+            'investigadores.documento',
             'programa.nombre',
             'registered_by_name'
         ];
 
         $this->withRelations = [
             'programa',
-            'procedenciaCodigo',
+            'procedenciaDetalle',
             'tipologia',
             'investigadores:nombre'
         ];
@@ -114,7 +117,7 @@ class ProyectoController extends BaseDataTableController
     {
         return [
             'programas' => Programa::all(),
-            'procedenciaCodigos' => ProcedenciaCodigo::all(),
+            'procedenciaDetalles' => ProcedenciaDetalle::all(),
             'tipologias' => Tipologia::all()
         ];
     }
@@ -140,11 +143,11 @@ class ProyectoController extends BaseDataTableController
         }
 
         $totalGeneral = Proyecto::count();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
-        $tipologias = Tipologia::all();
+        $procedencias = Procedencia::all();
+        $tipologias = Tipologia::where('model_type', 'proyecto')->get();
         $programas = Programa::all();
 
-        return view('programas.index', compact('datos', 'totalesPorPrograma', 'totalGeneral', 'procedenciaCodigos','tipologias','programas'));
+        return view('programas.index', compact('datos', 'totalesPorPrograma', 'totalGeneral', 'procedencias','tipologias','programas'));
     }
 
     public function buscarProyectos(Request $request){
@@ -160,21 +163,21 @@ class ProyectoController extends BaseDataTableController
 
         $programas = Programa::all();
         $tipologias = Tipologia::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $procedenciaDetalles = ProcedenciaDetalle::all();
         $search = $request->search;
 
-        return view('proyectos.index', compact('proyectos','programas','procedenciaCodigos','tipologias', 'search'));
+        return view('proyectos.index', compact('proyectos','programas','procedenciaDetalles','tipologias', 'search'));
     }
 
     public function proyectosPorGrupoCodigo(Request $request){
         $validatedData = $request->validate([
             'programa_sufijo'=>'required|string',
-            'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
+            'procedencia_id'=>'required|integer|exists:procedencias,id',
             'tipologia_id'=>'required|integer|exists:tipologias,id',
             'anio' => 'required|integer|digits:4|min:2010|max:2100',
         ]);
 
-        $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_codigo_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
+        $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
 
         return redirect()->route('proyectos', [
             'codigo_grupo' => $codigo,
@@ -254,39 +257,60 @@ class ProyectoController extends BaseDataTableController
 
     }
 
+    public function getProcedenciaDetalles($procedenciaId)
+    {
+        $detalles = ProcedenciaDetalle::where('procedencia_id', $procedenciaId)
+            ->orderBy('opcion')
+            ->get(['id', 'opcion', 'procedencia_id']);
+
+        return response()->json($detalles);
+    }
+
     public function create(){
         $procedencias = Procedencia::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $procedenciaDetalles = ProcedenciaDetalle::all();
         $tipologias = Tipologia::where('model_type', 'proyecto')->get();
         $programas = Programa::all();
+        $investigadores = Investigador::orderBy('nombre', 'asc')->get();
 
-
-        return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas'));
+        return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaDetalles', 'tipologias', 'programas', 'investigadores'));
     }
 
     public function store(Request $request){
-        $validatedData = $request->validate([
-            'nombre'=>'required|string|max:255',
-            'objetivo_general'=>'required|string|max:2000',
-            'programa_id'=>'required|integer|exists:programas,id',
-            'procedencia_id'=>'required|integer|exists:procedencias,id',
-            'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
-            'tipologia_id'=>'required|integer|exists:tipologias,id',
-            'fecha_inicio'=>'required|date',
-            'fecha_fin'=>'required|date|after:fecha_inicio',
-            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
-            'descripcion_archivo' => 'required_with:pdf_file|string|max:255',
-            'driver' => 'required|string|in:cloudinary,local',
-            'costo' => [
-                'required',
-                'numeric',
-                'min:0',
-                'regex:/^\d{1,13}(\.\d{1,2})?$/'
-            ],
-            'investigadores_nombres' => 'sometimes|array',
-            'investigadores_nombres.*' => 'nullable|string|max:255',
-        ]
-    );
+        try {
+            $validatedData = $request->validate([
+                'nombre'=>'required|string|max:255',
+                'objetivo_general'=>'required|string|max:2000',
+                'programa_id'=>'required|integer|exists:programas,id',
+                'procedencia_id'=>'required|integer|exists:procedencias,id',
+                'procedencia_detalle_id' => [
+                    'nullable',
+                    'exists:procedencia_detalles,id',
+                    Rule::exists('procedencia_detalles', 'id')
+                        ->where('procedencia_id', $request->procedencia_id)
+                ],
+                'tipologia_id'=>'required|integer|exists:tipologias,id',
+                'fecha_inicio'=>'required|date',
+                'fecha_fin'=>'required|date|after:fecha_inicio',
+                'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+                'descripcion_archivo' => 'nullable|required_with:pdf_file|string|max:255',
+                'driver' => 'required|string|in:cloudinary,local',
+                'costo' => [
+                    'required',
+                    'numeric',
+                    'min:0',
+                    'regex:/^\d{1,13}(\.\d{1,2})?$/'
+                ],
+                'investigadores_ids' => 'sometimes|array',
+                'investigadores_ids.*' => 'nullable|integer|exists:investigadores,id',
+            ]
+        );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            dd([
+                'errors' => $e->errors(),
+                'messages' => $e->getMessage()
+            ]);
+        }
 
         // Calcular el año a partir de la fecha de inicio
         $anio = Carbon::parse($validatedData['fecha_inicio'])->year;
@@ -307,7 +331,7 @@ class ProyectoController extends BaseDataTableController
         $driver = FileDriver::tryFrom($validatedData['driver']);
         unset($validatedData['driver']);
 
-        $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file', 'descripcion_archivo'])->toArray();
+        $proyectoData = collect($validatedData)->except(['investigadores_ids', 'pdf_file', 'descripcion_archivo'])->toArray();
         $proyecto = new Proyecto($proyectoData);
         $proyecto->generarCodigo();
 
@@ -332,9 +356,13 @@ class ProyectoController extends BaseDataTableController
             }
 
             // Agregar investigadores
-            $nuevosInvestigadores = $validatedData["investigadores_nombres"] ?? [];
+            $idsParaAsociar = $validatedData['investigadores_ids'] ?? [];
 
-            $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, []);
+            foreach ($idsParaAsociar as $investigadorId) {
+                if ($investigadorId) { // Asegurarse de que no sea nulo
+                    $proyecto->agregarORestaurarInvestigador((int)$investigadorId);
+                }
+            }
 
             DB::commit();
             return redirect()->back()
@@ -355,37 +383,47 @@ class ProyectoController extends BaseDataTableController
     public function edit($codigo){
         $proyecto = Proyecto::with('investigadores')->where('codigo', $codigo)->firstOrFail();
         $procedencias = Procedencia::all();
-        $procedenciaCodigos = ProcedenciaCodigo::all();
+        $procedenciaDetalles = ProcedenciaDetalle::all();
         $tipologias = Tipologia::all();
         $programas = Programa::all();
 
 
-        return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaCodigos', 'tipologias', 'programas', 'proyecto'));
+        return view('proyectos.crear_proyecto', compact('procedencias', 'procedenciaDetalles', 'tipologias', 'programas', 'proyecto'));
     }
     public function update(Request $request, Proyecto $proyecto){
-        $validatedData = $request->validate([
-            'nombre'=>'required|string|max:255',
-            'objetivo_general'=>'required|string|max:2000',
-            'programa_id'=>'required|integer|exists:programas,id',
-            'procedencia_id'=>'required|integer|exists:procedencias,id',
-            'procedencia_codigo_id'=>'required|integer|exists:procedencia_codigos,id',
-            'tipologia_id'=>'required|integer|exists:tipologias,id',
-            'fecha_inicio'=>'required|date',
-            'fecha_fin'=>'required|date|after:fecha_inicio',
-            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
-            'descripcion_archivo' => 'required_with:pdf_file|string|max:255',
-            'driver' => 'required|string|in:cloudinary,local',
-            'costo' => [
-                'required',
-                'numeric',
-                'min:0',
-                'regex:/^\d{1,13}(\.\d{1,2})?$/'
-            ],
-            'investigadores_ids' => 'sometimes|array',
-            'investigadores_ids.*' => 'nullable|integer|exists:investigadores,id',
-            'investigadores_nombres' => 'sometimes|array',
-            'investigadores_nombres.*' => 'nullable|string|max:255',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'nombre'=>'required|string|max:255',
+                'objetivo_general'=>'required|string|max:2000',
+                'programa_id'=>'required|integer|exists:programas,id',
+                'procedencia_id'=>'required|integer|exists:procedencias,id',
+                'procedencia_detalle_id' => [
+                    'nullable',
+                    'exists:procedencia_detalles,id',
+                    Rule::exists('procedencia_detalles', 'id')
+                        ->where('procedencia_id', $request->procedencia_id)
+                ],
+                'tipologia_id'=>'required|integer|exists:tipologias,id',
+                'fecha_inicio'=>'required|date',
+                'fecha_fin'=>'required|date|after:fecha_inicio',
+                'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+                'descripcion_archivo' => 'nullable|required_with:pdf_file|string|max:255',
+                'driver' => 'required|string|in:cloudinary,local',
+                'costo' => [
+                    'required',
+                    'numeric',
+                    'min:0',
+                    'regex:/^\d{1,13}(\.\d{1,2})?$/'
+                ],
+                'investigadores_ids' => 'sometimes|array',
+                'investigadores_ids.*' => 'nullable|integer|exists:investigadores,id'
+            ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+            dd([
+                'errors' => $e->errors(),
+                'messages' => $e->getMessage()
+            ]);
+        }
 
         $driver = FileDriver::tryFrom($validatedData['driver']);
         unset($validatedData['driver']);
@@ -405,7 +443,7 @@ class ProyectoController extends BaseDataTableController
                 }
             }
 
-            $proyectoData = collect($validatedData)->except(['investigadores_ids', 'investigadores_nombres', 'pdf_file'])->toArray();
+            $proyectoData = collect($validatedData)->except(['investigadores_ids', 'pdf_file'])->toArray();
 
             $proyecto->fill($proyectoData);
 
@@ -415,18 +453,21 @@ class ProyectoController extends BaseDataTableController
             $proyecto->last_modified_by_email = $actualizador->email;
 
             if ($proyecto->isDirty('fecha_inicio') || $proyecto->isDirty('programa_id') ||
-                $proyecto->isDirty('procedencia_codigo_id') || $proyecto->isDirty('tipologia_id')) {
+                $proyecto->isDirty('procedencia_id') || $proyecto->isDirty('tipologia_id')) {
                 $proyecto->generarCodigo(); // Regenerar el código
                 $proyecto->pdf_url = $proyecto->pdf_url ? $uploader->renombrarArchivo($proyecto->pdf_url, $proyecto->codigo): null;
             }
             $proyecto->update();
 
             $idsActivos = $validatedData['investigadores_ids'] ?? [];
-            $nuevosInvestigadores = $validatedData['investigadores_nombres'] ?? [];
 
             $proyecto->eliminarInvestigadoresRemovidos($idsActivos);
 
-            $proyecto->agregarInvestigadoresPorNombre($nuevosInvestigadores, $idsActivos);
+            foreach ($idsActivos as $investigadorId) {
+                if ($investigadorId) {
+                    $proyecto->agregarORestaurarInvestigador((int)$investigadorId);
+                }
+            }
 
             DB::commit();
 

@@ -168,9 +168,22 @@ abstract class BaseDataTableController extends Controller
     protected function getBaseData($item)
     {
         return array_map(function($field) use ($item) {
-            return $item->$field ?? null;
+            return $this->getNestedProperty($item, $field);
         }, $this->columns);
     }
+
+    protected function getNestedProperty($object, $path) {
+        $segments = explode('__', $path);
+        foreach ($segments as $segment) {
+            if (is_object($object) && isset($object->$segment)) {
+                $object = $object->$segment;
+            } else {
+                return null;
+            }
+        }
+        return $object;
+    }
+
 
     protected function getActionButtons($item)
     {

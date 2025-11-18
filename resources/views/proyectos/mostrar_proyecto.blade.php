@@ -52,7 +52,10 @@
 
                         <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Procedencia</dt>
                         <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->procedencia->opcion }}</dd>
-
+                        @if ($proyecto->procedenciaDetalle)
+                        <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Detalle Procedencia</dt>
+                        <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->procedenciaDetalle->opcion }}</dd>
+                        @endif
                         <dt class="col-xl-2 col-md-3 col-sm-4 text-truncate">Tipologia</dt>
                         <dd class="col-xl-10 col-md-9 col-sm-8">{{ $proyecto->tipologia->opcion }}</dd>
 

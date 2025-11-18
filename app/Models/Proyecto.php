@@ -20,7 +20,7 @@ class Proyecto extends Model
         'objetivo_general',
         'programa_id',
         'procedencia_id',
-        'procedencia_codigo_id',
+        'procedencia_detalle_id',
         'tipologia_id',
         'fecha_inicio',
         'fecha_fin',
@@ -82,15 +82,15 @@ class Proyecto extends Model
 
         $this->codigo = self::generarCodigoUnico(
             $sufijoPrograma,
-            $this->procedencia_codigo_id,
+            $this->procedencia_id,
             $this->tipologia_id,
             $anio
         );
     }
 
-    public static function generarCodigoUnico($programaSufijo, $procedenciaCodigoId, $tipologiaId, $anio)
+    public static function generarCodigoUnico($programaSufijo, $procedenciaId, $tipologiaId, $anio)
     {
-        $baseCodigo = "{$programaSufijo}-{$procedenciaCodigoId}-{$tipologiaId}-{$anio}";
+        $baseCodigo = "{$programaSufijo}-{$procedenciaId}-{$tipologiaId}-{$anio}";
 
         // Buscar el último código que empiece igual
         $ultimoProyecto = self::where("codigo", "like", "{$baseCodigo}-%")
@@ -115,64 +115,36 @@ class Proyecto extends Model
         return $nuevoCodigo;
     }
 
-    public function agregarInvestigadoresPorNombre(array $nombres, array $idsActivos): void
+    public function agregarORestaurarInvestigador(int $investigadorId)
     {
-        $idsActivosFiltrados = array_filter(
-            $idsActivos,
-            fn($id) => is_numeric($id) && $id > 0
-        );
-        $nombresNuevos = array_filter(
-            $nombres ?? [],
-            fn($nombre) => !is_null($nombre) && trim($nombre) !== ''
-        );
-        foreach ($nombresNuevos as $nombre) {
-            $this->agregarInvestigadorConRestauracionInteligente($nombre, $idsActivosFiltrados);
+        // 1. Verificar si ya existe un vínculo activo
+        $isAttached = $this->investigadores()->where('investigador_id', $investigadorId)->exists();
+        if ($isAttached) {
+            return null; // Ya está activo, no hacer nada
         }
-    }
 
-    /**
-     * Agrega un investigador al proyecto, restaurando el vínculo si fue eliminado hace poco.
-     *
-     * @param string $nombre Nombre del investigador a agregar.
-     * @param array $idsActivos IDs de investigadores activos para evitar duplicados.
-     */
-    public function agregarInvestigadorConRestauracionInteligente(?string $nombre, array $investigadoresIds, ?int $investigadorId = null)
-    {
-        $investigador = $investigadorId
-            ? Investigador::find($investigadorId)
-            : Investigador::firstOrCreate(['nombre' => trim($nombre)]);
-
-        if (!$investigador || in_array($investigador->id, $investigadoresIds)) {
-            return null;
-        }
+        // 2. Buscar un vínculo eliminado recientemente
         $vinculoEliminado = InvestigadorProyecto::withTrashed()
             ->where('proyecto_id', $this->id)
-            ->where('investigador_id', $investigador->id)
+            ->where('investigador_id', $investigadorId)
             ->whereNotNull('deleted_at')
             ->latest('deleted_at')
             ->first();
 
+        // 3. Restaurar si fue eliminado hace menos de 24 horas
         if ($vinculoEliminado && $vinculoEliminado->deleted_at->gt(now()->subHours(24))) {
             $vinculoEliminado->restore();
-            return [
-                'restore' => true,
-                'nombre' => $investigador->nombre,
-                'investigador_id' => $investigador->id,
-                'pivot_id' => $vinculoEliminado->id,
-            ];
+            return [ 'restore' => true, 'investigador_id' => $investigadorId ];
         }
+
+        // 4. Crear un nuevo vínculo si no se pudo restaurar
         $nuevoVinculo = InvestigadorProyecto::create([
             'proyecto_id' => $this->id,
-            'investigador_id' => $investigador->id,
+            'investigador_id' => $investigadorId,
             'created_at' => now(),
         ]);
-        return [
-            'restore' => false,
-            'nombre' => $investigador->nombre,
-            'investigador_id' => $investigador->id,
-            'pivot_id' => $nuevoVinculo->id,
-        ];
 
+        return [ 'restore' => false, 'investigador_id' => $investigadorId, 'pivot_id' => $nuevoVinculo->id ];
     }
 
     public function eliminarInvestigadoresRemovidos(array $idsActivos): void
@@ -227,9 +199,9 @@ class Proyecto extends Model
         return $this->belongsTo(Procedencia::class);
     }
 
-    public function procedenciaCodigo(): BelongsTo
+    public function procedenciaDetalle()
     {
-        return $this->belongsTo(ProcedenciaCodigo::class);
+        return $this->belongsTo(ProcedenciaDetalle::class);
     }
 
     public function tipologia(): BelongsTo

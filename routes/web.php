@@ -238,10 +238,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/{producto_id}/view', [ProductoController::class, 'show'])
                 ->name('productos.show');
 
-            Route::get('crear', [ProductoController::class, 'create'])
-                ->middleware('can:producto.create')
-                ->name('productos.create');
-
             Route::post('crear', [ProductoController::class, 'store'])
                 ->middleware('can:producto.create')
                 ->name('productos.store');

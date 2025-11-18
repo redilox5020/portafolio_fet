@@ -143,11 +143,202 @@ class ProyectoController extends BaseDataTableController
         }
 
         $totalGeneral = Proyecto::count();
+
+        // KPIs principales
+        $investigadoresActivos = DB::table('investigador_proyecto')
+            ->whereNull('deleted_at')
+            ->distinct('investigador_id')
+            ->count('investigador_id');
+
+        $productosGenerados = DB::table('productos')->count();
+
+        $inversionTotal = Proyecto::sum('costo');
+
+        // Proyectos por año
+        $proyectosPorAnio = Proyecto::selectRaw('anio, COUNT(*) as total')
+            ->groupBy('anio')
+            ->orderBy('anio')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'anio' => (string)$item->anio,
+                    'proyectos' => $item->total
+                ];
+            });
+
+        // Distribución por tipología
+        $proyectosPorTipologia = Proyecto::with('tipologia')
+            ->select('tipologia_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('tipologia_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'name' => $item->tipologia->opcion ?? 'Sin tipología',
+                    'value' => $item->total
+                ];
+            });
+
+        // Proyectos por procedencia
+        $proyectosPorProcedencia = Proyecto::with('procedencia')
+            ->select('procedencia_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('procedencia_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'name' => $item->procedencia->opcion ?? 'Sin procedencia',
+                    'value' => $item->total
+                ];
+            });
+
+        // Proyectos e inversión por programa
+        $programasData = Programa::withCount('proyectos')
+            ->with(['proyectos' => function($query) {
+                $query->select('programa_id', DB::raw('SUM(costo) as total_costo'))
+                    ->groupBy('programa_id');
+            }])
+            ->get()
+            ->map(function($programa) {
+                return [
+                    'programa' => $programa->nombre,
+                    'sufijo' => $programa->sufijo,
+                    'proyectos' => $programa->proyectos_count,
+                    'costo' => $programa->proyectos->sum('total_costo') ?? 0
+                ];
+            });
+
+        // Productos por tipo
+        $productosPorTipo = DB::table('productos')
+            ->join('tipologias', 'productos.tipologia_id', '=', 'tipologias.id')
+            ->select('tipologias.opcion as tipo', DB::raw('COUNT(*) as cantidad'))
+            ->groupBy('tipologias.opcion')
+            ->get();
+
+        // Estadísticas de investigadores
+        $totalInvestigadores = Investigador::count();
+
+        // Investigadores activos (tienen al menos un proyecto activo)
+        $investigadoresActivos = DB::table('investigador_proyecto')
+            ->whereNull('deleted_at')
+            ->distinct('investigador_id')
+            ->count('investigador_id');
+
+        // Investigadores históricos (tienen al menos un registro eliminado)
+        $investigadoresHistoricos = DB::table('investigador_proyecto')
+            ->whereNotNull('deleted_at')
+            ->distinct('investigador_id')
+            ->count('investigador_id');
+
+        // Investigadores revinculados (tienen registros eliminados Y activos)
+        $investigadoresRevinculados = DB::table('investigador_proyecto as ip1')
+            ->whereNotNull('ip1.deleted_at')
+            ->whereExists(function($query) {
+                $query->select(DB::raw(1))
+                    ->from('investigador_proyecto as ip2')
+                    ->whereColumn('ip2.investigador_id', 'ip1.investigador_id')
+                    ->whereNull('ip2.deleted_at');
+            })
+            ->distinct('ip1.investigador_id')
+            ->count('ip1.investigador_id');
+
+
+        // Total de asociaciones/participaciones (todos los registros)
+        $totalParticipaciones = DB::table('investigador_proyecto')->count();
+
+        // Total de participaciones históricas (solo eliminadas)
+        $participacionesHistoricas = DB::table('investigador_proyecto')
+            ->whereNotNull('deleted_at')
+            ->count();
+
+        // Total de participaciones activas
+        $participacionesActivas = DB::table('investigador_proyecto')
+            ->whereNull('deleted_at')
+            ->count();
+
+        // Promedio de proyectos por investigador activo
+        $promedioProyectosPorInvestigador = $investigadoresActivos > 0
+            ? round($participacionesActivas / $investigadoresActivos, 1)
+            : 0;
+
+        // Promedio de participaciones por investigador histórico
+        $promedioParticipacionesHistoricas = $investigadoresHistoricos > 0
+            ? round($participacionesHistoricas / $investigadoresHistoricos, 1)
+            : 0;
+
+        // Top 10 investigadores más activos
+        $topInvestigadores = DB::table('investigador_proyecto')
+            ->join('investigadores', 'investigador_proyecto.investigador_id', '=', 'investigadores.id')
+            ->select('investigadores.nombre', DB::raw('COUNT(*) as proyectos'))
+            ->whereNull('investigador_proyecto.deleted_at')
+            ->groupBy('investigadores.id', 'investigadores.nombre')
+            ->orderByDesc('proyectos')
+            ->limit(10)
+            ->get();
+
+        // Estadísticas de archivos
+        $archivosStats = [
+            'total' => DB::table('archivos')->count(),
+            'cloudinary' => DB::table('archivos')->where('driver', 'cloudinary')->count(),
+            'local' => DB::table('archivos')->where('driver', 'local')->count(),
+            'tamanioTotal' => DB::table('archivos')->sum('tamanio'),
+            'porProyecto' => DB::table('archivos')->where('archivable_type', 'App\\Models\\Proyecto')->count(),
+            'porProducto' => DB::table('archivos')->where('archivable_type', 'App\\Models\\Producto')->count(),
+        ];
+
+        // Evolución mensual de investigadores (últimos 6 meses)
+        $evolucionInvestigadores = collect(range(5, 0))->map(function($monthsAgo) {
+            $fecha = Carbon::now()->subMonths($monthsAgo);
+            $activos = DB::table('investigador_proyecto')
+                ->whereNull('deleted_at')
+                ->where('created_at', '<=', $fecha)
+                ->distinct('investigador_id')
+                ->count('investigador_id');
+
+            $historicos = DB::table('investigador_proyecto')
+                ->whereNotNull('deleted_at')
+                ->where('created_at', '<=', $fecha)
+                ->distinct('investigador_id')
+                ->count('investigador_id');
+
+            return [
+                'mes' => $fecha->locale('es')->isoFormat('MMM'),
+                'activos' => $activos,
+                'historicos' => $historicos
+            ];
+        });
+
         $procedencias = Procedencia::all();
         $tipologias = Tipologia::where('model_type', 'proyecto')->get();
         $programas = Programa::all();
 
-        return view('programas.index', compact('datos', 'totalesPorPrograma', 'totalGeneral', 'procedencias','tipologias','programas'));
+        return view('programas.index', compact(
+            'datos',
+            'totalesPorPrograma',
+            'totalGeneral',
+            'procedencias',
+            'tipologias',
+            'programas',
+
+            'investigadoresActivos',
+            'productosGenerados',
+            'inversionTotal',
+            'proyectosPorAnio',
+            'proyectosPorTipologia',
+            'proyectosPorProcedencia',
+            'programasData',
+            'productosPorTipo',
+            'totalInvestigadores',
+            'investigadoresHistoricos',
+            'investigadoresRevinculados',
+            'topInvestigadores',
+            'archivosStats',
+            'evolucionInvestigadores',
+
+            'totalParticipaciones',
+            'participacionesHistoricas',
+            'participacionesActivas',
+            'promedioProyectosPorInvestigador',
+            'promedioParticipacionesHistoricas'
+        ));
     }
 
     public function buscarProyectos(Request $request){

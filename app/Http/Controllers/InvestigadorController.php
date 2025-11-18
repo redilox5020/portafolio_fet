@@ -81,10 +81,11 @@ class InvestigadorController extends BaseSelectController
             ->where('nombre', 'LIKE', '%' . $term . '%')
             ->orWhere('documento', 'LIKE', '%' . $term . '%');
 
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $investigadores */
         $investigadores = $query->paginate(10, ['id', 'nombre', 'tipo_documento', 'documento'], 'page', $page);
 
         // Formatear la respuesta para Select2
-        $results = $investigadores->getCollection()->map(function ($investigador) {
+        $results = $investigadores->map(function ($investigador) {
             return [
                 'id' => $investigador->id,
                 'text' => $investigador->nombre . ' (' . $investigador->tipo_documento .' - '. $investigador->documento . ')'

@@ -6,7 +6,7 @@
     data-modal="producto" data-select="tipologia_id"
     data-table="productoTable" id="formProducto">
         @csrf
-        <input type="hidden" name="proyecto_id" id="proyecto_id" value="{{ $proyecto_id }}">
+        <input type="hidden" name="proyecto_id" id="proyecto_id" value="{{ $proyecto_id ?? '' }}">
         <div class="group-form input-group">
             <label for="titulo_producto">Titulo</label>
             <input
@@ -25,10 +25,12 @@
                     {{ old('tipologia_id', $producto->tipologia->id ?? '') == '' ? 'selected' : '' }}>
                     -- Selecciona una tipología --
                 </option>
-                @foreach ($tipologias as $tipologia)
-                    <option value="{{ $tipologia->id }}" @selected(old('tipologia_id', $producto->tipologia->id ?? '') == $tipologia->id)>
-                        {{ $tipologia->opcion }}</option>
-                @endforeach
+                @isset($tipologias)
+                    @foreach ($tipologias as $tipologia)
+                        <option value="{{ $tipologia->id }}" @selected(old('tipologia_id', $producto->tipologia->id ?? '') == $tipologia->id)>
+                            {{ $tipologia->opcion }}</option>
+                    @endforeach
+                @endisset
             </select>
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-tipologia" data-desde="modal-crear-producto"><i
                     class="fa-solid fa-plus"></i></button>
@@ -49,9 +51,11 @@
         <div class="form-group">
             <label for="exampleFormControlSelect2">Seleccionar Autores: </label>
             <select multiple class="form-control"  name="autores_ids[]" id="exampleFormControlSelect2">
-                @foreach ($investigadores as $investigador)
-                <option value="{{ $investigador->id }}">{{ $investigador->nombre }}</option>
-                @endforeach
+                @isset($investigadores)
+                    @foreach ($investigadores as $investigador)
+                    <option value="{{ $investigador->id }}">{{ $investigador->nombre }}</option>
+                    @endforeach
+                @endisset
             </select>
         </div>
         <div class="form-group">
@@ -74,6 +78,14 @@
 
 @push('scripts')
 <script>
+const datosIniciales = {
+    proyecto_id     : @json($proyecto_id    ?? null),
+    tipologias      : @json($tipologias     ?? null),
+    investigadores  : @json($investigadores ?? null)
+}
+
+const tieneDatosPrecargados = datosIniciales.proyecto_id !== null;
+
 $(document).on('click', '#btn-abrir-modal-crear-producto', function () {
     const form = $('#formProducto')[0];
     form.reset();
@@ -84,24 +96,56 @@ $(document).on('click', '#btn-abrir-modal-crear-producto', function () {
 $(document).on('click', '.edit-btn', function () {
     const id = $(this).data('id');
 
-    console.log(id);
+    console.log('Editando producto:', id);
+
+    const urlEnpoint = tieneDatosPrecargados
+        ? `/admin/productos/${id}/view`
+        : `/admin/productos/${id}/view?full=1`;
 
     $.ajax({
-        url: `/admin/productos/${id}/view`,
+        url: urlEnpoint,
         method: 'GET',
-        success: function (producto) {
-            console.log(producto);
+        success: function (response) {
+            console.log('Respuesta del servidor:', response);
+
+            const producto   = response.producto || response;
+
+            const tipologias = tieneDatosPrecargados ? datosIniciales.tipologias : (response.tipologias || []);
+            const investigadores = tieneDatosPrecargados ? datosIniciales.investigadores : (response.investigadores || []);
+
             $('#formProducto input[name="titulo"]').val(producto.titulo);
-            $('#formProducto select[name="tipologia_id"]').val(producto.tipologia_id).trigger('change');
             $('#formProducto input[name="enlace"]').val(producto.enlace);
             $('#formProducto textarea[name="descripcion"]').val(producto.descripcion);
+            $('#formProducto input[name="proyecto_id"]').val(producto.proyecto_id)
+
+            if (!tieneDatosPrecargados) {
+                const $tipologiaSelect = $('#formProducto select[name="tipologia_id"]');
+                $tipologiaSelect.empty();
+                $tipologiaSelect.append('<option value="" disabled>-- Selecciona una tipología --</option>');
+
+                tipologias.forEach(function(tipologia) {
+                    const selected = tipologia.id == producto.tipologia_id ? 'selected' : '';
+                    $tipologiaSelect.append(`<option value="${tipologia.id}" ${selected}>${tipologia.opcion}</option>`);
+                });
+            } else {
+                $('#formProducto select[name="tipologia_id"]').val(producto.tipologia_id).trigger('change');
+            }
+
+            if (!tieneDatosPrecargados) {
+                const $autoresSelect = $('#formProducto select[name="autores_ids[]"]');
+                $autoresSelect.empty();
+
+                investigadores.forEach(function(investigador) {
+                    $autoresSelect.append(`<option value="${investigador.id}">${investigador.nombre}</option>`);
+                });
+            }
 
             const $autoresSelect = $('#formProducto select[name="autores_ids[]"]');
             $autoresSelect.val([]); // deselecciona todos
             if (producto.autores && Array.isArray(producto.autores)) {
                 $autoresSelect.val(producto.autores.map((autor)=>autor.id));
             }
-
+            $autoresSelect.trigger('change');
 
             const updateRouteTemplate = @json(route('productos.update', ['producto_id' => '__ID__']));
             let action = updateRouteTemplate.replace('__ID__', id);
@@ -110,8 +154,8 @@ $(document).on('click', '.edit-btn', function () {
             if(!$('#formProducto input[name="_method"]').length)
                 $('#formProducto').append('<input type="hidden" name="_method" value="PUT">');
         },
-        error: function () {
-            alert('Error al cargar el producto.');
+        error: function (xhr) {
+            console.error('Error al cargar el producto:', xhr);
         }
     });
 });

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\DataTable\BaseDataTableController;
 use App\Models\Producto;
-use App\Models\Proyecto;
+use App\Models\Tipologia;
 
 class ProductoController extends BaseDataTableController
 {
@@ -42,6 +42,7 @@ class ProductoController extends BaseDataTableController
             return [
                 'id' => $producto->id,
                 'titulo' => view('components.opcion-link', ['model' => $producto,'title'=>$producto->{$this->keyPrimary}, 'route' => 'productos.show', 'param'=>$producto->id])->render(),
+                'proyecto_nombre' => view('components.opcion-link', ['model' => $producto->proyecto,'title'=>$producto->proyecto->nombre, 'route' => 'proyecto.por.codigo', 'param'=>$producto->proyecto->codigo])->render(),
                 'tipologia' => $producto->tipologia,
                 'enlace' => $producto->enlace,
                 'acciones' => view('components.action-buttons', ['id_model' => $producto->id, 'is_modal' => true, 'modal' => "#modal-crear-producto"])->render()
@@ -51,19 +52,29 @@ class ProductoController extends BaseDataTableController
 
     public function show(Request $request, $id)
     {
-        $producto = Producto::with(['tipologia', 'autores:id,nombre'])->findOrFail($id);
+        if($request->has('full') && $request->ajax()){
+            $producto = Producto::with([
+                'tipologia',
+                'autores:id,nombre',
+                'proyecto.investigadores:id,nombre'
+            ])->findOrFail($id);
 
+            $tipologias = Tipologia::where('model_type', 'producto')
+                ->select('id','opcion')
+                ->get();
+
+            return response()->json([
+                'producto'=> $producto,
+                'tipologias' => $tipologias,
+                'investigadores' => $producto->proyecto->investigadores ?? []
+            ]);
+        }
+
+        $producto = Producto::with(['tipologia', 'autores:id,nombre'])->findOrFail($id);
         if($request->ajax()){
             return response()->json($producto);
         }
-
         return view('productos.show', compact('producto'));
-    }
-
-    public function create()
-    {
-        $tipologias = \App\Models\Tipologia::where('model_type', 'producto')->get();
-        return view('productos.create', compact('tipologias'));
     }
 
     public function store(Request $request)

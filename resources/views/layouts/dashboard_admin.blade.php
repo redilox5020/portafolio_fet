@@ -20,9 +20,9 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
+    <link href="{{asset("css/bootstrap5-styles.css")}}" rel="stylesheet">
     <link href="{{asset("css/sb-admin-2.min.css")}}" rel="stylesheet">
 
-    <link href="{{asset("css/bootstrap5-styles.css")}}" rel="stylesheet">
 
     @yield("css")
 
@@ -66,7 +66,7 @@
         <li class="nav-item">
             <a class="nav-link" href="{{route('users')}}">
                 <i class="fa-solid fa-users"></i>
-                <span>Listar Usuarios</span></a>
+                <span>Usuarios</span></a>
         </li>
 
         <li class="nav-item">
@@ -178,7 +178,12 @@
         <li class="nav-item">
             <a class="nav-link" href="{{route('proyectos')}}">
                 <i class="fa-solid fa-table-list"></i>
-                <span>Listar Proyectos</span></a>
+                <span>Proyectos</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{route('productos.index')}}">
+                <i class="fa-brands fa-product-hunt"></i>
+                <span>Productos</span></a>
         </li>
         @can("proyecto.create")
         <li class="nav-item">
@@ -414,6 +419,7 @@ aria-hidden="true">
 
 <!-- Custom scripts for all pages-->
 <script src="{{asset("js/sb-admin-2.min.js")}}"></script>
+<script src="{{asset("vendor/chart.js/Chart.min.js")}}"></script>
 
 @vite(['resources/js/admin/dashboard.js'])
 

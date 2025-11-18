@@ -126,7 +126,7 @@
         <div class="card-header bg-info text-white">
             <h6 class="m-0 font-weight-bold">Productos en este proyecto:</h6>
         </div>
-        @include('productos.index')
+        @include('productos.partials.product-list')
 
     </div>
 

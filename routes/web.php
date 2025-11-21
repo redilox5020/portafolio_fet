@@ -29,7 +29,7 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AdminController::class, 'login'])->name('login');
     Route::post('login', [AdminController::class, 'loginPost'])->name('logging');
     Route::get('register', [AdminController::class, 'register'])->name('register');
-    Route::post('register', [AdminController::class, 'registerPost'])->name('register');
+    Route::post('register', [AdminController::class, 'registerPost'])->name('register.store');
 
     Route::get('forgot-password', [AdminController::class, 'forgotPassword'])->name('forgot-password');
     Route::post('forgot-password', [AdminController::class, 'forgotPasswordPost'])->name('password.email');

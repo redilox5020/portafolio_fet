@@ -67,7 +67,7 @@
 
                 <!--Resgistrarse-->
 
-                <form action="{{ route('register') }}" class="formulario__register" method="POST">
+                <form action="{{ route('register.store') }}" class="formulario__register" method="POST">
                     @csrf
                     <img src="{{ asset('img/Logo-FET.png') }}" alt="Icono de entrar" class="icono-entrar">
                     <h2>Registrarse</h2>

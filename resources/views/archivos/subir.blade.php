@@ -16,12 +16,12 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
-        <div class="group-form">
+        <div class="group-form col-auto">
             <div class="input-group">
                 <label for="storage_type" class="form-label">Destino del archivo:</label>
                 <select name="driver" id="storage_type" class="form-select" required>
-                    <option value="cloudinary">Cloudinary (proveedor externo)</option>
-                    <option value="local">Almacenamiento local (laravel storage)</option>
+                    <option value="cloudinary" {{ old('driver') == 'cloudinary' ? 'selected' : '' }}>Cloudinary (proveedor externo)</option>
+                    <option value="local" {{ old('driver', 'local') == 'local' ? 'selected' : '' }}>Almacenamiento local</option>
                 </select>
             </div>
             <div class="form-text text-muted">

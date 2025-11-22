@@ -17,15 +17,24 @@
     <div class="table-responsive">
         <table class="table table-bordered" id="productoTable" width="100%" cellspacing="0">
             <colgroup>
-                        <col style="width: 5%;">
-                        <col style="width: 35%;">
-                        <col style="width: 25%;">
-                        <col style="width: 25%;">
-                        <col style="width: 10%;">
+                @empty($proyecto)
+                    <col style="width: 10%;">
+                    <col style="width: 15%;">
+                    <col style="width: 40%;">
+                    <col style="width: 18%;">
+                    <col style="width: 8%;">
+                    <col style="width: 9%;">
+                @else
+                    <col style="width: 12%;">
+                    <col style="width: 45%;">
+                    <col style="width: 25%;">
+                    <col style="width: 8%;">
+                    <col style="width: 10%;">
+                @endempty
             </colgroup>
             <thead>
                 <tr>
-                    <th>Id</th>
+                    <th>Código</th>
                     <th>Titulo</th>
                     @empty($proyecto)
                     <th>Proyecto</th>
@@ -81,8 +90,8 @@
                     }
                 },
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                        data: 'codigo',
+                        name: 'codigo'
                     },
                     {
                         data: 'titulo',
@@ -108,14 +117,14 @@
                         data: 'enlace',
                         name: 'recurso',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        className: 'text-center',
                     },
                     {
                         data: 'acciones',
                         name: 'acciones',
                         orderable: false,
-                        searchable: false,
-                        className: 'text-center'
+                        searchable: false
                     }
                 ],
                 language: {

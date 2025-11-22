@@ -131,12 +131,6 @@
                         name="investigadores_ids[]"
                         multiple="multiple"
                         required>
-
-                    {{--
-                    Sección para el modo EDICIÓN:
-                    Precargamos los investigadores que ya están asociados al proyecto.
-                    Select2 los leerá y mostrará automáticamente.
-                    --}}
                     @if (isset($proyecto) && $proyecto->investigadores)
                         @foreach ($proyecto->investigadores as $investigador)
                             <option value="{{ $investigador->id }}" selected>
@@ -145,11 +139,6 @@
                         @endforeach
                     @endif
 
-                    {{--
-                    Sección para ERRORES DE VALIDACIÓN:
-                    Si el backend falla, repoblamos el select con los IDs que
-                    el usuario había enviado.
-                    --}}
                     @if (old('investigadores_ids'))
                         @foreach (old('investigadores_ids') as $investigadorId)
                             {{-- Evitar duplicados si ya estaba en el modo edición --}}
@@ -157,15 +146,6 @@
                                 @continue
                             @endif
 
-                            {{--
-                            Necesitamos encontrar el investigador para mostrar su nombre.
-                            Esto asume que pasas una variable $investigadoresOld desde el controlador
-                            o que puedes obtenerla de alguna manera.
-                            Si es muy complejo, puedes omitir esto, pero el Select2
-                            mostrará solo los IDs.
-
-                            Forma simple (requiere un pequeño ajuste en el controlador al fallar):
-                            --}}
                             @isset($investigadoresOld) {{-- El controlador debe pasar esto --}}
                                 @php $investigador = $investigadoresOld->firstWhere('id', $investigadorId); @endphp
                                 @if($investigador)
@@ -232,8 +212,8 @@
                 <div class="input-group">
                     <label for="storage_type" class="form-label">Destino del archivo:</label>
                     <select name="driver" id="storage_type" class="form-select" required>
-                        <option value="cloudinary">Cloudinary (proveedor externo)</option>
-                        <option value="local">Almacenamiento local (laravel storage)</option>
+                        <option value="cloudinary" {{ old('driver') == 'cloudinary' ? 'selected' : '' }}>Cloudinary (proveedor externo)</option>
+                        <option value="local" {{ old('driver', 'local') == 'local' ? 'selected' : '' }}>Almacenamiento local</option>
                     </select>
                 </div>
                 <div class="form-text text-muted">

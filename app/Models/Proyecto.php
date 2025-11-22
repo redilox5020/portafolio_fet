@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Traits\HasArchivos;
 
@@ -40,11 +39,8 @@ class Proyecto extends Model
 
     public function getDuracionAttribute()
     {
-        $fechaInicio = Carbon::parse($this->fecha_inicio);
-        $fechaFin = Carbon::parse($this->fecha_fin);
-
         // Calcular la diferencia en años, meses, días, horas, minutos y segundos
-        $diferencia = $fechaInicio->diff($fechaFin);
+        $diferencia = $this->fecha_inicio->diff($this->fecha_fin);
 
         // Construir la duración de manera dinámica
         $duracion = [];
@@ -78,7 +74,7 @@ class Proyecto extends Model
         $sufijoPrograma = $this->programa->sufijo ?? Programa::find($this->programa_id)->sufijo;
 
         // Obtener año desde fecha_inicio
-        $anio = Carbon::parse($this->fecha_inicio)->year;
+        $anio = $this->fecha_inicio->format('y');
 
         $this->codigo = self::generarCodigoUnico(
             $sufijoPrograma,
@@ -90,7 +86,7 @@ class Proyecto extends Model
 
     public static function generarCodigoUnico($programaSufijo, $procedenciaId, $tipologiaId, $anio)
     {
-        $baseCodigo = "{$programaSufijo}-{$procedenciaId}-{$tipologiaId}-{$anio}";
+        $baseCodigo = $programaSufijo . $procedenciaId . $tipologiaId . $anio;
 
         // Buscar el último código que empiece igual
         $ultimoProyecto = self::where("codigo", "like", "{$baseCodigo}-%")
@@ -218,15 +214,21 @@ class Proyecto extends Model
     {
         parent::boot();
 
+        static::creating(function ($producto) {
+            if (empty($producto->codigo)) {
+                $producto->generarCodigo();
+            }
+        });
+
         static::creating(function ($proyecto) {
             if (empty($proyecto->anio) && !empty($proyecto->fecha_inicio)) {
-                $proyecto->anio = Carbon::parse($proyecto->fecha_inicio)->year;
+                $proyecto->anio = $proyecto->fecha_inicio->year;
             }
         });
 
         static::updating(function ($proyecto) {
             if ($proyecto->isDirty('fecha_inicio')) {
-                $proyecto->anio = Carbon::parse($proyecto->fecha_inicio)->year;
+                $proyecto->anio = $proyecto->fecha_inicio->year;
             }
         });
     }

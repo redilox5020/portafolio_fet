@@ -40,24 +40,26 @@ class ProductoController extends BaseDataTableController
     {
         return $results->map(function($producto) {
             return [
-                'id' => $producto->id,
-                'titulo' => view('components.opcion-link', ['model' => $producto,'title'=>$producto->{$this->keyPrimary}, 'route' => 'productos.show', 'param'=>$producto->id])->render(),
+                'codigo' => $producto->codigo,
+                'titulo' => view('components.opcion-link', ['model' => $producto,'title'=>$producto->{$this->keyPrimary}, 'route' => 'productos.show', 'param'=>$producto->codigo])->render(),
                 'proyecto_nombre' => view('components.opcion-link', ['model' => $producto->proyecto,'title'=>$producto->proyecto->nombre, 'route' => 'proyecto.por.codigo', 'param'=>$producto->proyecto->codigo])->render(),
                 'tipologia' => $producto->tipologia,
-                'enlace' => $producto->enlace,
+                'enlace' => $producto->enlace
+                ? '<a href="' . $producto->enlace . '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-regular fa-eye"></i></a>'
+                : 'N/A',
                 'acciones' => view('components.action-buttons', ['id_model' => $producto->id, 'is_modal' => true, 'modal' => "#modal-crear-producto"])->render()
             ];
         });
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $codigo)
     {
         if($request->has('full') && $request->ajax()){
             $producto = Producto::with([
                 'tipologia',
                 'autores:id,nombre',
                 'proyecto.investigadores:id,nombre'
-            ])->findOrFail($id);
+            ])->where('codigo', $codigo)->firstOrFail();
 
             $tipologias = Tipologia::where('model_type', 'producto')
                 ->select('id','opcion')
@@ -70,7 +72,7 @@ class ProductoController extends BaseDataTableController
             ]);
         }
 
-        $producto = Producto::with(['tipologia', 'autores:id,nombre'])->findOrFail($id);
+        $producto = Producto::with(['tipologia', 'autores:id,nombre'])->where('codigo', $codigo)->firstOrFail();
         if($request->ajax()){
             return response()->json($producto);
         }

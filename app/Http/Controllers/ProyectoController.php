@@ -368,7 +368,12 @@ class ProyectoController extends BaseDataTableController
             'anio' => 'required|integer|digits:4|min:2010|max:2100',
         ]);
 
-        $codigo = "{$validatedData['programa_sufijo']}-{$validatedData['procedencia_id']}-{$validatedData['tipologia_id']}-{$validatedData['anio']}";
+        $anioDosDigitos = substr($validatedData['anio'], -2);
+
+        $codigo = $validatedData['programa_sufijo'] .
+                $validatedData['procedencia_id'] .
+                $validatedData['tipologia_id'] .
+                $anioDosDigitos;
 
         return redirect()->route('proyectos', [
             'codigo_grupo' => $codigo,
@@ -524,7 +529,6 @@ class ProyectoController extends BaseDataTableController
 
         $proyectoData = collect($validatedData)->except(['investigadores_ids', 'pdf_file', 'descripcion_archivo'])->toArray();
         $proyecto = new Proyecto($proyectoData);
-        $proyecto->generarCodigo();
 
         $creador = auth()->user();
         $proyecto->creador()->associate($creador);

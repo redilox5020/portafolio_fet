@@ -14,6 +14,13 @@ return new class extends Migration
         Schema::create('investigadores', function (Blueprint $table) {
             $table->id();
             $table->string("nombre");
+            $table->string('email')->nullable()->index();
+            $table->string('tipo_documento', 5)->nullable();
+            $table->string('documento', 50)->nullable()->index();
+            $table->string('telefono', 20)->nullable();
+            $table->timestamps();
+
+            $table->index('nombre');
         });
     }
 

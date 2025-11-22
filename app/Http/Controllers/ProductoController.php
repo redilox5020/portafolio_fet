@@ -47,7 +47,7 @@ class ProductoController extends BaseDataTableController
                 'enlace' => $producto->enlace
                 ? '<a href="' . $producto->enlace . '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-regular fa-eye"></i></a>'
                 : 'N/A',
-                'acciones' => view('components.action-buttons', ['id_model' => $producto->id, 'is_modal' => true, 'modal' => "#modal-crear-producto"])->render()
+                'acciones' => view('components.action-buttons', ['id_model' => $producto->codigo, 'is_modal' => true, 'modal' => "#modal-crear-producto"])->render()
             ];
         });
     }

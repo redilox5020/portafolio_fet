@@ -11,9 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('programas', function (Blueprint $table) {
+            $table->id();
+            $table->string("nombre");
+            $table->string("sufijo");
+        });
         Schema::create('procedencias', function (Blueprint $table) {
             $table->id();
             $table->string("opcion");
+        });
+        Schema::create('tipologias', function (Blueprint $table) {
+            $table->id();
+            $table->string("opcion");
+            $table->string('model_type')->default('proyecto');
         });
     }
 
@@ -22,6 +32,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('tipologias');
         Schema::dropIfExists('procedencias');
+        Schema::dropIfExists('programas');
     }
 };

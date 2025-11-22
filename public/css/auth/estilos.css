@@ -112,6 +112,9 @@ main {
     text-align: center;
 
 }
+.form-group{
+    margin-bottom: 1rem;
+}
 
 .contenedor__login-register form h2 {
     font-size: 30px;
@@ -127,9 +130,8 @@ main {
     color: rgb(114, 117, 114);
 }
 
-.contenedor__login-register form input {
+.contenedor__login-register form input:not([type="checkbox"]) {
     width: 100%;
-    margin-top: 20px;
     padding: 10px;
     border: none;
     background: #f2f2f2;
@@ -139,7 +141,6 @@ main {
 
 .contenedor__login-register form button {
     padding: 10px 40px;
-    margin-top: 40px;
     border: none;
     font-size: 14px;
     background: #61CE70;

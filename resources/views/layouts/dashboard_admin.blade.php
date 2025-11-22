@@ -107,7 +107,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                 aria-expanded="true" aria-controls="collapseTwo">
-                <span>Tipologia</span>
+                <span>Tipologias</span>
             </a>
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
@@ -125,7 +125,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
                 aria-expanded="true" aria-controls="collapseTwo">
-                <span>Procedencia</span>
+                <span>Procedencias</span>
             </a>
             <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
@@ -143,7 +143,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFour"
                 aria-expanded="true" aria-controls="collapseTwo">
-                <span>Procedencia Codigo</span>
+                <span>Detalle Procedencias</span>
             </a>
             <div id="collapseFour" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
@@ -161,7 +161,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFive"
                 aria-expanded="true" aria-controls="collapseTwo">
-                <span>Programa</span>
+                <span>Programas</span>
             </a>
             <div id="collapseFive" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">

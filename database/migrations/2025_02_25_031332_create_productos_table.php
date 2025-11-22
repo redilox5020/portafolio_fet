@@ -13,18 +13,13 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
+            $table->string('codigo', 100)->unique();
             $table->foreignId('proyecto_id')->constrained('proyectos')->onDelete('cascade');
             $table->string('titulo');
             $table->foreignId('tipologia_id')->constrained('tipologias')->onDelete('cascade');
             $table->text('descripcion')->nullable();
             $table->string('enlace')->nullable();
             $table->timestamps();
-        });
-
-        Schema::create('investigador_producto', function (Blueprint $table) {
-            $table->foreignId('investigador_id')->constrained('investigadores')->onDelete('cascade');
-            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
-            $table->primary(['investigador_id', 'producto_id']);
         });
     }
 
@@ -33,7 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('investigador_producto');
         Schema::dropIfExists('productos');
     }
 };

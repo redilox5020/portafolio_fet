@@ -11,7 +11,6 @@
         rel="stylesheet">">
     <!-- Custom styles for this template-->
     <link href="{{ asset('css/auth/estilos.css') }}" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
 </head>
 <body>
@@ -38,13 +37,23 @@
                     @csrf
                     <img src="{{ asset('img/Logo-FET.png') }}" alt="Icono de entrar" class="icono-entrar">
                     <h2>Iniciar Sesión</h2>
-                    <p1>Repositorio de proyectos FET</p1>
-                    <input name="email" type="email" placeholder="Ingresa direccion de correo">
-                    <input name="password" type="password" placeholder="Contraseña">
-                    <button type="submit">Entrar</button>
-                    <div>
-                        <input name="remember" type="checkbox" class="form-control-input" id="customCheck">
-                        <label class="form-control-label" for="customCheck">Acuérdate de mi</label>
+                    <div class="form-group">
+                        <p1>Repositorio de proyectos FET</p1>
+                    </div>
+                    <div class="form-group">
+                        <input name="email" type="email" placeholder="Ingresa direccion de correo">
+                    </div>
+                    <div class="form-group">
+                        <input name="password" type="password" placeholder="Contraseña">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Entrar</button>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input name="remember" type="checkbox" class="form-check-input" id="customCheck">
+                            <label class="form-check-label" for="customCheck">Acuérdate de mi</label>
+                        </div>
                     </div>
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -71,13 +80,27 @@
                     @csrf
                     <img src="{{ asset('img/Logo-FET.png') }}" alt="Icono de entrar" class="icono-entrar">
                     <h2>Registrarse</h2>
-                    <p2>Repositorio de proyectos FET</p2>
-                    <input type="text" name="name" placeholder="Nombre">
-                    <input type="text" name="last_name" placeholder="Apellido">
-                    <input type="email" name="email" placeholder="Correo Electronico">
-                    <input type="password" name="password" placeholder="Contraseña">
-                    <input type="password" name="password_confirmation" placeholder="Repetir Contraseña">
-                    <button type="submit">Registrarse</button>
+                    <div class="form-group">
+                        <p2>Repositorio de proyectos FET</p2>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="name" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="last_name" placeholder="Apellido">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" name="email" placeholder="Correo Electronico">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" placeholder="Contraseña">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password_confirmation" placeholder="Repetir Contraseña">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Registrarse</button>
+                    </div>
                 </form>
 
             </div>
